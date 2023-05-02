@@ -204,7 +204,6 @@ namespace MuxyGameLink.Imports
     public delegate void GatewayOnBitsUsedDelegate(VoidPtr UserData, IntPtr BitsUsed);
     public delegate void GatewayOnActionUsedDelegate(VoidPtr UserData, IntPtr ActionUsed);
 
-
     public class Imported
     {
         // URL Derivation
@@ -246,10 +245,10 @@ namespace MuxyGameLink.Imports
         public static extern RequestId MGW_SDK_Deauthenticate(Schema.GatewaySDK SDK);
 
         [DllImport("cgamelink.dll", EntryPoint = "MGW_SDK_ReceiveMessage")]
-        public static extern bool MGW_SDK_ReceiveMessage(Schema.GatewaySDK SDK, byte[] Message, uint BytesLength);
+        public static extern UInt32 MGW_SDK_ReceiveMessage(Schema.GatewaySDK SDK, byte[] Message, uint BytesLength);
 
         [DllImport("cgamelink.dll", EntryPoint = "MGW_SDK_HasPayloads")]
-        public static extern bool MGW_SDK_HasPayloads(Schema.GatewaySDK SDK);
+        public static extern UInt32 MGW_SDK_HasPayloads(Schema.GatewaySDK SDK);
 
         [DllImport("cgamelink.dll", EntryPoint = "MGW_SDK_HandleReconnect")]
         public static extern void MGW_SDK_HandleReconnect(Schema.GatewaySDK SDK);
@@ -264,7 +263,7 @@ namespace MuxyGameLink.Imports
         public static extern void MGW_SDK_ForeachPayload(Schema.GatewaySDK SDK, GatewayForeachPayloadDelegate Delegate, VoidPtr User);
 
         [DllImport("cgamelink.dll", EntryPoint = "MGW_SDK_IsAuthenticated")]
-        public static extern bool MGW_SDK_IsAuthenticated(Schema.GatewaySDK SDK);
+        public static extern UInt32 MGW_SDK_IsAuthenticated(Schema.GatewaySDK SDK);
 
         [DllImport("cgamelink.dll", EntryPoint = "MGW_SDK_SetGameMetadata")]
         public static extern RequestId MGW_SDK_SetGameMetadata(Schema.GatewaySDK SDK, MGW_GameMetadata Meta);

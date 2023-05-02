@@ -5,8 +5,11 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System;
 using System.Threading.Tasks;
+using System.Net.NetworkInformation;
+using System.Reflection;
 
 #if UNITY_EDITOR || UNITY_STANDALONE
+using AOT;
 using UnityEngine;
 #endif
 
@@ -164,19 +167,51 @@ namespace MuxyGateway
             Transport.OpenAndRunInProduction(this);
         }
 
+        private class InvokeOnDebugMessageParameters
+        {
+            public SDK SDK;
+        }
+
+#if UNITY_EDITOR || UNITY_STANDALONE
+        [MonoPInvokeCallback(typeof(GatewayDebugMessageDelegate))]
+#endif
+        private static void InvokeOnDebugMessage(IntPtr Data, string Message)
+        {
+            if (Data == IntPtr.Zero)
+            {
+                return;
+            }
+
+            GCHandle handle = GCHandle.FromIntPtr(Data);
+            if (handle.Target == null)
+            {
+                return;
+            }
+
+            InvokeOnDebugMessageParameters args = handle.Target as InvokeOnDebugMessageParameters;
+
+            if (args == null)
+            {
+                return;
+            }
+
+            if (args.SDK != null)
+            {
+                args.SDK.LogMessage(Message);
+            }
+        }
+
         public SDK(string GameID)
         {
             Instance = Imported.MGW_MakeSDK(GameID);
             this.GameID = GameID;
             this.Transport = new();
 
-            GatewayDebugMessageDelegate Callback = (UserData, Message) =>
-            {
-                this.LogMessage(Message);
-            };
+            InvokeOnDebugMessageParameters args = new InvokeOnDebugMessageParameters();
+            args.SDK = this;
 
-            DebugMessage = GCHandle.Alloc(Callback, GCHandleType.Normal);
-            Imported.MGW_SDK_OnDebugMessage(Instance, Callback, IntPtr.Zero);
+            DebugMessage = GCHandle.Alloc(args);
+            Imported.MGW_SDK_OnDebugMessage(Instance, InvokeOnDebugMessage, GCHandle.ToIntPtr(DebugMessage));
         }
 
         ~SDK()
@@ -211,31 +246,64 @@ namespace MuxyGateway
             }
 
             byte[] Bytes = UTF8WithoutBOM.GetBytes(Message);
-            bool result = Imported.MGW_SDK_ReceiveMessage(Instance, Bytes, (uint)Bytes.Length);
+            bool result = Imported.MGW_SDK_ReceiveMessage(Instance, Bytes, (uint)Bytes.Length) != 0;
             return result;
         }
 
         public bool HasPayloads()
         {
-            return Imported.MGW_SDK_HasPayloads(Instance);
+            return Imported.MGW_SDK_HasPayloads(Instance) != 0;
         }
 
         public delegate void ForeachPayloadDelegate(Payload Payload);
-        public void ForeachPayload(ForeachPayloadDelegate Delegate)
+
+        private class InvokeForeachPayloadParameters
         {
-            GatewayForeachPayloadDelegate WrapperCallback = (UserData, Msg) =>
+            public ForeachPayloadDelegate Callback;
+        }
+
+#if UNITY_EDITOR || UNITY_STANDALONE
+        [MonoPInvokeCallback(typeof(GatewayForeachPayloadDelegate))]
+#endif
+        private static void InvokeForeachPayload(IntPtr Data, IntPtr Message)
+        {
+            if (Data == IntPtr.Zero)
+            {
+                return;
+            }
+
+            GCHandle handle = GCHandle.FromIntPtr(Data);
+            if (handle.Target == null)
+            {
+                return;
+            }
+
+            InvokeForeachPayloadParameters args = handle.Target as InvokeForeachPayloadParameters;
+
+            if (args == null)
+            {
+                return;
+            }
+
+            if (args.Callback != null)
             {
                 Payload p = new Payload();
-                MGW_Payload first = Marshal.PtrToStructure<MGW_Payload>(Msg);
+                MGW_Payload first = Marshal.PtrToStructure<MGW_Payload>(Message);
 
                 p.Bytes = new byte[first.Length];
                 Marshal.Copy(first.Bytes, p.Bytes, 0, (int)first.Length);
 
-                Delegate(p);
-            };
+                args.Callback(p);
+            }
+        }
 
-            GCHandle Handle = GCHandle.Alloc(WrapperCallback, GCHandleType.Normal);
-            Imported.MGW_SDK_ForeachPayload(Instance, WrapperCallback, IntPtr.Zero);
+        public void ForeachPayload(ForeachPayloadDelegate Delegate)
+        {
+            InvokeForeachPayloadParameters args = new InvokeForeachPayloadParameters();
+            args.Callback = Delegate;
+
+            GCHandle Handle = GCHandle.Alloc(args);
+            Imported.MGW_SDK_ForeachPayload(Instance, InvokeForeachPayload, GCHandle.ToIntPtr(Handle));
             Handle.Free();
         }
 
@@ -259,9 +327,34 @@ namespace MuxyGateway
 
         #region Authentication
         public delegate void OnAuthenticateDelegate(AuthenticationResponse Response);
-        public void AuthenticateWithPIN(String PIN, OnAuthenticateDelegate Delegate)
+        private class InvokeOnAuthenticateParameters
         {
-            GatewayAuthenticateResponseDelegate WrapperCallback = (UserData, Msg) =>
+            public OnAuthenticateDelegate Callback;
+        }
+
+#if UNITY_EDITOR || UNITY_STANDALONE
+        [MonoPInvokeCallback(typeof(GatewayAuthenticateResponseDelegate))]
+#endif
+        private static void InvokeOnAuthenticate(IntPtr Data, IntPtr Msg)
+        {
+            if (Data == IntPtr.Zero)
+            {
+                return;
+            }
+
+            GCHandle handle = GCHandle.FromIntPtr(Data);
+            if (handle.Target == null)
+            {
+                return;
+            }
+
+            InvokeOnAuthenticateParameters args = handle.Target as InvokeOnAuthenticateParameters;
+            if (args == null)
+            {
+                return;
+            }
+
+            if (args.Callback != null)
             {
                 AuthenticationResponse Response = new AuthenticationResponse();
                 MGW_AuthenticateResponse resp = Marshal.PtrToStructure<MGW_AuthenticateResponse>(Msg);
@@ -271,36 +364,28 @@ namespace MuxyGateway
                 Response.TwitchUsername = NativeString.StringFromUTF8(resp.TwitchName);
                 Response.HasError = resp.HasError != 0;
 
-                Delegate(Response);
+                args.Callback(Response);
+            }
 
-                GCHandle Self = GCHandle.FromIntPtr(UserData);
-                Self.Free();
-            };
+            handle.Free();
+        }
 
-            GCHandle Handle = GCHandle.Alloc(WrapperCallback, GCHandleType.Normal);
-            Imported.MGW_SDK_AuthenticateWithPIN(Instance, PIN, WrapperCallback, (IntPtr)Handle);
+        public void AuthenticateWithPIN(String PIN, OnAuthenticateDelegate Delegate)
+        {
+            InvokeOnAuthenticateParameters args = new InvokeOnAuthenticateParameters();
+            args.Callback = Delegate;
+
+            GCHandle Handle = GCHandle.Alloc(args);
+            Imported.MGW_SDK_AuthenticateWithPIN(Instance, PIN, InvokeOnAuthenticate, GCHandle.ToIntPtr(Handle));
         }
 
         public void AuthenticateWithRefreshToken(String Refresh, OnAuthenticateDelegate Delegate)
         {
-            GatewayAuthenticateResponseDelegate WrapperCallback = (UserData, Msg) =>
-            {
-                AuthenticationResponse Response = new AuthenticationResponse();
-                MGW_AuthenticateResponse resp = Marshal.PtrToStructure<MGW_AuthenticateResponse>(Msg);
+            InvokeOnAuthenticateParameters args = new InvokeOnAuthenticateParameters();
+            args.Callback = Delegate;
 
-                Response.JWT = NativeString.StringFromUTF8(resp.JWT);
-                Response.RefreshToken = NativeString.StringFromUTF8(resp.RefreshToken);
-                Response.TwitchUsername = NativeString.StringFromUTF8(resp.TwitchName);
-                Response.HasError = resp.HasError != 0;
-
-                Delegate(Response);
-
-                GCHandle Self = GCHandle.FromIntPtr(UserData);
-                Self.Free();
-            };
-
-            GCHandle Handle = GCHandle.Alloc(WrapperCallback, GCHandleType.Normal);
-            Imported.MGW_SDK_AuthenticateWithRefreshToken(Instance, Refresh, WrapperCallback, (IntPtr)Handle);
+            GCHandle Handle = GCHandle.Alloc(args);
+            Imported.MGW_SDK_AuthenticateWithRefreshToken(Instance, Refresh, InvokeOnAuthenticate, GCHandle.ToIntPtr(Handle));
         }
 
         public void Deauthenticate()
@@ -316,7 +401,7 @@ namespace MuxyGateway
         {
             get
             {
-                return Imported.MGW_SDK_IsAuthenticated(Instance);
+                return Imported.MGW_SDK_IsAuthenticated(Instance) != 0;
             }
         }
         #endregion
@@ -397,6 +482,56 @@ namespace MuxyGateway
 
         #region Polls
         private GCHandle PollDelegateHandle;
+
+        private class InvokePollUpdateParameters
+        {
+            public PollConfiguration.OnUpdateDelegate Callback;
+        }
+
+#if UNITY_EDITOR || UNITY_STANDALONE
+        [MonoPInvokeCallback(typeof(GatewayPollUpdateDelegate))]
+#endif
+        private static void InvokePollUpdate(IntPtr Data, IntPtr Msg)
+        {
+            if (Data == IntPtr.Zero)
+            {
+                return;
+            }
+
+            GCHandle handle = GCHandle.FromIntPtr(Data);
+            if (handle.Target == null)
+            {
+                return;
+            }
+
+            InvokePollUpdateParameters args = handle.Target as InvokePollUpdateParameters;
+            if (args == null)
+            {
+                return;
+            }
+
+            if (args.Callback != null)
+            {
+                MGW_PollUpdate NativeUpdate = Marshal.PtrToStructure<MGW_PollUpdate>(Msg);
+
+                PollUpdate Update = new PollUpdate();
+                Update.Winner = NativeUpdate.Winner;
+                Update.WinningVoteCount = NativeUpdate.WinningVoteCount;
+
+                int[] ManagedResults = new int[NativeUpdate.ResultCount];
+                Marshal.Copy(NativeUpdate.Results, ManagedResults, 0, (int)NativeUpdate.ResultCount);
+
+                List<int> ResultList = new List<int>(ManagedResults);
+
+                Update.Results = ResultList;
+                Update.Count = NativeUpdate.Count;
+                Update.Mean = NativeUpdate.Mean;
+                Update.IsFinal = NativeUpdate.IsFinal != 0;
+
+                args.Callback(Update);
+            }
+        }
+
         public void StartPoll(PollConfiguration Configuration)
         {
             MGW_PollConfiguration NativeConfig = new MGW_PollConfiguration();
@@ -426,31 +561,14 @@ namespace MuxyGateway
             NativeConfig.OptionsCount = (UInt64)Configuration.Options.Count;
             NativeConfig.Duration = Configuration.DurationInSeconds;
 
-            GatewayPollUpdateDelegate WrapperCallback = (IntPtr User, IntPtr UpdatePtr) =>
-            {
-                MGW_PollUpdate NativeUpdate = Marshal.PtrToStructure<MGW_PollUpdate>(UpdatePtr);
+            InvokePollUpdateParameters args = new InvokePollUpdateParameters();
+            args.Callback = Configuration.OnPollUpdate;
 
-                PollUpdate Update = new PollUpdate();
-                Update.Winner = NativeUpdate.Winner;
-                Update.WinningVoteCount = NativeUpdate.WinningVoteCount;
+            GCHandle NextPollDelegateHandle = GCHandle.Alloc(args);
 
-                int[] ManagedResults = new int[NativeUpdate.ResultCount];
-                Marshal.Copy(NativeUpdate.Results, ManagedResults, 0, (int)NativeUpdate.ResultCount);
+            NativeConfig.OnUpdate = InvokePollUpdate;
+            NativeConfig.User = GCHandle.ToIntPtr(NextPollDelegateHandle);
 
-                List<int> ResultList = new List<int>(ManagedResults);
-
-                Update.Results = ResultList;
-                Update.Count = NativeUpdate.Count;
-                Update.Mean = NativeUpdate.Mean;
-                Update.IsFinal = NativeUpdate.IsFinal != 0;
-
-                Configuration.OnPollUpdate(Update);
-            };
-
-            NativeConfig.OnUpdate = WrapperCallback;
-            NativeConfig.User = IntPtr.Zero;
-
-            GCHandle NextPollDelegateHandle = GCHandle.Alloc(WrapperCallback, GCHandleType.Normal);
             Imported.MGW_SDK_StartPoll(Instance, NativeConfig);
 
             StringsArrayHandle.Free();
@@ -528,12 +646,36 @@ namespace MuxyGateway
         }
 
         public delegate void OnActionUsedDelegate(ActionUsed Used);
-        private GCHandle ActionUsedDelegateHandle;
-        public void OnActionUsed(OnActionUsedDelegate Delegate)
+        private class InvokeOnActionUsedParameters
         {
-            GatewayOnActionUsedDelegate WrapperDelegate = (UserData, Pointer) =>
+            public OnActionUsedDelegate Callback;
+        }
+
+#if UNITY_EDITOR || UNITY_STANDALONE
+        [MonoPInvokeCallback(typeof(GatewayOnActionUsedDelegate))]
+#endif
+        private static void InvokeOnActionUsed(IntPtr Data, IntPtr Msg)
+        {
+            if (Data == IntPtr.Zero)
             {
-                MGW_ActionUsed Value = Marshal.PtrToStructure<MGW_ActionUsed>(Pointer);
+                return;
+            }
+
+            GCHandle handle = GCHandle.FromIntPtr(Data);
+            if (handle.Target == null)
+            {
+                return;
+            }
+
+            InvokeOnActionUsedParameters args = handle.Target as InvokeOnActionUsedParameters;
+            if (args == null)
+            {
+                return;
+            }
+
+            if (args.Callback != null)
+            {
+                MGW_ActionUsed Value = Marshal.PtrToStructure<MGW_ActionUsed>(Msg);
 
                 ActionUsed Used = new ActionUsed();
                 Used.TransactionID = Value.TransactionID;
@@ -542,13 +684,20 @@ namespace MuxyGateway
                 Used.UserID = Value.UserID;
                 Used.Username = Value.Username;
 
-                Delegate(Used);
-            };
+                args.Callback(Used);
+            }
+        }
+
+        private GCHandle ActionUsedDelegateHandle;
+        public void OnActionUsed(OnActionUsedDelegate Delegate)
+        {
+            InvokeOnActionUsedParameters args = new InvokeOnActionUsedParameters();
+            args.Callback = Delegate;
 
             // This is kinda sketch: OnActionUsed doesn't detach the previous
             // callback after a call, so this leaks the GC Handle.
-            ActionUsedDelegateHandle = GCHandle.Alloc(WrapperDelegate, GCHandleType.Normal);
-            Imported.MGW_SDK_OnActionUsed(Instance, WrapperDelegate, IntPtr.Zero);
+            ActionUsedDelegateHandle = GCHandle.Alloc(args);
+            Imported.MGW_SDK_OnActionUsed(Instance, InvokeOnActionUsed, GCHandle.ToIntPtr(ActionUsedDelegateHandle));
         }
 
         public void AcceptAction(ActionUsed Used, string Description)
@@ -578,12 +727,36 @@ namespace MuxyGateway
 
         #region Bits 
         public delegate void OnBitsUsedDelegate(BitsUsed Used);
-        private GCHandle BitsUsedDelegateHandle;
-        public void OnBitsUsed(OnBitsUsedDelegate Delegate)
+        private class InvokeOnBitsUsedParameters
         {
-            GatewayOnBitsUsedDelegate WrapperDelegate = (UserData, Pointer) =>
+            public OnBitsUsedDelegate Callback;
+        }
+
+#if UNITY_EDITOR || UNITY_STANDALONE
+        [MonoPInvokeCallback(typeof(GatewayOnBitsUsedDelegate))]
+#endif
+        private static void InvokeOnBitsUsed(IntPtr Data, IntPtr Msg)
+        {
+            if (Data == IntPtr.Zero)
             {
-                MGW_BitsUsed Value = Marshal.PtrToStructure<MGW_BitsUsed>(Pointer);
+                return;
+            }
+
+            GCHandle handle = GCHandle.FromIntPtr(Data);
+            if (handle.Target == null)
+            {
+                return;
+            }
+
+            InvokeOnBitsUsedParameters args = handle.Target as InvokeOnBitsUsedParameters;
+            if (args == null)
+            {
+                return;
+            }
+
+            if (args.Callback != null)
+            {
+                MGW_BitsUsed Value = Marshal.PtrToStructure<MGW_BitsUsed>(Msg);
 
                 BitsUsed Used = new BitsUsed();
                 Used.TransactionID = Value.TransactionID;
@@ -592,13 +765,20 @@ namespace MuxyGateway
                 Used.UserID = Value.UserID;
                 Used.Username = Value.Username;
 
-                Delegate(Used);
-            };
+                args.Callback(Used);
+            }
+        }
+
+        private GCHandle BitsUsedDelegateHandle;
+        public void OnBitsUsed(OnBitsUsedDelegate Delegate)
+        {
+            InvokeOnBitsUsedParameters args = new InvokeOnBitsUsedParameters();
+            args.Callback = Delegate;
 
             // This is kinda sketch: OnActionUsed doesn't detach the previous
             // callback after a call, so this leaks the GC Handle.
-            BitsUsedDelegateHandle = GCHandle.Alloc(WrapperDelegate, GCHandleType.Normal);
-            Imported.MGW_SDK_OnBitsUsed(Instance, WrapperDelegate, IntPtr.Zero);
+            BitsUsedDelegateHandle = GCHandle.Alloc(args);
+            Imported.MGW_SDK_OnBitsUsed(Instance, InvokeOnBitsUsed, GCHandle.ToIntPtr(BitsUsedDelegateHandle));
         }
         #endregion
     }
