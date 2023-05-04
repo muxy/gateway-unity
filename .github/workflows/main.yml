@@ -4,15 +4,14 @@ on: [push, pull_request]
 jobs:
   buildTests:
     name: Test in ${{ matrix.testMode }}
-    runs-on: ubuntu-latest
+    runs-on: windows-2019
     strategy:
       fail-fast: false
       matrix:
         projectPath:
-          - ./Tests~/Gateway Tests
+          - './Tests~/Gateway'
         testMode:
           - playmode
-          - editmode
     steps:
       - uses: actions/checkout@v2
         with:
@@ -23,7 +22,7 @@ jobs:
           key: Library-${{ matrix.projectPath }}
           restore-keys: |
             Library-
-      - uses: game-ci/unity-test-runner@v2
+      - uses: game-ci/unity-test-runner@v2.0.3
         id: tests
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}

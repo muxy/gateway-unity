@@ -1,9 +1,9 @@
 {
   "dependencies": {
     "com.muxy.gamelink": {
-      "version": "file:../../..",
+      "version": "file:Gateway",
       "depth": 0,
-      "source": "local",
+      "source": "embedded",
       "dependencies": {}
     },
     "com.unity.2d.animation": {
