@@ -1,6 +1,6 @@
 {
-	"name": "com.muxy.gamelink",
-	"version": "0.1.0",
+	"name": "com.muxy.gateway",
+	"version": "0.0.1",
 	"displayName": "Muxy Gateway",
 	"description": "Muxy Gateway is the easy solution to add Twitch viewer interactivity to your game and generate revenue through Twitch Bits. Muxy's Gateway provides the necessary tools for game developers to create audience-interactive mechanics in their games. When Twitch streamers have the Muxy Gateway extension active, viewers can directly interact with your game as it's played.",
 	"unity": "2020.3",

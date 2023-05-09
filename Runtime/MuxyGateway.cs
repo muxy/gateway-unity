@@ -1,5 +1,5 @@
-﻿using MuxyGameLink.Imports;
-using MuxyGameLink.Imports.Schema;
+﻿using MuxyGateway.Imports;
+using MuxyGateway.Imports.Schema;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;

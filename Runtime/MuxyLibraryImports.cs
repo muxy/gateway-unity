@@ -1,9 +1,9 @@
-using MuxyGameLink.Imports.Schema;
+using MuxyGateway.Imports.Schema;
 using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using System;
 
-namespace MuxyGameLink.Imports
+namespace MuxyGateway.Imports
 {
     // StringPtr should be made into MGL_String
     using StringPtr = System.IntPtr;
