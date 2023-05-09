@@ -1,0 +1,36 @@
+name: Create Release Zip
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Update Version
+        run: |
+          echo "// This file is auto-generated. Do not modify." > ./Runtime/MuxyGatewayVersion.cs
+          echo "namespace MuxyGateway" >> ./Runtime/MuxyGatewayVersion.cs
+          echo "{" >> ./Runtime/MuxyGatewayVersion.cs
+          echo "    class Constants { public const string Version = \"${{ github.ref_name }}\"; }" >> ./Runtime/MuxyGatewayVersion.cs
+          echo "}" >> ./Runtime/MuxyGatewayVersion.cs
+          cat ./Runtime/MuxyGatewayVersion.cs
+          mkdir .MuxyGateway
+          cp -r * .MuxyGateway/
+          mv .MuxyGateway MuxyGateway
+          zip -r "MuxyGateway-${{github.ref_name}}.zip" MuxyGateway/* -x ".git/*" ".github/*"
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          name: Gamelink ${{ github.ref_name }}
+          allowUpdates: true
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          artifacts: "MuxyGateway-${{github.ref_name}}.zip"
