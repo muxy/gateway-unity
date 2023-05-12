@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.IO;
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR || UNITY_STANDALONE
 using UnityEditor;
 using UnityEngine;
 #endif
@@ -80,6 +80,14 @@ namespace MuxyGateway
                 StopAsync().Wait();
             };
 #endif
+
+#if UNITY_STANDALONE
+            UnityEngine.Application.quitting += () =>
+            {
+                LogMessage("Stopping due to application quit.");
+                StopAsync().Wait();
+            };
+#endif
         }
 
         ~WebsocketTransport()
@@ -146,7 +154,7 @@ namespace MuxyGateway
 
         public void Disconnect()
         {
-            StopAsync();
+            StopAsync().Wait();
         }
 
         /// <summary>
@@ -156,6 +164,11 @@ namespace MuxyGateway
         /// <param name="instance">The instance to use for sending and receiving messages</param>
         public void Run(SDK instance)
         {
+            if (WriteThread != null || ReadThread != null)
+            {
+                Disconnect();
+            }
+
             Done = false;
             WriteThread = new Thread(async () =>
             {
@@ -235,11 +248,13 @@ namespace MuxyGateway
             if (WriteThread != null)
             {
                 WriteThread.Join(TimeSpan.FromSeconds(5));
+                WriteThread = null;
             }
 
             if (ReadThread != null)
             {
                 ReadThread.Join(TimeSpan.FromSeconds(5));
+                WriteThread = null;
             }
 
             UnboundedCancellationSource = new CancellationTokenSource();
@@ -282,9 +297,14 @@ namespace MuxyGateway
                     }
                 }
             }
-            catch (InvalidOperationException ex)
+            catch (ThreadAbortException)
             {
-                Console.WriteLine(ex.ToString());
+                // Don't try.
+                return;
+            }
+            catch (Exception ex)
+            {
+                LogMessage(ex.ToString());
 
                 if (!Done)
                 {
@@ -347,8 +367,9 @@ namespace MuxyGateway
                     // Don't try.
                     return;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    LogMessage(ex.ToString());
                     if (!Done)
                     {
                         await AttemptReconnect(instance);
@@ -381,6 +402,7 @@ namespace MuxyGateway
             }
 
             Reconnecting = true;
+            LogMessage("Attempting reconnect.");
 
             if (Websocket.State != WebSocketState.Aborted)
             {
