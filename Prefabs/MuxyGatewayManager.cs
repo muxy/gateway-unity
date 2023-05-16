@@ -84,13 +84,6 @@ public class MuxyGatewayManager : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        SDK = new(GameID);
-        SetupCallbacks();
-        CheckForRefreshToken();
-    }
-
     private void OnDisable()
     {
         if (SDK != null)

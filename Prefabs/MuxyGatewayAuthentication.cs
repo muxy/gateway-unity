@@ -68,4 +68,9 @@ public class MuxyGatewayAuthentication : MonoBehaviour
         ChangeUI(false, false);
     }
 
+    public void OnGetExtensionClick()
+    {
+        Application.OpenURL("https://dashboard.twitch.tv/extensions/i575hs2x9lb3u8hqujtezit03w1740");
+    }
+
 }
