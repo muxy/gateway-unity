@@ -1,5 +1,5 @@
-﻿using MuxyGameLink.Imports;
-using MuxyGameLink.Imports.Schema;
+﻿using MuxyGateway.Imports;
+using MuxyGateway.Imports.Schema;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -218,7 +218,7 @@ namespace MuxyGateway
         {
             try
             {
-                Transport.StopAsync().RunSynchronously();
+                Transport.StopAsync().Wait();
             }
             finally
             {
@@ -307,15 +307,60 @@ namespace MuxyGateway
             Handle.Free();
         }
 
+        private struct Version
+        {
+            public int Major;
+            public int Minor;
+            public int Patch;
+        }
+
+        private Version ParseVersion(string str)
+        {
+            Version result = new Version();
+
+            if (str == null)
+            {
+                return result;
+            }
+
+            string[] parts = str.Split('.');
+            if (parts.Length != 3)
+            {
+                return result;
+            }
+
+            if (parts[0].StartsWith("v"))
+            {
+                parts[0] = parts[0].TrimStart('v');
+            }
+
+            try
+            {
+                result.Major = int.Parse(parts[0]);
+                result.Minor = int.Parse(parts[1]);
+                result.Patch = int.Parse(parts[2]);
+            }
+            catch
+            {
+                result.Major = 0;
+                result.Minor = 0;
+                result.Patch = 0;
+            }
+
+            return result;
+        }
+
         public String GetSandboxURL()
         {
-            string s = NativeString.StringFromUTF8AndDeallocate(Imported.MGW_SDK_GetSandboxURL(Instance));
+            Version v = ParseVersion(Constants.Version);
+            string s = NativeString.StringFromUTF8AndDeallocate(Imported.MGW_SDK_GetProjectionSandboxURL(Instance, "gateway-unity", v.Major, v.Minor, v.Patch));
             return s;
         }
 
         public String GetProductionURL()
         {
-            string s = NativeString.StringFromUTF8AndDeallocate(Imported.MGW_SDK_GetProductionURL(Instance));
+            Version v = ParseVersion(Constants.Version);
+            string s = NativeString.StringFromUTF8AndDeallocate(Imported.MGW_SDK_GetProjectionProductionURL(Instance, "gateway-unity", v.Major, v.Minor, v.Patch));
             return s;
         }
 

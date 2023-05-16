@@ -43,13 +43,23 @@ namespace MuxyGateway
             return src;
         }
 
+        private void LogMessage(string message)
+        {
+#if UNITY_EDITOR
+            UnityEngine.Debug.Log(message);
+#else
+            Console.WriteLine(message);
+#endif
+        }
+
         /// <summary>
         ///  Creates a websocket transport without an associated Gamelink instance or stage.
-        /// <param name="HandleMessagesInMainThread">If you are using Unity or an engine that doesn't work nicely with multithreading this should be set to true. If set to true, you must call Update() for GameLink to receive messages</param>
         /// </summary>
         public WebsocketTransport()
         {
             Websocket = new ClientWebSocket();
+            this.HandleMessagesInMainThread = true;
+
 #if UNITY_EDITOR
             EditorApplication.playModeStateChanged += (PlayModeStateChange state) =>
             {
@@ -58,17 +68,16 @@ namespace MuxyGateway
                     // If a user forgets to stop the websocket transport, the editor locks up.
                     // This is bad, prevent this by attaching an event to stop the websocket connection
                     // when the editor stops the PIE mode.
-                    UnityEngine.Debug.Log("Stopping websocket transport due to editor state change.");
-                    StopAsync().RunSynchronously();
-
-                    UnityEngine.Debug.Log("This may cause errors while playing in editor, but prevents leaking a connection, which is worse.");
+                    LogMessage("Stopping websocket transport due to editor state change.");
+                    StopAsync().Wait();
+                    LogMessage("This may cause errors while playing in editor, but prevents leaking a connection, which is worse.");
                 }
             };
 
             EditorApplication.quitting += () =>
             {
-                UnityEngine.Debug.Log("Stopping due to application quit.");
-                StopAsync().RunSynchronously();
+                LogMessage("Stopping due to application quit.");
+                StopAsync().Wait();
             };
 #endif
         }
@@ -77,10 +86,11 @@ namespace MuxyGateway
         {
             try
             {
-                StopAsync().RunSynchronously();
+                StopAsync().Wait();
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException ex)
             {
+                LogMessage(ex.ToString());
             }
         }
 
@@ -100,7 +110,7 @@ namespace MuxyGateway
             }
         }
 
-        private async Task OpenAndRunInStage(MuxyGateway.SDK instance, Stage stage)
+        private async Task OpenAndRunInStage(SDK instance, Stage stage)
         {
             switch (stage)
             {
@@ -144,24 +154,39 @@ namespace MuxyGateway
         ///  Any callbacks invoked from `instance` will be called on a background thread, not the main thread.
         /// </summary>
         /// <param name="instance">The instance to use for sending and receiving messages</param>
-        public void Run(MuxyGateway.SDK instance)
+        public void Run(SDK instance)
         {
             Done = false;
             WriteThread = new Thread(async () =>
             {
-                while (!Done)
+                try
                 {
-                    await SendMessages(instance);
-                    Thread.Sleep(100);
+                    while (!Done)
+                    {
+                        await SendMessages(instance);
+                        Thread.Sleep(100);
+                    }
                 }
+                catch (Exception ex)
+                {
+                    LogMessage(ex.ToString());
+                }
+
             });
             WriteThread.Start();
 
             ReadThread = new Thread(async () =>
             {
-                while (!Done)
+                try
                 {
-                    await ReceiveMessage(instance);
+                    while (!Done)
+                    {
+                        await ReceiveMessage(instance);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogMessage(ex.ToString());
                 }
             });
             ReadThread.Start();
@@ -171,7 +196,7 @@ namespace MuxyGateway
         ///  Updates the Websocket Transport, it's only required to call this if you set HandleMessagesInMainThread to true when initializing the WebsocketTransport
         /// </summary>
         /// <param name="instance">The instance to use for sending and receiving messages</param>
-        public void Update(MuxyGateway.SDK instance)
+        public void Update(SDK instance)
         {
             string m;
             while (Messages.TryDequeue(out m))
@@ -182,14 +207,17 @@ namespace MuxyGateway
 
         /// <summary>
         ///  Stops writing and reading threads.
+        ///  When running in unity, this must be called on a MonoBehavior's OnDisable callback.
+        ///  for a clean shutdown.
         /// </summary>
         public async Task StopAsync()
         {
             Done = true;
+            UnboundedCancellationSource.Cancel();
 
             try
             {
-                if (Websocket.State != WebSocketState.Closed)
+                if (Websocket.State != WebSocketState.Closed && Websocket.State != WebSocketState.Aborted)
                 {
                     using (CancellationTokenSource src = TokenSource())
                     {
@@ -198,12 +226,12 @@ namespace MuxyGateway
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Ignore
+                LogMessage(ex.ToString());
             }
 
-            UnboundedCancellationSource.Cancel();
             if (WriteThread != null)
             {
                 WriteThread.Join(TimeSpan.FromSeconds(5));
@@ -222,7 +250,7 @@ namespace MuxyGateway
         /// </summary>
         /// <param name="instance">instance to send messages from</param>
         /// <returns></returns>
-        public async Task SendMessages(MuxyGateway.SDK instance)
+        public async Task SendMessages(SDK instance)
         {
             if (Websocket.State != WebSocketState.Open)
             {
@@ -236,7 +264,7 @@ namespace MuxyGateway
 
             List<byte[]> messages = new List<byte[]>();
 
-            instance.ForeachPayload((MuxyGateway.Payload Payload) =>
+            instance.ForeachPayload((Payload Payload) =>
             {
                 messages.Add(Payload.Bytes);
             });
@@ -291,7 +319,6 @@ namespace MuxyGateway
                     continue;
                 }
 
-
                 try
                 {
                     // Reading has an infinite timeout
@@ -315,7 +342,12 @@ namespace MuxyGateway
                         break;
                     }
                 }
-                catch (Exception ex)
+                catch (ThreadAbortException ex)
+                {
+                    // Don't try.
+                    return;
+                }
+                catch (Exception)
                 {
                     if (!Done)
                     {
@@ -393,7 +425,7 @@ namespace MuxyGateway
                         waitMillis = 30000;
                     }
 
-                    Console.WriteLine("Attempting to reconnect. attempt={0} wait={1}ms", i + 1, waitMillis);
+                    LogMessage(string.Format("Attempting to reconnect. attempt={0} wait={1}ms", i + 1, waitMillis));
                     Thread.Sleep(waitMillis);
                 }
 

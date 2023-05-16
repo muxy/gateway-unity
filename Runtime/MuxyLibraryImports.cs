@@ -1,9 +1,9 @@
-using MuxyGameLink.Imports.Schema;
+using MuxyGateway.Imports.Schema;
 using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using System;
 
-namespace MuxyGameLink.Imports
+namespace MuxyGateway.Imports
 {
     // StringPtr should be made into MGL_String
     using StringPtr = System.IntPtr;
@@ -234,6 +234,12 @@ namespace MuxyGameLink.Imports
 
         [DllImport("cgamelink.dll", EntryPoint = "MGW_SDK_GetProductionURL")]
         public static extern StringPtr MGW_SDK_GetProductionURL(Schema.GatewaySDK SDK);
+
+        [DllImport("cgamelink.dll", EntryPoint = "MGW_SDK_GetProjectionSandboxURL")]
+        public static extern StringPtr MGW_SDK_GetProjectionSandboxURL(Schema.GatewaySDK SDK, [MarshalAs(UnmanagedType.LPUTF8Str)] String Projection, int Major, int Minor, int Patch);
+
+        [DllImport("cgamelink.dll", EntryPoint = "MGW_SDK_GetProjectionProductionURL")]
+        public static extern StringPtr MGW_SDK_GetProjectionProductionURL(Schema.GatewaySDK SDK, [MarshalAs(UnmanagedType.LPUTF8Str)] String Projection, int Major, int Minor, int Patch);
 
         [DllImport("cgamelink.dll", EntryPoint = "MGW_SDK_AuthenticateWithPIN")]
         public static extern RequestId MGW_SDK_AuthenticateWithPIN(Schema.GatewaySDK SDK, [MarshalAs(UnmanagedType.LPUTF8Str)] String PIN, GatewayAuthenticateResponseDelegate Delegate, VoidPtr User);
