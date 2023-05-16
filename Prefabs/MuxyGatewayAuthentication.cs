@@ -24,6 +24,11 @@ public class MuxyGatewayAuthentication : MonoBehaviour
     }
     void Start()
     {
+        if (GatewayManager == null)
+        {
+            Debug.LogError("MuxyGatewayAuthentication Prefab does not have MuxyGatewayManager set!");
+        }
+
         PINInput = this.transform.Find("Canvas/PINGroup/PINInput").GetComponent<TMP_InputField>();
         FailedAuthText = this.transform.Find("Canvas/FailedAuthText").GetComponent<TMP_Text>();
         SuccessGroup = this.transform.Find("Canvas/SuccessGroup").gameObject;
