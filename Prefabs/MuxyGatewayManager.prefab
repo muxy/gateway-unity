@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3335976728011701588}
-  - component: {fileID: 7446242093721272715}
+  - component: {fileID: 2734461632032836684}
   m_Layer: 0
   m_Name: MuxyGatewayManager
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7446242093721272715
+--- !u!114 &2734461632032836684
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -44,63 +44,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ea8341c31b4f264a97636fb4a7d638a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ConnectionStage: 0
   GameID: 
   GameMetadata:
     Name: 
-    Logo: {fileID: 0}
+    Logo: 
     Theme: 
-  GameActions:
-  - ID: 
-    Name: 
-    Description: 
-    Icon: 
-    Category: 0
-    State: 1
-    Impact: 0
-    Count: 0
-  - ID: 
-    Name: 
-    Description: 
-    Icon: 
-    Category: 0
-    State: 0
-    Impact: 0
-    Count: 0
-  - ID: 
-    Name: 
-    Description: 
-    Icon: 
-    Category: 0
-    State: 0
-    Impact: 0
-    Count: 0
-  - ID: 
-    Name: 
-    Description: 
-    Icon: 
-    Category: 0
-    State: 0
-    Impact: 0
-    Count: 0
-  - ID: 
-    Name: 
-    Description: 
-    Icon: 
-    Category: 0
-    State: 0
-    Impact: 0
-    Count: 0
-  GameTexts:
-  - Label: 
-    Value: 
-    Icon: {fileID: 0}
+  GameActions: []
+  GameTexts: []
   PollConfiguration:
     Prompt: 
+    Location: 0
+    Mode: 1
+    Options: []
+    DurationInSeconds: 0
   OnAuthentication:
     m_PersistentCalls:
       m_Calls: []
-  OnGameActionUsed:
+  OnAnyGameActionUsed:
     m_PersistentCalls:
       m_Calls: []
   OnPollUpdate:
