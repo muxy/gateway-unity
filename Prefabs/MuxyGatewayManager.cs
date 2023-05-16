@@ -7,17 +7,9 @@ using UnityEngine.Events;
 
 public class MuxyGatewayManager : MonoBehaviour
 {
-    public enum MuxyGatewayConnectionStage
-    {
-        Sandbox,
-        Production
-    }
-
-    public MuxyGatewayConnectionStage ConnectionStage = MuxyGatewayConnectionStage.Sandbox;
 
     [Header("Game ID (typically Giantbomb ID)")]
     public String GameID = "";
-
 
     [SerializeField] private GameMetadata GameMetadata = new();
     [SerializeField] private List<GameAction> GameActions = new();
@@ -26,18 +18,17 @@ public class MuxyGatewayManager : MonoBehaviour
 
     [Header("Events")]
     public MuxyGatewayAuthenticationEvent OnAuthentication = new();
-    public MuxyGatewayGameActionUsedEvent OnGameActionUsed = new();
+    public MuxyGatewayGameActionUsedEvent OnAnyGameActionUsed = new();
     public MuxyGatewayPollUpdate OnPollUpdate = new();
     public MuxyGatewayBitsUsedEvent OnBitsUsed = new();
 
     [Serializable]
     public class MuxyGatewayAuthenticationEvent : UnityEvent<AuthenticationResponse> { }
     [Serializable]
-    public class MuxyGatewayGameActionUsedEvent : UnityEvent<GameActionUsed> { }
-    [Serializable]
     public class MuxyGatewayBitsUsedEvent : UnityEvent<BitsUsed> { }
     [Serializable]
     public class MuxyGatewayPollUpdate : UnityEvent<PollUpdate> { }
+
 
     // Private //
 
@@ -45,7 +36,7 @@ public class MuxyGatewayManager : MonoBehaviour
 
     private SDK SDK;
     private SDK.OnAuthenticateDelegate AuthCB;
-    private SDK.OnActionUsedDelegate ActionCB;
+    private SDK.OnGameActionUsedDelegate ActionCB;
     private SDK.OnBitsUsedDelegate BitsCB;
 
     private bool DidOpenAndRun = false;
@@ -54,7 +45,7 @@ public class MuxyGatewayManager : MonoBehaviour
     {
         ActionCB = (Used) =>
         {
-            OnGameActionUsed.Invoke(Used);
+            OnAnyGameActionUsed.Invoke(Used);
         };
 
         BitsCB = (Used) =>
@@ -73,9 +64,9 @@ public class MuxyGatewayManager : MonoBehaviour
 
             PlayerPrefs.SetString(PLAYER_PREFS_REFRESH_TOKEN, Response.RefreshToken);
 
-            SDK.OnActionUsed(ActionCB);
+            SDK.OnGameActionUsed(ActionCB);
             SDK.OnBitsUsed(BitsCB);
-            SDK.SetActions(GameActions.ToArray());
+            SDK.SetGameActions(GameActions.ToArray());
             SDK.SetGameMetadata(GameMetadata);
 
             OnAuthentication.Invoke(Response);
@@ -100,18 +91,31 @@ public class MuxyGatewayManager : MonoBehaviour
         CheckForRefreshToken();
     }
 
+    private void OnDisable()
+    {
+        if (SDK != null)
+        {
+            SDK.StopWebsocketTransport();
+            SDK = null;
+        }
+    }
+
+    private void OnEnable()
+    {
+        if (SDK == null)
+        {
+            SDK = new(GameID);
+            DidOpenAndRun = false;
+            SetupCallbacks();
+            CheckForRefreshToken();
+        }
+    }
+
+
     public void OpenAndRunSDK()
     {
         if (DidOpenAndRun) return;
-
-        if (ConnectionStage == MuxyGatewayConnectionStage.Production)
-        {
-            SDK.RunInProduction();
-        }
-        else
-        {
-            SDK.RunInSandbox();
-        }
+        SDK.RunInProduction();
         DidOpenAndRun = true;
     }
 
@@ -131,10 +135,10 @@ public class MuxyGatewayManager : MonoBehaviour
         return SDK.IsAuthenticated;
     }
 
-    public async void Deauthenticate()
+    public void Deauthenticate()
     {
         PlayerPrefs.SetString(PLAYER_PREFS_REFRESH_TOKEN, "");
-        await SDK.Deauthenticate();
+        SDK.Deauthenticate();
     }
 
     public void AddGameText(GameText Text)
@@ -181,12 +185,12 @@ public class MuxyGatewayManager : MonoBehaviour
         SDK.SetGameMetadata(Metadata);
     }
 
-    public void SetAllActionStates(GameActionState State)
+    public void SetAllGameActionStates(GameActionState State)
     {
         foreach (var Action in GameActions)
         {
             Action.State = State;
         }
-        SDK.SetActions(GameActions.ToArray());
+        SDK.SetGameActions(GameActions.ToArray());
     }
 }

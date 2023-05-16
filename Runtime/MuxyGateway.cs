@@ -11,6 +11,7 @@ using System.Reflection;
 #if UNITY_EDITOR || UNITY_STANDALONE
 using AOT;
 using UnityEngine;
+using UnityEngine.Events;
 #endif
 
 namespace MuxyGateway
@@ -29,106 +30,119 @@ namespace MuxyGateway
         public byte[] Bytes { get; set; } = new byte[0];
     }
 
+    [Serializable]
     public class GameMetadata
     {
-        public string Name { get; set; } = string.Empty;
-        public string Logo { get; set; } = string.Empty;
-        public string Theme { get; set; } = string.Empty;
+        public string Name;
+        public string Logo;
+        public string Theme;
     }
 
+    [Serializable]
     public class GameText
     {
-        public string Label { get; set; } = string.Empty;
-        public string Value { get; set; } = string.Empty;
-        public string Icon { get; set; } = string.Empty;
+        public string Label;
+        public string Value;
+        public string Icon;
     }
 
-    public enum ActionCategory
+    [Serializable]
+    public enum GameActionCategory
     {
         Neutral = 0,
         Hinder = 1,
         Help = 2
     }
 
-    public enum ActionState
+    [Serializable]
+    public enum GameActionState
     {
         Unavailable = 0,
         Available = 1,
         Hidden = 2
     }
 
-    public class Action
+    [Serializable]
+    public class MuxyGatewayGameActionUsedEvent : UnityEvent<GameActionUsed> { }
+
+    [Serializable]
+    public class GameAction
     {
         public static int InfiniteCount = 0xFFFF;
 
-        public string ID { get; set; } = string.Empty;
+        public string ID;
 
-        public ActionCategory Category { get; set; } = ActionCategory.Neutral;
-        public ActionState State { get; set; } = ActionState.Unavailable;
-        public int Impact { get; set; } = 0;
+        public GameActionCategory Category = GameActionCategory.Neutral;
+        public GameActionState State = GameActionState.Unavailable;
+        public int Impact;
+        public string Name;
+        public string Description;
+        public string Icon;
 
-        public string Name { set; get; } = string.Empty;
-        public string Description { set; get; } = string.Empty;
-        public string Icon { set; get; } = string.Empty;
+        public int Count = InfiniteCount;
 
-        public int Count { get; set; } = InfiniteCount;
+        public MuxyGatewayGameActionUsedEvent OnGameActionUsed;
     }
 
+    [Serializable]
     public class PollUpdate
     {
-        public int Winner { get; set; } = 0;
-        public int WinningVoteCount { get; set; } = 0;
+        public int Winner;
+        public int WinningVoteCount;
 
-        public List<int> Results { get; set; } = new List<int>();
+        public List<int> Results = new List<int>();
 
-        public int Count { set; get; } = 0;
-        public double Mean { get; set; } = 0;
-        public bool IsFinal { get; set; } = false;
+        public int Count;
+        public double Mean;
+        public bool IsFinal = false;
     }
 
+    [Serializable]
     public enum PollLocation
     {
         Default = 0
     }
 
+    [Serializable]
     public enum PollMode
     {
         Chaos = 0,
         Order = 1
     }
 
+    [Serializable]
     public class PollConfiguration
     {
         public static int InfiniteDuration = 0;
         public delegate void OnUpdateDelegate(PollUpdate Update);
 
-        public string Prompt { set; get; } = string.Empty;
-        public PollLocation Location { set; get; } = PollLocation.Default;
-        public PollMode Mode { set; get; } = PollMode.Order;
+        public string Prompt;
+        public PollLocation Location = PollLocation.Default;
+        public PollMode Mode = PollMode.Order;
 
-        public List<string> Options { set; get; } = new List<string>();
+        public List<string> Options = new List<string>();
 
-        public Int32 DurationInSeconds { set; get; } = InfiniteDuration;
+        public Int32 DurationInSeconds= InfiniteDuration;
 
-        public OnUpdateDelegate OnPollUpdate { set; get; } = (Update) => { };
+        public OnUpdateDelegate OnPollUpdate = (Update) => { };
     }
 
     public class BitsUsed
     {
-        public string TransactionID { set; get; } = string.Empty;
-        public string SKU { set; get; } = string.Empty;
-        public int Bits { set; get; } = 0;
-        public string UserID { set; get; } = string.Empty;
-        public string Username { set; get; } = string.Empty;
+        public string TransactionID;
+        public string SKU;
+        public int Bits;
+        public string UserID;
+        public string Username;
     }
 
-    public class ActionUsed
+    public class GameActionUsed
     {
-        public string TransactionID { set; get; } = string.Empty;
-        public string ActionID { set; get; } = string.Empty;
-        public int Cost { set; get; } = 0;
-        public string UserID { set; get; } = string.Empty;
-        public string Username { set; get; } = string.Empty;
+        public string TransactionID;
+        public string ActionID;
+        public int Cost;
+        public string UserID;
+        public string Username;
     }
 
     public class SDK
@@ -466,7 +480,7 @@ namespace MuxyGateway
         public void SetGameLogo(Texture2D texture)
         {
             MGW_GameMetadata meta = new MGW_GameMetadata();
-            meta.GameLogo = ConvertTextureToImage(texture);
+            meta.GameLogo = ConvertTextureToBase64(texture);
 
             Imported.MGW_SDK_SetGameMetadata(Instance, meta);
         }
@@ -484,7 +498,7 @@ namespace MuxyGateway
             }
         }
 
-        public static string ConvertTextureToImage(Texture2D texture)
+        public static string ConvertTextureToBase64(Texture2D texture)
         {
             if (texture == null)
             {
@@ -638,11 +652,14 @@ namespace MuxyGateway
         #endregion
 
         #region Actions
-        public void SetActions(Action[] Actions)
+        private static Dictionary<string, MuxyGatewayGameActionUsedEvent> GameActionCallbacks;
+        public void SetGameActions(GameAction[] Actions)
         {
+            GameActionCallbacks = new();
+
             List<MGW_Action> NativeActions = new List<MGW_Action>();
 
-            foreach (Action Action in Actions)
+            foreach (GameAction Action in Actions)
             {
                 MGW_Action Value = new MGW_Action();
                 Value.ID = Action.ID;
@@ -655,49 +672,50 @@ namespace MuxyGateway
                 Value.Count = Action.Count;
 
                 NativeActions.Add(Value);
+                GameActionCallbacks.Add(Action.ID, Action.OnGameActionUsed);
             }
 
             Imported.MGW_SDK_SetActions(Instance, NativeActions.ToArray(), (UInt64)NativeActions.Count);
         }
 
-        public void EnableAction(string ID)
+        public void EnableGameAction(string ID)
         {
             Imported.MGW_SDK_EnableAction(Instance, ID);
         }
 
-        public void DisableAction(string ID)
+        public void DisableGameAction(string ID)
         {
             Imported.MGW_SDK_DisableAction(Instance, ID);
         }
 
-        public void SetMaximumActionCount(string ID, int Count)
+        public void SetMaximumGameActionCount(string ID, int Count)
         {
             Imported.MGW_SDK_SetActionMaximumCount(Instance, ID, Count);
         }
 
-        public void SetActionCount(string ID, int Count)
+        public void SetGameActionCount(string ID, int Count)
         {
             Imported.MGW_SDK_SetActionCount(Instance, ID, Count);
         }
 
-        public void IncrementActionCount(string ID, int Delta)
+        public void IncrementGameActionCount(string ID, int Delta)
         {
             Imported.MGW_SDK_IncrementActionCount(Instance, ID, Delta);
         }
 
-        public void DecrementActionCount(string ID, int Delta)
+        public void DecrementGameActionCount(string ID, int Delta)
         {
             Imported.MGW_SDK_DecrementActionCount(Instance, ID, Delta);
         }
 
-        public delegate void OnActionUsedDelegate(ActionUsed Used);
+        public delegate void OnGameActionUsedDelegate(GameActionUsed Used);
         private class InvokeOnActionUsedParameters
         {
-            public OnActionUsedDelegate Callback;
+            public OnGameActionUsedDelegate Callback;
         }
 
 #if UNITY_EDITOR || UNITY_STANDALONE
-        [MonoPInvokeCallback(typeof(GatewayOnActionUsedDelegate))]
+        [MonoPInvokeCallback(typeof(OnGameActionUsedDelegate))]
 #endif
         private static void InvokeOnActionUsed(IntPtr Data, IntPtr Msg)
         {
@@ -722,30 +740,35 @@ namespace MuxyGateway
             {
                 MGW_ActionUsed Value = Marshal.PtrToStructure<MGW_ActionUsed>(Msg);
 
-                ActionUsed Used = new ActionUsed();
+                GameActionUsed Used = new GameActionUsed();
                 Used.TransactionID = Value.TransactionID;
                 Used.ActionID = Value.ActionID;
                 Used.Cost = Value.Cost;
                 Used.UserID = Value.UserID;
                 Used.Username = Value.Username;
 
+                MuxyGatewayGameActionUsedEvent Callback;
+                if (GameActionCallbacks.TryGetValue(Used.ActionID, out Callback))
+                {
+                    Callback.Invoke(Used);
+                }
                 args.Callback(Used);
             }
         }
 
-        private GCHandle ActionUsedDelegateHandle;
-        public void OnActionUsed(OnActionUsedDelegate Delegate)
+        private GCHandle GameActionUsedDelegateHandle;
+        public void OnGameActionUsed(OnGameActionUsedDelegate Delegate)
         {
             InvokeOnActionUsedParameters args = new InvokeOnActionUsedParameters();
             args.Callback = Delegate;
 
             // This is kinda sketch: OnActionUsed doesn't detach the previous
             // callback after a call, so this leaks the GC Handle.
-            ActionUsedDelegateHandle = GCHandle.Alloc(args);
-            Imported.MGW_SDK_OnActionUsed(Instance, InvokeOnActionUsed, GCHandle.ToIntPtr(ActionUsedDelegateHandle));
+            GameActionUsedDelegateHandle = GCHandle.Alloc(args);
+            Imported.MGW_SDK_OnActionUsed(Instance, InvokeOnActionUsed, GCHandle.ToIntPtr(GameActionUsedDelegateHandle));
         }
 
-        public void AcceptAction(ActionUsed Used, string Description)
+        public void AcceptGameAction(GameActionUsed Used, string Description)
         {
             MGW_ActionUsed Native = new MGW_ActionUsed();
             Native.ActionID = Used.ActionID;
@@ -757,7 +780,7 @@ namespace MuxyGateway
             Imported.MGW_SDK_AcceptAction(Instance, Native, Description);
         }
 
-        public void RefundAction(ActionUsed Used, string Description)
+        public void RefundGameAction(GameActionUsed Used, string Description)
         {
             MGW_ActionUsed Native = new MGW_ActionUsed();
             Native.ActionID = Used.ActionID;

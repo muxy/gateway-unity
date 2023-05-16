@@ -122,7 +122,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 4081891841067073791}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MuxyGatewayAuthentication, Assembly-CSharp
         m_MethodName: OnDeauthenticateClick
         m_Mode: 1
@@ -655,7 +655,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 4081891841067073791}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MuxyGatewayAuthentication, Assembly-CSharp
         m_MethodName: OnAuthenticateClick
         m_Mode: 1
@@ -1586,7 +1586,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7985427510131431940}
-  - component: {fileID: 4081891841067073791}
+  - component: {fileID: 2102921156662415519}
   m_Layer: 0
   m_Name: MuxyGatewayAuthenticateUI
   m_TagString: Untagged
@@ -1611,7 +1611,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4081891841067073791
+--- !u!114 &2102921156662415519
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

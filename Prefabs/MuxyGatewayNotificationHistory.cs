@@ -1,12 +1,11 @@
 using TMPro;
 using UnityEngine;
 
-public class GatewayNotificationHistory : MonoBehaviour
+public class MuxyGatewayNotificationHistory : MonoBehaviour
 {
     public float ClearTime = 5;
-    public GameObject HistoryGroup;
 
-
+    private GameObject HistoryGroup;
     private float ClearTimer = 5;
 
     public void Update()
