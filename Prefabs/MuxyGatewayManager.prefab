@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3335976728011701588}
-  - component: {fileID: 2734461632032836684}
+  - component: {fileID: 1432649689203300629}
   m_Layer: 0
   m_Name: MuxyGatewayManager
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2734461632032836684
+--- !u!114 &1432649689203300629
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -57,13 +57,13 @@ MonoBehaviour:
     Mode: 1
     Options: []
     DurationInSeconds: 0
+  OnPollUpdate:
+    m_PersistentCalls:
+      m_Calls: []
   OnAuthentication:
     m_PersistentCalls:
       m_Calls: []
   OnAnyGameActionUsed:
-    m_PersistentCalls:
-      m_Calls: []
-  OnPollUpdate:
     m_PersistentCalls:
       m_Calls: []
   OnBitsUsed:

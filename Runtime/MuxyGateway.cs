@@ -74,12 +74,12 @@ namespace MuxyGateway
 
         public GameActionCategory Category = GameActionCategory.Neutral;
         public GameActionState State = GameActionState.Unavailable;
-        public int Impact;
+        [Range(1, 5)] public int Impact;
         public string Name;
         public string Description;
         public string Icon;
 
-        public int Count = InfiniteCount;
+        [SerializeField, Range(0, 65535)] public int Count = 65535;
 
         public MuxyGatewayGameActionUsedEvent OnGameActionUsed;
     }
@@ -122,7 +122,7 @@ namespace MuxyGateway
 
         public List<string> Options = new List<string>();
 
-        public Int32 DurationInSeconds= InfiniteDuration;
+        public Int32 DurationInSeconds = InfiniteDuration;
 
         public OnUpdateDelegate OnPollUpdate = (Update) => { };
     }

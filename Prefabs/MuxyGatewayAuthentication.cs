@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class MuxyGatewayAuthentication : MonoBehaviour
 {
-
+    [Header("Muxy Gateway Manager")]
     public MuxyGatewayManager GatewayManager;
 
     private TMP_InputField PINInput;
@@ -22,13 +22,9 @@ public class MuxyGatewayAuthentication : MonoBehaviour
     {
         GatewayManager.OnAuthentication.RemoveListener(OnAuthenticationAttempt);
     }
+
     void Start()
     {
-        if (GatewayManager == null)
-        {
-            Debug.LogError("MuxyGatewayAuthentication Prefab does not have MuxyGatewayManager set!");
-        }
-
         PINInput = this.transform.Find("Canvas/PINGroup/PINInput").GetComponent<TMP_InputField>();
         FailedAuthText = this.transform.Find("Canvas/FailedAuthText").GetComponent<TMP_Text>();
         SuccessGroup = this.transform.Find("Canvas/SuccessGroup").gameObject;
