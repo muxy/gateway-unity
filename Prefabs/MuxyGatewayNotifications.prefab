@@ -1647,8 +1647,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GatewayManager: {fileID: 0}
-  AutoAddActionMessages: 1
-  MessageTemplate: '{Username} just bought {ActionID}'
   ClearTime: 5
   HelpActionIcon: {fileID: 0}
   NeutralActionIcon: {fileID: 0}
@@ -1658,6 +1656,8 @@ MonoBehaviour:
   Impact3Color: {r: 0, g: 0, b: 0, a: 0}
   Impact4Color: {r: 0, g: 0, b: 0, a: 0}
   Impact5Color: {r: 0, g: 0, b: 0, a: 0}
+  AutoAddActionMessages: 1
+  MessageTemplate: '{Username} just bought {ActionID}'
 --- !u!1 &5636554022272495000
 GameObject:
   m_ObjectHideFlags: 0

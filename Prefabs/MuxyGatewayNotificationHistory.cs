@@ -11,8 +11,6 @@ public class MuxyGatewayNotificationHistory : MonoBehaviour
     public MuxyGatewayManager GatewayManager;
 
     [Header("Settings")]
-    public bool AutoAddActionMessages = true;
-    public string MessageTemplate = @"{Username} just bought {ActionID}";
     public float ClearTime = 8;
     public Texture2D HelpActionIcon;
     public Texture2D NeutralActionIcon;
@@ -22,6 +20,9 @@ public class MuxyGatewayNotificationHistory : MonoBehaviour
     public Color Impact3Color = new Color(255, 255, 255);
     public Color Impact4Color = new Color(255, 255, 255);
     public Color Impact5Color = new Color(255, 255, 255);
+    [Header("Messaging")]
+    public bool AutoAddActionMessages = true;
+    public string MessageTemplate = @"{Username} just bought {ActionID}";
 
     private GameObject Elements;
     private GameObject Canvas;
@@ -57,7 +58,7 @@ public class MuxyGatewayNotificationHistory : MonoBehaviour
             return;
         }
 
-        Dictionary<string, string> parameters = new();
+        Dictionary<string, string> parameters = new Dictionary<string, string>();
 
         parameters.Add("TransactionID", UsedAction.TransactionID);
         parameters.Add("ActionID", UsedAction.ActionID);
@@ -130,7 +131,7 @@ public class MuxyGatewayNotificationHistory : MonoBehaviour
     {
         this.ClearTimer = ClearTime;
         ShiftEntries();
-        TMP_Text NewText = Elements.transform.GetChild(0).gameObject.GetComponent<TMP_Text>();
+        TMP_Text NewText = Elements.transform.GetChild(0).transform.Find("ActionText").gameObject.GetComponent<TMP_Text>();
         NewText.SetText(ActionDesc);
         NewText.color = new Color(TextColor.r, TextColor.g, TextColor.b, NewText.color.a);
         Canvas.SetActive(true);
