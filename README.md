@@ -1,4 +1,4 @@
-![Muxy Gateway Logo](https://github.com/muxy/gateway-unity/assets/135379/82c89548-7423-4be4-b40b-5728569bcfdf)
+![Muxy_Gateway Logo](https://github.com/muxy/gateway-unity/assets/135379/cf68994a-cadc-40b6-a9e8-31a157c4317a)
 
 > The fastest way to make your game “Twitch friendly”
 
