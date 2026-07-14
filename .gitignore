@@ -12,6 +12,13 @@
 /[Bb]uilds/
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
+/TestProject~/[Ll]ibrary/
+/TestProject~/[Tt]emp/
+/TestProject~/[Oo]bj/
+/TestProject~/[Bb]uild/
+/TestProject~/[Bb]uilds/
+/TestProject~/[Ll]ogs/
+/TestProject~/[Uu]ser[Ss]ettings/
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data

@@ -26,7 +26,7 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          projectPath: TestProject
+          projectPath: TestProject~
           unityVersion: ${{ env.UNITY_VERSION }}
           testMode: EditMode
 
@@ -48,7 +48,7 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          projectPath: TestProject
+          projectPath: TestProject~
           unityVersion: ${{ env.UNITY_VERSION }}
           targetPlatform: ${{ matrix.targetPlatform }}
           buildMethod: GatewayBuild.PerformBuild
@@ -74,7 +74,7 @@ jobs:
           version="${GITHUB_REF_NAME#v}"
           mkdir -p dist/package
           find . -mindepth 1 -maxdepth 1 \
-            ! -name .git ! -name .github ! -name TestProject ! -name dist \
+            ! -name .git ! -name .github ! -name 'TestProject~' ! -name dist \
             -exec cp -R {} dist/package/ \;
           tar -czf "dist/com.muxy.gateway-$version.tgz" -C dist package
           (cd dist/package && zip -qr "../MuxyGateway-$version.zip" .)
