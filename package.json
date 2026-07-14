@@ -8,6 +8,7 @@
 	"changelogUrl": "https://github.com/muxy/gateway-unity/blob/main/CHANGELOG.md",
 	"licensesUrl": "https://github.com/muxy/gateway-unity/blob/main/LICENSE.md",
 	"dependencies": {
+		"com.unity.modules.imageconversion": "1.0.0",
 		"com.unity.textmeshpro": "3.0.6"
 	},
 	"author": {
