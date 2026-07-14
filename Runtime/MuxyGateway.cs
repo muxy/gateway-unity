@@ -162,7 +162,7 @@ namespace MuxyGateway
 
         public void StopWebsocketTransport()
         {
-            Transport.StopAsync();
+            Transport.StopAsync().GetAwaiter().GetResult();
         }
 
         public async Task RunInCustomAsync(String uri)
