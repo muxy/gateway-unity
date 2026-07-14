@@ -57,7 +57,7 @@ public class MuxyGatewayNotificationHistory : MonoBehaviour
             return;
         }
 
-        Dictionary<string, string> parameters = new();
+        Dictionary<string, string> parameters = new Dictionary<string, string>();
 
         parameters.Add("TransactionID", UsedAction.TransactionID);
         parameters.Add("ActionID", UsedAction.ActionID);

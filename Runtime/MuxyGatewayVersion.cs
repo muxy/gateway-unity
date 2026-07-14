@@ -3,6 +3,6 @@ namespace MuxyGateway
 {
     class Constants
     {
-        public const string Version = "v0.0.0";
+        public const string Version = "1.0.0-rc.2";
     }
 }

@@ -77,6 +77,9 @@ but first lets take a look at the settings we add to MuxyGatewayManager.
 > you should request a permanent ID for your game by filling out the form
 > [here](https://www.muxy.io/gateway).
 
+> Connection Stage: New prefabs default to `Sandbox`, which is safe for development and testing.
+> Select `Production` explicitly only when preparing a live game build.
+
 ---
 
 #### Game Metadata
