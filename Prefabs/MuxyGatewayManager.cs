@@ -11,16 +11,19 @@ public class MuxyGatewayManager : MonoBehaviour
     [Header("Game ID")]
     public String GameID = "";
 
-    [SerializeField] private GameMetadata GameMetadata = new();
-    [SerializeField] private List<GameAction> GameActions = new();
-    [SerializeField] private List<GameText> GameTexts = new();
-    [SerializeField] private PollConfiguration PollConfiguration = new();
-    public MuxyGatewayPollUpdate OnPollUpdate = new();
+    [Header("Connection")]
+    public Stage ConnectionStage = Stage.Sandbox;
+
+    [SerializeField] private GameMetadata GameMetadata = new GameMetadata();
+    [SerializeField] private List<GameAction> GameActions = new List<GameAction>();
+    [SerializeField] private List<GameText> GameTexts = new List<GameText>();
+    [SerializeField] private PollConfiguration PollConfiguration = new PollConfiguration();
+    public MuxyGatewayPollUpdate OnPollUpdate = new MuxyGatewayPollUpdate();
 
     [Header("Events")]
-    public MuxyGatewayAuthenticationEvent OnAuthentication = new();
-    public MuxyGatewayGameActionUsedEvent OnAnyGameActionUsed = new();
-    public MuxyGatewayBitsUsedEvent OnBitsUsed = new();
+    public MuxyGatewayAuthenticationEvent OnAuthentication = new MuxyGatewayAuthenticationEvent();
+    public MuxyGatewayGameActionUsedEvent OnAnyGameActionUsed = new MuxyGatewayGameActionUsedEvent();
+    public MuxyGatewayBitsUsedEvent OnBitsUsed = new MuxyGatewayBitsUsedEvent();
 
     [Serializable]
     public class MuxyGatewayAuthenticationEvent : UnityEvent<AuthenticationResponse> { }
@@ -96,7 +99,7 @@ public class MuxyGatewayManager : MonoBehaviour
     {
         if (SDK == null)
         {
-            SDK = new(GameID);
+            SDK = new SDK(GameID);
             DidOpenAndRun = false;
             SetupCallbacks();
             CheckForRefreshToken();
@@ -110,7 +113,16 @@ public class MuxyGatewayManager : MonoBehaviour
     public void OpenAndRunSDK()
     {
         if (DidOpenAndRun) return;
-        SDK.RunInProduction();
+
+        if (ConnectionStage == Stage.Production)
+        {
+            SDK.RunInProduction();
+        }
+        else
+        {
+            SDK.RunInSandbox();
+        }
+
         DidOpenAndRun = true;
     }
 
@@ -135,7 +147,7 @@ public class MuxyGatewayManager : MonoBehaviour
         PlayerPrefs.SetString(PLAYER_PREFS_REFRESH_TOKEN, "");
         SDK.Deauthenticate();
         DidOpenAndRun = false;
-        SDK = new(GameID);
+        SDK = new SDK(GameID);
     }
 
     public void AddGameText(GameText Text)

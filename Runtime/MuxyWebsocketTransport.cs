@@ -7,8 +7,11 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.IO;
 
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
+
+#if UNITY_EDITOR || UNITY_STANDALONE
 using UnityEngine;
 #endif
 
@@ -105,7 +108,7 @@ namespace MuxyGateway
         /// <summary>
         ///  Opens a websocket connection to the given uri, usually computed by calling SDK.ConnectionAddress
         /// </summary>
-        /// <param name="uri">URI to connect to. Must be prefixed with the protocol, usually "ws://"</param>
+        /// <param name="uri">URI to connect to. Must use the secure WebSocket protocol, "wss://".</param>
         /// <returns></returns>
         public async Task Open(string uri)
         {
@@ -118,6 +121,26 @@ namespace MuxyGateway
             }
         }
 
+        private static string BuildSecureUri(string address)
+        {
+            if (string.IsNullOrWhiteSpace(address))
+            {
+                throw new ArgumentException("A Gateway WebSocket address is required.", nameof(address));
+            }
+
+            if (address.StartsWith("wss://", StringComparison.OrdinalIgnoreCase))
+            {
+                return address;
+            }
+
+            if (address.StartsWith("ws://", StringComparison.OrdinalIgnoreCase))
+            {
+                address = address.Substring("ws://".Length);
+            }
+
+            return "wss://" + address.TrimStart('/');
+        }
+
         private async Task OpenAndRunInStage(SDK instance, Stage stage)
         {
             switch (stage)
@@ -125,7 +148,7 @@ namespace MuxyGateway
                 case Stage.Sandbox:
                     {
                         string url = instance.GetSandboxURL();
-                        await Open("ws://" + url)
+                        await Open(BuildSecureUri(url))
                             .ConfigureAwait(false);
                         break;
                     }
@@ -133,7 +156,7 @@ namespace MuxyGateway
                 case Stage.Production:
                     {
                         string url = instance.GetProductionURL();
-                        await Open("ws://" + url)
+                        await Open(BuildSecureUri(url))
                             .ConfigureAwait(false);
                         break;
                     }

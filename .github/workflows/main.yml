@@ -1,36 +1,89 @@
-name: Create Release Zip
+name: Validate and release Gateway Unity
 
 on:
-  release:
-    types: [published]
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  UNITY_VERSION: 2020.3.48f1
 
 jobs:
-  build:
+  editmode:
+    name: EditMode tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: TestProject~
+          unityVersion: ${{ env.UNITY_VERSION }}
+          testMode: EditMode
+
+  player-build:
+    name: ${{ matrix.targetPlatform }} player build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          - StandaloneWindows64
+          - StandaloneOSX
+          - StandaloneLinux64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: TestProject~
+          unityVersion: ${{ env.UNITY_VERSION }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          buildMethod: GatewayBuild.PerformBuild
+
+  release:
+    name: Publish release artifacts
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [editmode, player-build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Update Version
+      - uses: actions/checkout@v4
+      - name: Verify release version
+        shell: bash
         run: |
-          echo "// This file is auto-generated. Do not modify." > ./Runtime/MuxyGatewayVersion.cs
-          echo "namespace MuxyGateway" >> ./Runtime/MuxyGatewayVersion.cs
-          echo "{" >> ./Runtime/MuxyGatewayVersion.cs
-          echo "    class Constants { public const string Version = \"${{ github.ref_name }}\"; }" >> ./Runtime/MuxyGatewayVersion.cs
-          echo "}" >> ./Runtime/MuxyGatewayVersion.cs
-          cat ./Runtime/MuxyGatewayVersion.cs
-          mkdir .MuxyGateway
-          cp -r * .MuxyGateway/
-          mv .MuxyGateway MuxyGateway
-          zip -r "MuxyGateway-${{github.ref_name}}.zip" MuxyGateway/* -x ".git/*" ".github/*"
-
-      - name: Create Release
-        uses: ncipollo/release-action@v1
+          version="${GITHUB_REF_NAME#v}"
+          test "$(jq -r .version package.json)" = "$version"
+          grep -F "Version = \"$version\"" Runtime/MuxyGatewayVersion.cs
+      - name: Build UPM and ZIP artifacts
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          mkdir -p dist/package
+          find . -mindepth 1 -maxdepth 1 \
+            ! -name .git ! -name .github ! -name 'TestProject~' ! -name dist \
+            -exec cp -R {} dist/package/ \;
+          tar -czf "dist/com.muxy.gateway-$version.tgz" -C dist package
+          (cd dist/package && zip -qr "../MuxyGateway-$version.zip" .)
+          (cd dist && sha256sum *.tgz *.zip > SHA256SUMS)
+      - uses: softprops/action-gh-release@v2
         with:
-          name: Gamelink ${{ github.ref_name }}
-          allowUpdates: true
-          omitBodyDuringUpdate: true
-          omitNameDuringUpdate: true
-          artifacts: "MuxyGateway-${{github.ref_name}}.zip"
+          generate_release_notes: true
+          prerelease: true
+          files: |
+            dist/com.muxy.gateway-*.tgz
+            dist/MuxyGateway-*.zip
+            dist/SHA256SUMS

@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GameID: 
+  ConnectionStage: 1
   GameMetadata:
     Name: 
     Logo: 

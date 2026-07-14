@@ -162,7 +162,7 @@ namespace MuxyGateway
 
         public void StopWebsocketTransport()
         {
-            Transport.StopAsync();
+            Transport.StopAsync().GetAwaiter().GetResult();
         }
 
         public async Task RunInCustomAsync(String uri)
@@ -219,7 +219,7 @@ namespace MuxyGateway
         {
             Instance = Imported.MGW_MakeSDK(GameID);
             this.GameID = GameID;
-            this.Transport = new();
+            this.Transport = new WebsocketTransport();
 
             InvokeOnDebugMessageParameters args = new InvokeOnDebugMessageParameters();
             args.SDK = this;
@@ -655,7 +655,7 @@ namespace MuxyGateway
         private static Dictionary<string, MuxyGatewayGameActionUsedEvent> GameActionCallbacks;
         public void SetGameActions(GameAction[] Actions)
         {
-            GameActionCallbacks = new();
+            GameActionCallbacks = new Dictionary<string, MuxyGatewayGameActionUsedEvent>();
 
             List<MGW_Action> NativeActions = new List<MGW_Action>();
 

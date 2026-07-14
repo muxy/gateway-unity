@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "com.muxy.gateway": "file:../..",
+    "com.unity.test-framework": "1.1.33",
+    "com.unity.textmeshpro": "3.0.6"
+  },
+  "testables": [
+    "com.muxy.gateway"
+  ]
+}
