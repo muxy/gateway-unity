@@ -39,8 +39,6 @@ public class MuxyGatewayManager : MonoBehaviour
     private SDK.OnGameActionUsedDelegate ActionCB;
     private SDK.OnBitsUsedDelegate BitsCB;
 
-    private bool DidOpenAndRun = false;
-
     private void SetupCallbacks()
     {
         ActionCB = (Used) =>
@@ -55,7 +53,9 @@ public class MuxyGatewayManager : MonoBehaviour
 
         AuthCB = (Response) =>
         {
+            SDK authenticatedSDK = SDK;
             OnAuthentication.Invoke(Response);
+            if (SDK != authenticatedSDK || SDK == null || SDK.IsDisposed) return;
 
             if (Response.HasError)
             {
@@ -87,7 +87,7 @@ public class MuxyGatewayManager : MonoBehaviour
     {
         if (SDK != null)
         {
-            SDK.StopWebsocketTransport();
+            SDK.Dispose();
             SDK = null;
         }
     }
@@ -97,7 +97,6 @@ public class MuxyGatewayManager : MonoBehaviour
         if (SDK == null)
         {
             SDK = new SDK(GameID);
-            DidOpenAndRun = false;
             SetupCallbacks();
             CheckForRefreshToken();
         }
@@ -109,14 +108,12 @@ public class MuxyGatewayManager : MonoBehaviour
 
     public void OpenAndRunSDK()
     {
-        if (DidOpenAndRun) return;
         SDK.RunInProduction();
-        DidOpenAndRun = true;
     }
 
     private void Update()
     {
-        SDK.Update();
+        SDK?.Update();
     }
 
     public void AuthenticateWithPIN(String PIN)
@@ -134,7 +131,7 @@ public class MuxyGatewayManager : MonoBehaviour
     {
         PlayerPrefs.SetString(PLAYER_PREFS_REFRESH_TOKEN, "");
         SDK.Deauthenticate();
-        DidOpenAndRun = false;
+        SDK.Dispose();
         SDK = new SDK(GameID);
     }
 
