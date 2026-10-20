@@ -6,6 +6,7 @@
 - Replace the beta minimum-version suffix with the intended Unity 2020.3.0f1 stable target.
 - Preserve the Muxy.Gateway assembly, public type ownership, and existing asset GUIDs.
 - Add an isolated package-import/custom-assembly compilation harness and record scoped validation results.
+- Record activated Unity 2020.3.0f1/2020.3.17f1 live-Editor compilation and production WSS PIN/refresh passes, alongside the remaining batch licensing limitation; extend clean package checks to Unity 6000.0.85f1 and 6000.4.8f1.
 
 [0.1.0] 2022/10/04
 Initial release
