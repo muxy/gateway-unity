@@ -24,6 +24,35 @@ gameplay, see live stats, vote on key game decisions, and more.
 5. Select `Add package from disk...` from the Add Package dropdown and select
    the `package.json` file from the Gateway folder.
 
+### Unity and package dependencies
+
+The package targets Unity **2020.3.0f1 or newer**, using C# 8-compatible
+constructor syntax. Exact tested Editor versions and the limits of this first
+compatibility update are recorded in
+[compilation and package validation](Validation~/Compilation-And-Packages.md).
+Package import/compilation does not establish authenticated player or platform support.
+
+The package manifest requests its dependencies automatically:
+
+| Dependency | Requested version | Purpose |
+|---|---|---|
+| `com.unity.textmeshpro` | `3.0.6` | Authentication, notification, and polling UI |
+| `com.unity.ugui` | `1.0.0` | Unity UI components |
+| `com.unity.modules.imageconversion` | `1.0.0` | PNG encoding for game logos |
+
+On Unity 2023.2 and newer, TextMeshPro is included in uGUI. These Editors supply
+a built-in TextMeshPro compatibility package and their own uGUI version; let
+Package Manager resolve those built-ins. Do not manually downgrade uGUI or copy
+an older TextMeshPro implementation into the project. Check the resolved versions
+in the project's `Packages/packages-lock.json`.
+
+The SDK and its bundled prefab scripts still share the **`Muxy.Gateway`** assembly,
+so these UI dependencies apply to both prefab and code integrations. Consumer
+scripts under a custom `.asmdef` must reference `Muxy.Gateway`. Public type names,
+assembly ownership, and existing prefab/script GUIDs are preserved by this update.
+Import TMP Essential Resources through **Window > TextMeshPro** if your UI project
+does not already contain them.
+
 ## Using Gateway
 
 There are two flows to choose from when using Gateway:
@@ -239,7 +268,7 @@ public bool Production;
 
 void Start()
 {
-    SDK = new(GameID);
+    SDK = new SDK(GameID);
     SDK.RunInProduction();
 }
 
@@ -292,9 +321,9 @@ You can set your game's name, logo and a theme for the extension:
 ```csharp
 Texture2D GameLogo = Resources.Load<Texture2D>("Textures/Gateway/MyGameLogo.png");
 
-GameMetadata Meta = new();
+GameMetadata Meta = new GameMetadata();
 Meta.Name = "My awesome game!";
-Meta.Logo = SDK.ConvertTextureToImage(GameLogo);
+Meta.Logo = SDK.ConvertTextureToBase64(GameLogo);
 Meta.Theme = "default";
 
 SDK.SetGameMetadata(Meta);
@@ -376,7 +405,7 @@ Easily create a poll for Twitch viewers and receive immediate results in your
 game:
 
 ```csharp
-PollConfiguration Config = new();
+PollConfiguration Config = new PollConfiguration();
 Config.Mode = PollMode.Order; // PollMode.Chaos would allow everyone to vote as many times as they want
 Config.DurationInSeconds = 30;
 
