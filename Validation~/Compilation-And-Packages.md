@@ -2,6 +2,8 @@
 
 Date: October 20, 2026. Branch: `codex/unity-compilation-package-compatibility`.
 
+**Historical compilation/package update:** this records the first fix and its validation, including the separate validation-only WSS probe. The later shipping transport implementation and normal SDK connection results are documented in [Shipping-Transport.md](Shipping-Transport.md). Transport/lifecycle limitations below describe the earlier source identified in these snapshots.
+
 Base commit: `fc9fb13da721f85d03f0a2f507d7620a0ff5212f`. Results below concern the modified working-tree source, identified by the SHA-256 values in the result JSON files. Package version remains `0.0.1` until a release is prepared; installing the original tag does not install these fixes.
 
 ## Changes implemented

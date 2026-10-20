@@ -1,5 +1,7 @@
 # Live-Editor compatibility and PIN validation
 
+**Historical procedure for SDK commit `e1c80fb`:** its private-field cleanup matches the original transport. For current SDK testing use [the shipping transport procedure](../Validation~/Shipping-Transport.md), which exercises public connection/disposal APIs and needs no replacement socket.
+
 This is a fallback for a licensed, already-running Unity Editor when a separate batch process fails activation. It is validation tooling for the current SDK internals, not a runtime integration example or a replacement for clean-project/package/player tests.
 
 1. Use a disposable or checkpointed test project. Record its exact Editor version, existing dependencies, and baseline errors. Back up `Packages/manifest.json` and `packages-lock.json` before adding test dependencies.

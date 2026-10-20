@@ -1,4 +1,8 @@
 [Unreleased]
+- Use WSS/TLS 1.2 for production and sandbox connections, with cancellable owned TCP/TLS streams and standard WebSocket framing.
+- Replace async raw threads with tracked send/receive tasks, bounded reconnect delays, fresh sockets on reopen, and main-thread native dispatch.
+- Add awaitable stage/stop APIs and deterministic SDK disposal; release lifecycle subscriptions, native instances, pending authentication handles, and replaced callback handles. Dispose the prefab manager's SDK on disable/deauthentication.
+- Disable native diagnostic forwarding by default and expose explicit opt-in logging plus connection status/errors.
 - Expand all 13 target-typed constructors for Unity 2020.3's C# 8 compiler.
 - Preserve UTF-8 marshalling attributes without relying on the LPUTF8Str enum name missing from Unity 2020.3's .NET Standard 2.0 reference assemblies.
 - Declare TextMeshPro, uGUI, and image-conversion dependencies. Newer Editors resolve their built-in TMP compatibility package and uGUI implementation.
