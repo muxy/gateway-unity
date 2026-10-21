@@ -1,6 +1,6 @@
 [Unreleased]
 - Preserve reflection-loaded Mono TLS configuration types through a package Editor linker callback; fixes WSS connection failures in High-stripping Unity 6 Mono players.
-- Add Windows Mono/IL2CPP player, native callback, authenticated reconnect, certificate rejection and lifecycle stress probes; record the available eight-version matrix and missing-module limits.
+- Add Windows Mono/IL2CPP player, native callback, authenticated reconnect, certificate rejection and lifecycle stress probes; complete all 16 combinations across the eight-version matrix after installing the two missing IL2CPP modules.
 - Use WSS/TLS 1.2 for production and sandbox connections, with cancellable owned TCP/TLS streams and standard WebSocket framing.
 - Replace async raw threads with tracked send/receive tasks, bounded reconnect delays, fresh sockets on reopen, and main-thread native dispatch.
 - Add awaitable stage/stop APIs and deterministic SDK disposal; release lifecycle subscriptions, native instances, pending authentication handles, and replaced callback handles. Dispose the prefab manager's SDK on disable/deauthentication.

@@ -31,19 +31,21 @@ at least 100 idempotent disposal cycles, actual manager disable/re-enable, and s
 
 | Unity | Mono build/runtime | IL2CPP build/runtime |
 |---|---|---|
-| 2020.3.0f1 | Passed | Module missing |
+| 2020.3.0f1 | Passed | Passed |
 | 2020.3.17f1 | Passed | Passed |
 | 2020.3.48f1 | Passed | Passed |
 | 2022.3.62f3 | Passed | Passed |
 | 2023.2.20f1 | Passed | Passed |
 | 6000.0.85f1 | Passed | Passed |
-| 6000.4.8f1 | Passed | Module missing |
+| 6000.4.8f1 | Passed | Passed |
 | 6000.6.6f1 | Passed | Passed |
 
 The two oldest versions were built through their already-activated, running Editors.
-The other versions used isolated batch fixtures. The two unavailable IL2CPP modules
-were downloaded by Unity's installer, but installation stopped when administrator
-approval timed out. They remain untested; this is not a compiler failure.
+The other versions used isolated batch fixtures. The two initially missing IL2CPP
+modules installed after Windows administrator approval. Their builds and runtime
+checks then passed, completing all **16 Mono/IL2CPP combinations** in this matrix.
+The separate 2020.3.0f1 batch process still failed licensing; its activated Editor
+successfully produced the IL2CPP player.
 
 Offline authentication and transaction messages are **synthetic protocol fixtures**
 passed through the actual native SDK and managed delegates. No socket is started
@@ -52,7 +54,7 @@ is performed. Those callback results establish native ABI/stripping compatibilit
 
 ## Live PIN and authenticated reconnect
 
-**All 14 available combinations in the table passed the complete live sequence**
+**All 16 combinations in the table passed the complete live sequence**
 against the final SDK commit. Each run used a separate fresh configuration PIN.
 
 The live probe uses a separate new SDK instance and its normal production WSS flow.
@@ -74,7 +76,7 @@ an authentication rejection even before the visible five-minute expiry.
 
 ## Bounded lifecycle stress
 
-Four endpoint configurations run two batches of 1,000 native disposal and actual
+Six configurations run two batches of 1,000 native disposal and actual
 manager enable/disable cycles, with garbage collection and external Windows process
 measurements at baseline, midpoint, and completion. The manager's SDK must be
 disposed on disable and recreated on enable; scene unload must dispose its SDK.
@@ -82,9 +84,11 @@ disposed on disable and recreated on enable; scene unload must dispose its SDK.
 | Player | Private bytes: baseline / midpoint / end | Windows handles |
 |---|---|---|
 | 2020.3.0f1 Mono | 141,242,368 / 141,242,368 / 141,320,192 | 390 / 390 / 390 |
+| 2020.3.0f1 IL2CPP | 144,330,752 / 144,330,752 / 144,330,752 | 395 / 395 / 395 |
 | 2020.3.17f1 IL2CPP | 144,084,992 / 144,084,992 / 144,084,992 | 393 / 393 / 393 |
 | 6000.6.6f1 Mono | 158,334,976 / 158,605,312 / 158,642,176 | 398 / 398 / 398 |
 | 6000.6.6f1 IL2CPP | 147,243,008 / 147,148,800 / 147,148,800 | 361 / 361 / 361 |
+| 6000.4.8f1 IL2CPP | 154,652,672 / 154,554,368 / 154,583,040 | 367 / 367 / 367 |
 
 The external measurements are authoritative. Unity Mono's in-player Process API
 returned zero metrics; IL2CPP threw `NotSupportedException`. The helper now handles
@@ -102,6 +106,8 @@ An ephemeral self-signed localhost certificate, with matching IPv4 SAN, is serve
 over TLS 1.2 by a loopback listener. No certificate is installed in a trust store.
 Both Editors reject it with `AuthenticationException`, disconnect, and join stop.
 Dedicated High-stripping **Mono and IL2CPP players in both versions also passed**.
+Additional IL2CPP certificate checks passed on 2020.3.0f1 and 6000.4.8f1 after their
+modules installed, bringing the stripped-player certificate total to six passes.
 They distinguish certificate rejection from a configuration initialization failure,
 and verify disconnect and awaited stop. Server traces confirm the test certificate
 was presented; this was not merely a connection-refused result.
@@ -117,7 +123,7 @@ The checks cover consumer assembly compilation, dependency resolution and Unicod
 struct marshalling. Additional High-stripping Mono players are built from the clean
 Unity 2020 ZIP install and Unity 6.6 Git install, exercising package-delivered linker
 preservation. **Both additional players passed the complete live PIN/refresh,
-authenticated reconnect, reopen and disposal sequence**, for 16 live player runs
+authenticated reconnect, reopen and disposal sequence**, for 18 live player runs
 in total. The ZIP is a release candidate; the existing `v1.0.0-rc` asset has not
 been replaced and no new release has been published.
 
@@ -170,4 +176,4 @@ This matrix covers these eight installed releases on Windows x64. Other Unity
 patches, macOS/Linux, WebGL, sandbox authentication, authenticated long-duration
 traffic and real viewer-originated poll/action/Bits transactions are not established
 by these results. Direct connections still have no HTTP proxy or redirect support.
-The two missing IL2CPP modules must be installed before their player runs can pass.
+Both previously missing IL2CPP module combinations are now included in the passing matrix.

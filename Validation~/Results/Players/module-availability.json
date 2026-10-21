@@ -1,6 +1,6 @@
 [
   {
-    "il2cpp": false,
+    "il2cpp": true,
     "version": "2020.3.0f1",
     "mono": true
   },
@@ -30,7 +30,7 @@
     "mono": true
   },
   {
-    "il2cpp": false,
+    "il2cpp": true,
     "version": "6000.4.8f1",
     "mono": true
   },

@@ -3,19 +3,8 @@
   "platform": "Windows x64",
   "sdkCommit": "b0df7c86f4e3be8bb994ae1acf876370882c73d0",
   "managedStripping": "High",
-  "untested": [
-    {
-      "reason": "Windows IL2CPP module missing; installer elevation timed out",
-      "unityVersion": "2020.3.0f1",
-      "backend": "IL2CPP"
-    },
-    {
-      "reason": "Windows IL2CPP module missing; installer elevation timed out",
-      "unityVersion": "6000.4.8f1",
-      "backend": "IL2CPP"
-    }
-  ],
-  "mainCombinations": 14,
+  "untested": [],
+  "mainCombinations": 16,
   "candidateZipSha256": "243C6D9E9939A0C48F0E142E748B54D3AB3BEF791E876F8F467ACABB97880DCA",
   "players": [
     {
@@ -248,7 +237,37 @@
       "liveReport": "distribution-git-6000.6.6f1-Mono-live.json",
       "buildReport": "distribution-git-6000.6.6f1-Mono-build.json",
       "backend": "Mono"
+    },
+    {
+      "unityVersion": "2020.3.0f1",
+      "backend": "IL2CPP",
+      "distribution": false,
+      "buildReport": "2020.3.0f1-IL2CPP-build.json",
+      "liveReport": "2020.3.0f1-IL2CPP-live.json",
+      "soakReport": "2020.3.0f1-IL2CPP-soak.json",
+      "binarySha256": {
+        "GameAssembly.dll": "77AF5226C2DFA50205C82619C159A72A848436D46B114FAEADB08AC2B96E5014",
+        "GatewayValidation_BackUpThisFolder_ButDontShipItWithYourGame/Managed/Muxy.Gateway.dll": "0C06ADF70FBDBE1082E0910E304F107BA0007FFC648F43304791C0E004C22E36",
+        "GatewayValidation.exe": "B6F51B5ED058CA7537BBF0017FE8B3E043632572C12E5304348F61A15DAEF5C1",
+        "GatewayValidation_BackUpThisFolder_ButDontShipItWithYourGame/Managed/Assembly-CSharp.dll": "CBD317C53B659E4B30090C1ECE6B8CAA448DB689AFEAB3C8C5B9BFA4201C6C72",
+        "GatewayValidation_Data/Plugins/x86_64/cgamelink.dll": "D3D059BFF392A25137DA7F1B76663DE98E51E0E3C153E0B85C4C57785AADC5EE"
+      }
+    },
+    {
+      "unityVersion": "6000.4.8f1",
+      "backend": "IL2CPP",
+      "distribution": false,
+      "buildReport": "6000.4.8f1-IL2CPP-build.json",
+      "liveReport": "6000.4.8f1-IL2CPP-live.json",
+      "soakReport": "6000.4.8f1-IL2CPP-soak.json",
+      "binarySha256": {
+        "GameAssembly.dll": "783E9989FF0A967FBD19FE383535F4779FCB4E61B1EF1EA6E1D0158E2A4EA9FA",
+        "GatewayValidation_BackUpThisFolder_ButDontShipItWithYourGame/Managed/Muxy.Gateway.dll": "B8E54BD8F5C4CA2BC0BF03375632C22C1B4B41C5FF7CF0945D8F7B003DEABD10",
+        "GatewayValidation.exe": "4DF70C500797CE0B913F1D3528244F276836AFC006DDDDCFFCFFCC9375C965E5",
+        "GatewayValidation_BackUpThisFolder_ButDontShipItWithYourGame/Managed/Assembly-CSharp.dll": "B2AAB245ACE5E68A446CF63C36C87C94CF1E39576B1DE48B96215858C350DA0B",
+        "GatewayValidation_Data/Plugins/x86_64/cgamelink.dll": "D3D059BFF392A25137DA7F1B76663DE98E51E0E3C153E0B85C4C57785AADC5EE"
+      }
     }
   ],
-  "status": "passed-available-combinations"
+  "status": "passed-all-listed-combinations"
 }
