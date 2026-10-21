@@ -6,6 +6,8 @@ param(
 
     [string]$EditorPath,
 
+    [string]$PackageSource,
+
     [string]$OutputRoot = (Join-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) '.gateway-validation'),
 
     [ValidateRange(30, 1800)]
@@ -14,6 +16,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $packageRoot = [IO.Path]::GetFullPath((Split-Path $PSScriptRoot -Parent))
+if (-not $PackageSource) { $PackageSource = 'file:' + $packageRoot.Replace('\', '/') }
 if (-not $EditorPath) {
     $EditorPath = Join-Path $env:ProgramFiles "Unity\Hub\Editor\$UnityVersion\Editor\Unity.exe"
 }
@@ -45,7 +48,7 @@ function Write-FixtureFile([string]$RelativePath, [string]$Content) {
 Write-FixtureFile '.gateway-package-import-fixture' $packageRoot
 Write-FixtureFile 'ProjectSettings/ProjectVersion.txt' "m_EditorVersion: $UnityVersion`n"
 # Only Gateway is requested: its manifest must supply all package dependencies.
-$manifest = @{ dependencies = @{ 'com.muxy.gateway' = ('file:' + $packageRoot.Replace('\', '/')) } }
+$manifest = @{ dependencies = @{ 'com.muxy.gateway' = $PackageSource } }
 Write-FixtureFile 'Packages/manifest.json' ($manifest | ConvertTo-Json -Depth 5)
 Write-FixtureFile 'Assets/Consumer/Gateway.PackageConsumer.asmdef' @'
 {
@@ -102,6 +105,9 @@ public static class GatewayPackageImportValidation
                 throw new InvalidOperationException("UI package providers were not resolved.");
 
             ValidateUtf8Marshalling();
+            Type linker = Type.GetType("MuxyGateway.Editor.GatewayLinkerProcessor, Muxy.Gateway.Editor");
+            if (linker == null || !typeof(UnityEditor.Build.IUnityLinkerProcessor).IsAssignableFrom(linker))
+                throw new InvalidOperationException("Package linker callback was not registered.");
 
             // No SDK, scene owner, transport, or native instance is constructed.
             File.WriteAllLines(Path.Combine(Application.dataPath, "../package-import-result.txt"), new[]
@@ -112,6 +118,7 @@ public static class GatewayPackageImportValidation
                 "tmpProvider=" + tmpProvider.name + "@" + tmpProvider.version,
                 "uiProvider=" + uiProvider.name + "@" + uiProvider.version,
                 "utf8StructMarshalling=passed",
+                "linkerProcessor=registered",
                 "status=passed"
             });
             Debug.Log("GATEWAY_PACKAGE_IMPORT_PASSED");
@@ -211,10 +218,11 @@ foreach ($dependency in $lock.dependencies.PSObject.Properties) {
         version = $dependency.Value.version
         source = $dependency.Value.source
         depth = $dependency.Value.depth
+        resolvedHash = $dependency.Value.hash
     }
 }
 $sourceHashes = @{}
-$sourceFiles = @(Get-ChildItem -LiteralPath (Join-Path $packageRoot 'Runtime'), (Join-Path $packageRoot 'Prefabs') -Filter '*.cs' -Recurse)
+$sourceFiles = @(Get-ChildItem -LiteralPath (Join-Path $packageRoot 'Runtime'), (Join-Path $packageRoot 'Prefabs'), (Join-Path $packageRoot 'Editor') -Filter '*.cs' -Recurse)
 $sourceFiles += Get-Item -LiteralPath (Join-Path $packageRoot 'package.json'), (Join-Path $packageRoot 'Muxy.Gateway.asmdef')
 foreach ($sourceFile in $sourceFiles) {
     $relativePath = $sourceFile.FullName.Substring($packageRoot.Length + 1).Replace('\', '/')
@@ -223,7 +231,8 @@ foreach ($sourceFile in $sourceFiles) {
 $report = [ordered]@{
     unityVersion = $UnityVersion
     status = 'passed'
-    scope = 'clean-local-package-import-consumer-compilation-and-utf8-struct-marshalling'
+    scope = 'clean-package-import-consumer-compilation-and-utf8-struct-marshalling'
+    packageSource = $PackageSource
     nativeInstanceConstructed = $false
     networkAuthenticationAttempted = $false
     observations = $observations

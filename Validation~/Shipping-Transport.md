@@ -1,5 +1,8 @@
 # Shipping WSS transport and connection cleanup
 
+For subsequent Windows Mono/IL2CPP builds, live player reconnects, stripping fixes,
+certificate checks, and lifecycle measurements, see [player compatibility](Player-Compatibility.md).
+
 Date: October 20, 2026. PR: [#15](https://github.com/muxy/gateway-unity/pull/15).
 
 Tested SDK commit: **`0c9011fd0de204a5d006c449adee5025efd70b70`**. Each current result includes SDK source hashes. These checks supersede the earlier validation-only socket workaround in [the original compilation report](Compilation-And-Packages.md).

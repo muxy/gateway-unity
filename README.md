@@ -31,6 +31,8 @@ constructor syntax. Exact tested Editor versions and the limits of this first
 compatibility update are recorded in
 [compilation and package validation](Validation~/Compilation-And-Packages.md).
 Package import/compilation does not establish authenticated player or platform support.
+Windows Mono/IL2CPP player builds, production PIN/reconnect checks and their exact
+tested scope are recorded in [player compatibility](Validation~/Player-Compatibility.md).
 
 The package manifest requests its dependencies automatically:
 

@@ -1,0 +1,13 @@
+{
+    "unityVersion": "6000.0.85f1",
+    "backend": "IL2CPP",
+    "timestampUtc": "2026-10-21T01:14:00.8125588Z",
+    "status": "passed",
+    "apiProfile": "NET_Standard_2_0",
+    "stripping": "High",
+    "failureType": "",
+    "errors": 0,
+    "warnings": 2,
+    "bytes": 358103584,
+    "seconds": 20.7104809
+}
