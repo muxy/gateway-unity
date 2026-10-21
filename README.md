@@ -53,6 +53,11 @@ assembly ownership, and existing prefab/script GUIDs are preserved by this updat
 Import TMP Essential Resources through **Window > TextMeshPro** if your UI project
 does not already contain them.
 
+The package's Editor build callback supplies linker preservation for Mono's TLS
+configuration types, including builds with High managed stripping. Keep the
+package's `Editor` folder when installing from an archive. No project-level
+`link.xml` or certificate-validation override is required.
+
 ## Using Gateway
 
 There are two flows to choose from when using Gateway:
