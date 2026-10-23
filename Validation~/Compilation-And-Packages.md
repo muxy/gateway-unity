@@ -1,119 +1,78 @@
-# Compilation and package compatibility: first SDK update
+# Unity compilation and package compatibility
 
-Date: October 20, 2026. Branch: `codex/unity-compilation-package-compatibility`.
+Scope split: October 23, 2026. PR: [#15](https://github.com/muxy/gateway-unity/pull/15).
+Base: `fc9fb13da721f85d03f0a2f507d7620a0ff5212f`.
 
-**Historical compilation/package update:** this records the first fix and its validation, including the separate validation-only WSS probe. The later shipping transport implementation and normal SDK connection results are documented in [Shipping-Transport.md](Shipping-Transport.md). Transport/lifecycle limitations below describe the earlier source identified in these snapshots.
+## Required fixes in this PR
 
-Base commit: `fc9fb13da721f85d03f0a2f507d7620a0ff5212f`. Results below concern the modified working-tree source, identified by the SHA-256 values in the result JSON files. Package version remains `0.0.1` until a release is prepared; installing the original tag does not install these fixes.
+- Expand the 13 target-typed constructors so Unity 2020.3's C# 8 compiler can parse the SDK and prefab scripts.
+- Preserve the existing UTF-8 marshalling ABI by replacing 33 references to the unavailable `UnmanagedType.LPUTF8Str` enum name with a shared `(UnmanagedType)48` constant. The native calling convention and encoding are unchanged.
+- Declare TextMeshPro 3.0.6, uGUI 1.0.0 and image-conversion 1.0.0 dependencies, with the explicit `UnityEngine.UI` assembly reference. Newer Editors resolve their built-in compatible UI providers.
+- Guard the `UnityEditor` import with `UNITY_EDITOR` so standalone players compile.
+- Declare the stable 2020.3.0f1 minimum instead of the beta suffix.
+- Preserve reflection-loaded Mono TLS configuration classes through an Editor-only `IUnityLinkerProcessor`. Package-local link.xml files are not consumed consistently across the supported versions; the callback supplies its generated descriptor to the build.
+- Update the README's compiler syntax, package instructions and existing method-name example.
 
-## Changes implemented
+The runtime SDK and prefab scripts are restored to the original compatibility
+revision `e1c80fb31a0b1eefa9055bd5a79f89fb33aad137`. The linker callback is retained
+from the later stripping fix. The package import harness checks the Editor linker
+callback's registration as well as consumer compilation and UTF-8 marshalling.
 
-- Replaced all 13 target-typed constructors with explicit types for C# 8 compilation. Updated the three corresponding constructor examples in the README.
-- Declared dependencies on TMP `3.0.6`, uGUI `1.0.0`, and the image-conversion module `1.0.0`. These are manifest requests; the Editor's built-ins and Package Manager's resolution policy determine the versions actually installed.
-- Added the missing explicit `UnityEngine.UI` assembly reference alongside `Unity.TextMeshPro`.
-- Restricted the `UnityEditor` import to `UNITY_EDITOR` rather than standalone-player compilation.
-- Changed the package's minimum-release suffix from `0b5` to the intended stable `0f1`. Live-Editor validation of that exact earliest patch passed; its separate clean batch check remains blocked as recorded below.
-- Fixed another clean-project compilation blocker: Unity 2020.3's .NET Standard 2.0 reference assemblies do not expose the named `UnmanagedType.LPUTF8Str` member. All 33 existing UTF-8 marshalling annotations now use one internal constant with the same ABI value, **48**. This preserves the original UTF-8 metadata; it does not substitute ANSI strings or require changing the consumer's API compatibility level. See [Microsoft's enum definition](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.unmanagedtype).
-- Preserved the `Muxy.Gateway` assembly, public type ownership, serialized fields, and existing asset GUIDs. No UI package split or public-type migration was needed for the package-resolution paths tested here.
+Transport and lifecycle changes are separated for their own review. Their code,
+connection/PIN/reconnect results, lifecycle tests and broader reports are preserved
+on `codex/gateway-transport-lifecycle`. They are not compatibility-only acceptance
+results.
 
-The existing root assembly still includes prefab/UI code, so even code integrations resolve the UI dependencies. An optional UI-free core is a separate architectural change.
+## Historical compatibility evidence
 
-## Actual clean-project checks
+The original October 20 clean-package results below are retained unchanged from
+`e1c80fb`. Each report records its source hashes and dependency providers. These
+checks used independent Windows x64 fixture projects requesting only the local
+Gateway package, a separate consumer assembly, six public type-ownership checks,
+and accented/Japanese/emoji UTF-8 struct round trips. They did not construct an SDK
+instance or authenticate to a server.
 
-The six batch runs below used separate Windows x64 fixture projects. Their project manifests requested **only `com.muxy.gateway` from the local working tree**; they did not preinstall TMP/uGUI or copy dependency assemblies into the projects. Unity used its default project compiler/API settings. The test helper also compiled a custom consumer assembly referencing `Muxy.Gateway`, checked that six SDK/manager/widget public types remained in that assembly, and exercised UTF-8 struct marshalling with accented text, Japanese characters, and an emoji. The original four fixtures were rerun after activation, and two additional installed versions were checked.
+| Exact Editor | Package/consumer compilation | UTF-8 struct check | Evidence |
+|---|---|---|---|
+| 2020.3.48f1 | Passed | Passed | [Result](Results/2020.3.48f1.json) |
+| 2022.3.62f3 | Passed | Passed | [Result](Results/2022.3.62f3.json) |
+| 2023.2.20f1 | Passed | Passed | [Result](Results/2023.2.20f1.json) |
+| 6000.6.6f1 | Passed | Passed | [Result](Results/6000.6.6f1.json) |
 
-| Exact Editor | Import, SDK and custom-consumer compilation | Resolved TMP / provider | Resolved uGUI | UTF-8 struct check |
-|---|---|---|---|---|
-| **2020.3.48f1** | **Passed** | Standalone TMP `3.0.6`, registry | `1.0.0`, built-in | **Passed** |
-| **2022.3.62f3** | **Passed** | Standalone TMP `3.0.7`, registry | `1.0.0`, built-in | **Passed** |
-| **2023.2.20f1** | **Passed** | Built-in TMP shim `5.0.0`; TMP types supplied by uGUI | `2.0.0`, built-in | **Passed** |
-| **6000.0.85f1** | **Passed** | Built-in TMP shim `5.0.0`; TMP types supplied by uGUI | `2.0.0`, built-in | **Passed** |
-| **6000.4.8f1** | **Passed** | Built-in TMP shim `5.0.0`; TMP types supplied by uGUI | `2.0.0`, built-in | **Passed** |
-| **6000.6.6f1** | **Passed** | Built-in TMP shim `5.0.0`; TMP types supplied by uGUI | `2.6.0`, built-in | **Passed** |
+Earlier focused compilation also passed with the Unity 2020.3.0f1 bundled Roslyn
+compiler, C# 8, its .NET Standard 2.0 references, and Editor/standalone symbol sets.
+That compilation reused UI assemblies from the 2020.3.48f1 fixture. It was not a
+minimum-version clean install or runtime test.
 
-Separate batch launches of **2020.3.0f1 and 2020.3.17f1 still reported an activation failure**, despite the user activating and opening those versions successfully. Their actual live-Editor results are recorded next; a batch failure does not negate a live-Editor pass, and a live pass does not establish clean batch dependency resolution.
+The stripping defect and its preservation fix were established during later player
+work using the changed transport. That evidence stays with the transport/lifecycle
+review; it is not evidence of a fresh player run of this narrowed branch.
 
-## Activated live-Editor checks
+## Reproduction
 
-The user's existing Windows x64 LEGO test projects were used without closing their running Editors. Temporary local-package entries, Editor probes, and a separate `Gateway.PackageConsumer` assembly were added. Both projects already had TMP `3.0.6`; this is existing-project integration evidence, not a fresh-dependency-resolution claim.
-
-| Exact Editor | SDK/package compilation | Custom consumer assembly | UTF-8 struct check | Native SDK construction |
-|---|---|---|---|---|
-| **2020.3.0f1** | **Passed** | **Passed**, six public types retain `Muxy.Gateway` ownership | **Passed** | **Passed** |
-| **2020.3.17f1** | **Passed** | **Passed**, six public types retain `Muxy.Gateway` ownership | **Passed** | **Passed** |
-
-The projects' unrelated template diagnostics, including LEGO/tutorial errors and shader diagnostics, are not a clean game-build result. The validation probes executing after compilation and their dedicated consumer assemblies establish the SDK results above.
-
-## Fresh Twitch PIN and refresh authentication
-
-On October 20, fresh configuration PINs were obtained by reloading the user's selected Twitch Gateway configuration tab. Each Editor received a different newly issued PIN. The same SDK source as fix commit **`e1c80fb31a0b1eefa9055bd5a79f89fb33aad137`** was used, with production game ID **`gamelink-testing`**, native-generated addresses, WSS, and normal certificate validation.
-
-| Editor | PIN callback, CDT | Approximate time from PIN request to submission | PIN authentication | In-memory refresh | Test native instance released |
-|---|---|---|---|---|---|
-| **2020.3.0f1** | **16:52:17.997** | **18.47 seconds** | **Passed** | **Passed**, 16:52:18.076 | **Yes** |
-| **2020.3.17f1** | **16:53:12.864** | **29.47 seconds** | **Passed** | **Passed**, 16:53:12.946 | **Yes** |
-
-For all four callbacks: `HasError == false`, native `IsAuthenticated == true`, JWT present, refresh token present, and no protocol error was observed. Timing uses the configuration-page reload request as the approximate issuance boundary, not a server-provided issuance timestamp. Both submissions were well inside the documented five-minute PIN window. JWTs and refresh tokens stayed in memory; reports retain presence flags rather than credential values.
-
-**Transport scope:** the validation probe uses its own short-lived `ClientWebSocket` and calls the actual SDK's `AuthenticateWithPIN`, `AuthenticateWithRefreshToken`, `ForeachPayload`, `ReceiveMessage`, and main-thread update path. It opens WSS immediately before submitting the PIN. This verifies native/managed SDK linking and refresh, not the unchanged shipping stage helpers, which still use plaintext WS. No production SDK source or native binary was changed in this rerun.
-
-An earlier minimum-Editor probe opened its WSS connection before a fresh PIN was ready and failed before receiving an authentication callback, despite submitting the PIN approximately 37 seconds after its request. The retry with an immediate connection and a separate fresh PIN passed. The initial error was transport-related; its exact cause was not captured, and it is not evidence of PIN expiry or credential denial. The failed observation is retained separately.
-
-The probe detached native debug forwarding before credential exchange. It used validation-only reflection for the current private SDK/native handle and idle transport cleanup because the SDK does not yet expose complete disposal. The reports confirm native destruction and validation-socket disposal, not a public disposal API, a leak-free soak, or server-side token revocation. The temporary probes and control files were removed after testing. The 2020.3.0f1 manifest was restored exactly; 2020.3.17f1 test entries were removed while preserving other template/project manifest updates. See the cleanup records.
-
-The 2020.3.48f1 clean fixture first exposed `CS0117` at the 33 named UTF-8 enum references under its default .NET Standard 2.0 configuration. After the ABI-constant fix, the same fixture compiled and the Unicode round trip passed. This additional blocker was masked by the API profile used in the earlier supplied report project.
-
-An initial validation-helper run on Unity 6.6 failed because `PackageInfo` was ambiguous between two Editor namespaces. The helper now explicitly aliases `UnityEditor.PackageManager.PackageInfo`; that helper error was not an SDK defect. The final checks above passed after this correction.
-
-The shim resolution observed in four modern Editors establishes a working single-manifest approach for these configurations. It supersedes the initial plan's assumption that separate UI package variants might be necessary. It does not prove every intervening Editor patch.
-
-## Minimum-Editor managed compiler checks
-
-Unity **2020.3.0f1's bundled Roslyn compiler** also compiled all runtime and prefab C# sources with explicit `-langversion:8.0`, its own .NET Standard 2.0 reference/shim assemblies, and its own engine assemblies:
-
-| Compilation symbols | Result |
-|---|---|
-| `UNITY_EDITOR,UNITY_STANDALONE,UNITY_STANDALONE_WIN` | **Passed, compiler exit 0** |
-| `UNITY_STANDALONE,UNITY_STANDALONE_WIN`, without Editor assembly references | **Passed, compiler exit 0** |
-
-These focused checks reused TMP/uGUI assemblies produced by the clean **2020.3.48f1** fixture. They establish minimum-compiler/source compatibility, including the standalone import guard. The separate live-Editor checks above now establish Editor execution in 2020.3.0f1; fresh batch dependency resolution and player execution remain unverified. The batch process's activation block remains open.
-
-Both focused compilations retained the five existing SDK warnings: two nullable-reference annotation warnings, one unawaited shutdown Task warning, and two unused exception-variable warnings. The shutdown warning belongs to the forthcoming lifecycle work. This update makes no warning-free or complete SDK-runtime claim.
-
-## Reproduce the clean import checks
-
-Run from the SDK repository in PowerShell, with the target Editor installed and activated:
+From the repository root, with the requested Editor installed and activated:
 
 ```powershell
 .\Tools~\Test-PackageImport.ps1 -UnityVersion 2020.3.48f1
 .\Tools~\Test-PackageImport.ps1 -UnityVersion 2022.3.62f3
 .\Tools~\Test-PackageImport.ps1 -UnityVersion 2023.2.20f1
-.\Tools~\Test-PackageImport.ps1 -UnityVersion 6000.0.85f1
-.\Tools~\Test-PackageImport.ps1 -UnityVersion 6000.4.8f1
 .\Tools~\Test-PackageImport.ps1 -UnityVersion 6000.6.6f1
 ```
 
-Use `-EditorPath` for a non-default installation. Use `-OutputRoot` for another validation location outside the SDK package; the default is `.gateway-validation` beside the repository. The harness creates one marked, reusable fixture per version and refuses to overwrite an unrelated project. It launches only its own hidden batch Editor, applies a timeout, requires an explicit validation success marker, and writes a JSON report with dependency resolution and SDK source hashes. It does not instantiate the SDK or submit credentials.
+The runner creates marked disposable fixtures outside the package, requests only
+Gateway before dependency resolution, compiles a custom consumer, and launches a
+hidden child Editor. A deadline and explicit passed result prevent stale success
+reports. It does not construct an SDK instance or submit credentials.
 
-Raw import logs, generated projects, and lockfiles remain in those fixture directories. The minimum-compiler response files and logs are in the sibling `managed-2020.3.0f1` validation directory. Result snapshots retained in this repository are:
+## Scope of the split
 
-- [Unity 2020.3.48f1](Results/2020.3.48f1.json)
-- [Unity 2022.3.62f3](Results/2022.3.62f3.json)
-- [Unity 2023.2.20f1](Results/2023.2.20f1.json)
-- [Unity 6000.0.85f1](Results/6000.0.85f1.json)
-- [Unity 6000.4.8f1](Results/6000.4.8f1.json)
-- [Unity 6000.6.6f1](Results/6000.6.6f1.json)
-- [Unity 2020.3.0f1 live import](Results/2020.3.0f1-live.json), [custom consumer](Results/2020.3.0f1-live-consumer.json), [PIN/refresh](Results/2020.3.0f1-authentication.json), [source identity](Results/2020.3.0f1-live-source-identity.json), [cleanup](Results/2020.3.0f1-cleanup.json)
-- [Unity 2020.3.17f1 live import](Results/2020.3.17f1-live.json), [custom consumer](Results/2020.3.17f1-live-consumer.json), [PIN/refresh](Results/2020.3.17f1-authentication.json), [source identity](Results/2020.3.17f1-live-source-identity.json), [cleanup](Results/2020.3.17f1-cleanup.json)
-- [Initial minimum-Editor transport failure](Results/2020.3.0f1-authentication-initial-failure.json)
-- [Minimum-Editor batch activation result](Results/2020.3.0f1-batch-blocked.json), [2020.3.17f1 batch activation result](Results/2020.3.17f1-batch-blocked.json)
+No Unity tests or builds were rerun solely to split these PRs. Git comparisons
+establish that the runtime/prefab compatibility source matches `e1c80fb`, the
+Editor preservation files match the existing implementation, and the transport
+branch retains the previously tested behavior changes.
 
-See [live-Editor validation setup](../Tools~/Live-Editor-Validation.md) for the fallback procedure and its limits.
-
-## Remaining acceptance work
-
-Resolve the separate batch licensing context for **2020.3.0f1 and 2020.3.17f1** before claiming their automated clean-project dependency checks pass. Their activated live-Editor SDK, custom-assembly, native construction, PIN, and refresh checks now pass.
-
-Git-URL and release-archive installation, player builds, IL2CPP, gameplay/prefab behavior, sandbox authentication, other operating systems/architectures, and the full Unity patch matrix remain pending. The old-Editor PIN/refresh passes cover their actual native authentication callbacks; other native callbacks and player behavior still need separate checks.
-
-Follow-up SDK work includes secure transport defaults, stage/async connection APIs, authentication configuration/storage, callback isolation, disposal, and widget defects.
+The historical reports above do not validate the exact newly combined
+compatibility-plus-linker snapshot. This PR does not claim live authentication,
+player/IL2CPP execution, every supported Unity patch, other operating systems,
+gameplay behavior, or a full current matrix. The broader results identify their
+own commits in the separate transport/lifecycle PR.

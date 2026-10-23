@@ -1,8 +1,0 @@
-{
-    "unityVersion": "6000.6.6f1",
-    "status": "passed",
-    "exceptionType": "AuthenticationException",
-    "rejected": true,
-    "disconnected": true,
-    "tasksJoined": true
-}
