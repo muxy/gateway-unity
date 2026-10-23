@@ -1,0 +1,63 @@
+{
+  "timestampUtc": "2026-10-23T17:50:26.0894149Z",
+  "testedSdkCommit": "7446772beafa11a08e2ca25704c38d248349e846",
+  "shippingSourceCommit": "e2e85488d436f3ec29355c825bae71d087636532",
+  "shippingCodeUnchanged": true,
+  "sourceHashesVerified": true,
+  "scope": "clean-package-import-consumer-compilation-utf8-and-linker-registration",
+  "licenseRepair": "Unity Hub Personal reactivation created legacy ULF; no license files included",
+  "imports": [
+    {
+      "unityVersion": "2020.3.0f1",
+      "status": "passed",
+      "report": "2020.3.0f1-package.json",
+      "resultSha256": "725C5BD872871578DEEEA19A3C563B916508ACF90D00CE6B834BBC23CAF8C305",
+      "importLogSha256": "C91D34BAB09C9AC46B7848B101B073E22ABE6205994C796709BF29680093EED4",
+      "resultWrittenUtc": "2026-10-23T17:49:00.5875133Z",
+      "earlierAttempts": [
+        {
+          "phase": "after-refresh",
+          "status": "environment-blocked",
+          "reason": "unity-license-activation",
+          "exitCode": 1,
+          "report": "2020.3.0f1-after-refresh.json",
+          "importLogSha256": "BBB1319AF2709E9ABE18CA8C94613E2A3E2D820FA2646F8D9CD82D71846CB66B"
+        },
+        {
+          "phase": "after-personal-reactivation",
+          "status": "environment-blocked",
+          "reason": "unity-license-activation",
+          "exitCode": 1,
+          "report": "2020.3.0f1-after-personal-reactivation.json",
+          "importLogSha256": "C65D59722A5FB636E4D19632EF782648E773E6BC10CBB57CB135D9E1CC84DC72"
+        }
+      ]
+    },
+    {
+      "unityVersion": "2020.3.17f1",
+      "status": "passed",
+      "report": "2020.3.17f1-package.json",
+      "resultSha256": "A3509D2CE047C20F9917F04419570740EDD6465EEE00B7BEE0E3A8C9E13BF913",
+      "importLogSha256": "A7A5072693987C0AB5BDF14946A77A87855B3AF7A77159A218882E85C6DB167B",
+      "resultWrittenUtc": "2026-10-23T17:48:58.7148303Z",
+      "earlierAttempts": [
+        {
+          "phase": "after-refresh",
+          "status": "environment-blocked",
+          "reason": "unity-license-activation",
+          "exitCode": 1,
+          "report": "2020.3.17f1-after-refresh.json",
+          "importLogSha256": "8775E92667B86512E2E4FF10654AACD105B8CD1179CBCA2BB0CBAFEB1014DD0E"
+        },
+        {
+          "phase": "after-personal-reactivation",
+          "status": "environment-blocked",
+          "reason": "unity-license-activation",
+          "exitCode": 1,
+          "report": "2020.3.17f1-after-personal-reactivation.json",
+          "importLogSha256": "9494D8BCAFABDC069F0BAD855E5B2F9F483BA04F0A1E162C504B6CF9D879F989"
+        }
+      ]
+    }
+  ]
+}

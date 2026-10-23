@@ -77,6 +77,7 @@ branch retains the previously tested behavior changes.
 The historical reports above predate the exact newly combined
 compatibility-plus-linker snapshot. The subsequent requested rerun establishes
 fresh package/compiler and stripped Mono/IL2CPP build/smoke results in its
-[separate report](Compatibility-Rerun-20261023.md), including the two remaining
-batch-license blocks. Live authentication, gameplay/network lifecycle behavior,
+[separate report](Compatibility-Rerun-20261023.md). The two early-Editor
+batch-license blocks were subsequently resolved by [Hub license reactivation](License-Repair-20261023.md),
+and both fresh package imports passed. Live authentication, gameplay/network lifecycle behavior,
 every patch/platform and a full current matrix remain outside this PR's scope.
