@@ -1,0 +1,12 @@
+{
+    "unityVersion": "2020.3.48f1",
+    "backend": "Mono",
+    "timestampUtc": "2026-10-23T15:26:59.1215893Z",
+    "status": "passed",
+    "failure": "",
+    "scope": "unauthenticated-production-WSS-connect-stop-reopen",
+    "connected": true,
+    "stopped": true,
+    "reopened": true,
+    "disposed": true
+}

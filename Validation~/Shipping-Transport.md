@@ -1,5 +1,10 @@
 # Shipping WSS transport and connection cleanup
 
+**Historical report (October 20 transport).** The manual connection-establishment
+implementation described below was replaced on October 23. See
+[ClientWebSocket validation](ClientWebSocket.md) for the current implementation,
+the isolated TLS cancellation reproduction, and the accepted bounded limitation.
+
 For subsequent Windows Mono/IL2CPP builds, live player reconnects, stripping fixes,
 certificate checks, and lifecycle measurements, see [player compatibility](Player-Compatibility.md).
 

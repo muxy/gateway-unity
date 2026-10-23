@@ -1,5 +1,9 @@
 # Windows player compatibility
 
+**Historical matrix (October 20 transport).** These results identify the tested
+commit below and do not establish the October 23 ClientWebSocket revision. See
+[the current transport report](ClientWebSocket.md) for its separate results and limits.
+
 Validation date: October 20, 2026 (America/Chicago; JSON timestamps use UTC).
 SDK commit: `b0df7c86f4e3be8bb994ae1acf876370882c73d0`.
 
