@@ -22,6 +22,7 @@ $dependencies=@{'com.muxy.gateway'=('file:'+$packageRoot.Replace('\','/'));'com.
 [IO.File]::WriteAllText((Join-Path $project 'Packages/manifest.json'),(@{dependencies=$dependencies} | ConvertTo-Json -Depth 8),$utf8)
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'GatewayPlayerValidation.cs') -Destination (Join-Path $project 'Assets/GatewayPlayerValidation/Runtime/GatewayPlayerValidation.cs')
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'GatewayCertificatePlayerValidation.cs') -Destination (Join-Path $project 'Assets/GatewayPlayerValidation/Runtime/GatewayCertificatePlayerValidation.cs')
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'GatewayConnectionValidation.cs') -Destination (Join-Path $project 'Assets/GatewayPlayerValidation/Runtime/GatewayConnectionValidation.cs')
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'GatewayPlayerBuildValidation.cs') -Destination (Join-Path $project 'Assets/GatewayPlayerValidation/Editor/GatewayPlayerBuildValidation.cs')
 $output=Join-Path $root "builds-$UnityVersion"
 [IO.Directory]::CreateDirectory($output) | Out-Null

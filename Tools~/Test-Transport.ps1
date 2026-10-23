@@ -4,6 +4,7 @@ param(
     [ValidatePattern('^\d+\.\d+\.\d+[fp]\d+$')]
     [string]$UnityVersion,
     [string]$EditorPath,
+    [ValidateSet('Lifecycle', 'Client')][string]$Probe = 'Lifecycle',
     [string]$OutputRoot = (Join-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) '.gateway-validation/transport-lifecycle'),
     [ValidateRange(30, 1800)] [int]$TimeoutSeconds = 180
 )
@@ -13,9 +14,11 @@ $project = [IO.Path]::GetFullPath((Join-Path $OutputRoot "package-import-$UnityV
 $packageRoot = [IO.Path]::GetFullPath((Split-Path $PSScriptRoot -Parent))
 if ($project.Equals($packageRoot, [StringComparison]::OrdinalIgnoreCase) -or $project.StartsWith($packageRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw 'The test fixture must be outside the SDK package.' }
 $marker = Join-Path $project '.gateway-package-import-fixture'
+$helper = if ($Probe -eq 'Client') { 'GatewayClientWebSocketValidation' } else { 'GatewayTransportLifecycleValidation' }
+$resultFile = if ($Probe -eq 'Client') { 'clientwebsocket-result.json' } else { 'transport-lifecycle-result.json' }
 if ((Test-Path -LiteralPath $marker) -and [IO.File]::ReadAllText($marker) -eq $packageRoot) {
     # Remove only this harness's previous helper before the dependency-only import.
-    foreach ($name in @('GatewayTransportLifecycleValidation.cs', 'GatewayTransportLifecycleValidation.cs.meta')) {
+    foreach ($name in @('GatewayTransportLifecycleValidation.cs', 'GatewayTransportLifecycleValidation.cs.meta', 'GatewayClientWebSocketValidation.cs', 'GatewayClientWebSocketValidation.cs.meta')) {
         $previousHelper = Join-Path $project "Assets/Editor/$name"
         if (Test-Path -LiteralPath $previousHelper) { Remove-Item -LiteralPath $previousHelper }
     }
@@ -27,12 +30,12 @@ $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
 $manifest.dependencies | Add-Member -NotePropertyName 'com.unity.modules.jsonserialize' -NotePropertyValue '1.0.0' -Force
 $utf8 = New-Object Text.UTF8Encoding($false)
 [IO.File]::WriteAllText($manifestPath, ($manifest | ConvertTo-Json -Depth 10), $utf8)
-Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'GatewayTransportLifecycleValidation.cs') -Destination (Join-Path $project 'Assets/Editor/GatewayTransportLifecycleValidation.cs')
-$resultPath = Join-Path $project 'transport-lifecycle-result.json'
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot ($helper + '.cs')) -Destination (Join-Path $project ('Assets/Editor/' + $helper + '.cs'))
+$resultPath = Join-Path $project $resultFile
 if (Test-Path -LiteralPath $resultPath) {
     Move-Item -LiteralPath $resultPath -Destination ($resultPath + '.' + [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss-fff') + '.previous')
 }
-$arguments = @('-batchmode', '-nographics', '-projectPath', ('"' + $project + '"'), '-executeMethod', 'GatewayTransportLifecycleValidation.Run', '-logFile', ('"' + (Join-Path $project 'transport-lifecycle.log') + '"'))
+$arguments = @('-batchmode', '-nographics', '-projectPath', ('"' + $project + '"'), '-executeMethod', ($helper + '.Run'), '-logFile', ('"' + (Join-Path $project ($helper + '.log')) + '"'))
 $process = Start-Process -FilePath $EditorPath -ArgumentList $arguments -WindowStyle Hidden -PassThru
 if (!$process.WaitForExit($TimeoutSeconds * 1000)) {
     # Only terminate the child Editor created by this invocation.

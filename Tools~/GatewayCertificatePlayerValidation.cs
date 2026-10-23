@@ -43,11 +43,13 @@ public sealed class GatewayCertificatePlayerValidation : MonoBehaviour
                 {
                     report.exceptionType = error.GetType().Name;
                     report.failureDetail = error.ToString();
-                    report.rejected = error is System.Security.Authentication.AuthenticationException;
                     report.configurationInitialized = true;
                     for (Exception nested = error; nested != null; nested = nested.InnerException)
+                    {
+                        report.rejected |= nested is System.Security.Authentication.AuthenticationException;
                         if (nested is TypeInitializationException || nested is MissingMemberException)
                             report.configurationInitialized = false;
+                    }
                 }
                 Task stop = transport.StopAsync();
                 if (await Task.WhenAny(stop, Task.Delay(2000)) != stop) throw new TimeoutException();

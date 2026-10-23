@@ -26,7 +26,9 @@ public static class GatewayCertificateValidation
                 {
                     report.exceptionType = error.GetType().Name;
                     // The listener must independently confirm it served its certificate.
-                    report.rejected = error is System.Security.Authentication.AuthenticationException;
+                    // ClientWebSocket wraps TLS failures in WebSocketException.
+                    for (Exception nested = error; nested != null; nested = nested.InnerException)
+                        report.rejected |= nested is System.Security.Authentication.AuthenticationException;
                 }
                 Task stop = transport.StopAsync();
                 if (await Task.WhenAny(stop, Task.Delay(2000)) != stop) throw new TimeoutException();

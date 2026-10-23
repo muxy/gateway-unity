@@ -24,6 +24,7 @@ public static class GatewayTransportLifecycleValidation
         public string scope = "local-loopback-transport-lifecycle-and-prefab-disable";
         public List<string> passed = new List<string>();
         public double maximumStopMilliseconds;
+        public int maximumResidualHandshakes;
     }
     private static Report report;
     private static string step;
@@ -49,6 +50,10 @@ public static class GatewayTransportLifecycleValidation
         await stop;
         report.maximumStopMilliseconds = Math.Max(report.maximumStopMilliseconds, watch.Elapsed.TotalMilliseconds);
         Check(!transport.IsConnected && Field(transport, "Current") == null && ((Task)Field(transport, "Stopping")).IsCompleted, step + ": socket tasks joined");
+    }
+    private static int AvailableHandshakes
+    {
+        get { return ((System.Threading.SemaphoreSlim)typeof(WebsocketTransport).GetField("ConnectSlots", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null)).CurrentCount; }
     }
     private sealed class Server : IDisposable
     {
@@ -196,6 +201,67 @@ public static class GatewayTransportLifecycleValidation
                 }
             }
             transport.Dispose();
+
+            step = "five-second stalled TLS deadline";
+            transport = new WebsocketTransport();
+            using (var server = new Server())
+            {
+                Task<TcpClient> accept = server.Accept(false);
+                Task open = transport.Open(server.Uri.Replace("ws://", "wss://"));
+                using (TcpClient stalled = await accept)
+                {
+                    var bytes = new byte[4096];
+                    Check(await stalled.GetStream().ReadAsync(bytes, 0, bytes.Length) > 0, "TLS ClientHello reached silent peer");
+                    Check(await Task.WhenAny(open, Task.Delay(7000)) == open, "stalled TLS deadline returns without peer closure");
+                    bool timedOut = false;
+                    try { await open; } catch (TimeoutException) { timedOut = true; }
+                    Check(timedOut && transport.LastConnectionError is TimeoutException, "connection timeout surfaced");
+                    await Stop(transport);
+                }
+            }
+            transport.Dispose();
+            await Until(() => AvailableHandshakes == 4);
+
+            step = "bound residual TLS handshakes";
+            var peers = new List<TcpClient>();
+            try
+            {
+                using (var server = new Server())
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        using (var pending = new WebsocketTransport())
+                        {
+                            Task<TcpClient> accept = server.Accept(false);
+                            Task open = pending.Open(server.Uri.Replace("ws://", "wss://"));
+                            TcpClient peer = await accept;
+                            peers.Add(peer);
+                            var bytes = new byte[4096];
+                            Check(await peer.GetStream().ReadAsync(bytes, 0, bytes.Length) > 0, "residual test received ClientHello " + i);
+                            await Stop(pending);
+                            try { await open; } catch (OperationCanceledException) { }
+                        }
+                        report.maximumResidualHandshakes = Math.Max(report.maximumResidualHandshakes, 4 - AvailableHandshakes);
+                    }
+                    // Runtimes that promptly cancel need not retain any slots.
+                    if (AvailableHandshakes == 0)
+                    {
+                        using (var blocked = new WebsocketTransport())
+                        {
+                            Task open = blocked.Open(server.Uri);
+                            Check(await Task.WhenAny(open, Task.Delay(7000)) == open, "exhausted handshake budget returns on deadline");
+                            bool timedOut = false;
+                            try { await open; } catch (TimeoutException) { timedOut = true; }
+                            Check(timedOut && !server.Listener.Pending(), "budget prevents a fifth TCP connection");
+                            await Stop(blocked);
+                        }
+                    }
+                    Check(report.maximumResidualHandshakes <= 4, "residual handshake count bounded");
+                }
+            }
+            finally { foreach (TcpClient peer in peers) peer.Close(); }
+            await Until(() => AvailableHandshakes == 4);
+            Check(true, "peer closure releases residual handshake budget");
 
             step = "reject invalid HTTP upgrade";
             transport = new WebsocketTransport();

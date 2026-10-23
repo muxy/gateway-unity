@@ -2,11 +2,8 @@ using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Net.WebSockets;
-using System.Net.Security;
 using System.Net.Sockets;
-using System.Collections.Generic;
 using System.Security.Authentication;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,118 +23,80 @@ namespace MuxyGateway
     /// </summary>
     public class WebsocketTransport : IDisposable
     {
+        // Some Unity runtimes do not finish ConnectAsync on cancellation during
+        // TLS negotiation. Bound all in-flight handshakes per managed domain,
+        // including those residual operations, rather than opening more sockets.
+        private static readonly SemaphoreSlim ConnectSlots = new SemaphoreSlim(4, 4);
+
         private sealed class Connection : IDisposable
         {
-            // Own the TCP/TLS stream during the upgrade as well as after it.
-            // Some Unity Mono ClientWebSocket versions cannot abort a stalled
-            // HTTP/TLS handshake because they do not retain that stream yet.
-            private readonly TcpClient Tcp = new TcpClient();
             private readonly object SocketGate = new object();
-            private Stream Stream;
-            internal WebSocket Socket;
+            private bool Disposed;
+            internal readonly ClientWebSocket Socket = new ClientWebSocket();
             internal readonly ConcurrentQueue<string> Incoming = new ConcurrentQueue<string>();
             internal readonly ConcurrentQueue<byte[]> Outgoing = new ConcurrentQueue<byte[]>();
             internal int NotifyReconnect;
             internal bool Active;
             internal async Task ConnectAsync(Uri target, CancellationToken token)
             {
-                using (token.Register(Abort))
+                await ConnectSlots.WaitAsync(token).ConfigureAwait(false);
+                bool tracked = false;
+                try
                 {
                     token.ThrowIfCancellationRequested();
-                    await Tcp.ConnectAsync(target.DnsSafeHost, target.Port).ConfigureAwait(false);
-                    token.ThrowIfCancellationRequested();
-                    Stream stream = Tcp.GetStream();
-                    Stream = stream;
-                    if (target.Scheme == "wss")
+                    Socket.Options.KeepAliveInterval = TimeSpan.FromSeconds(20);
+                    // The runtime owns TLS/certificate validation, HTTP upgrade,
+                    // proxies, framing and control messages. No custom handshake.
+                    Task connect = Socket.ConnectAsync(target, token);
+                    _ = ObserveConnect(connect);
+                    tracked = true;
+                    var canceled = NewCompletion();
+                    using (token.Register(() => { canceled.TrySetResult(true); Abort(); }))
                     {
-                        // No certificate-validation override: validate the
-                        // certificate chain and hostname using the runtime.
-                        var tls = new SslStream(stream, false);
-                        Stream = stream = tls;
-                        // Unity 2020.3 UnityTLS rejects SslProtocols.None. TLS 1.2
-                        // is supported across the declared Editor range.
-                        await tls.AuthenticateAsClientAsync(target.DnsSafeHost, null, SslProtocols.Tls12, false).ConfigureAwait(false);
-                    }
-                    token.ThrowIfCancellationRequested();
-                    string key;
-                    using (RandomNumberGenerator random = RandomNumberGenerator.Create())
-                    {
-                        var nonce = new byte[16]; random.GetBytes(nonce);
-                        key = Convert.ToBase64String(nonce);
-                    }
-                    byte[] request = Encoding.ASCII.GetBytes("GET " + target.PathAndQuery + " HTTP/1.1\r\nHost: " + target.Authority +
-                        "\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Key: " + key + "\r\n\r\n");
-                    await stream.WriteAsync(request, 0, request.Length, token).ConfigureAwait(false);
-                    var header = new StringBuilder();
-                    var one = new byte[1];
-                    int end = 0;
-                    const string terminator = "\r\n\r\n";
-                    while (end != terminator.Length)
-                    {
-                        if (await stream.ReadAsync(one, 0, 1, token).ConfigureAwait(false) == 0 || header.Length >= 16384)
-                            throw new WebSocketException("Invalid WebSocket upgrade response.");
-                        char value = (char)one[0]; header.Append(value);
-                        end = value == terminator[end] ? end + 1 : (value == '\r' ? 1 : 0);
-                    }
-                    ValidateUpgrade(header.ToString(), key);
-                    lock (SocketGate)
-                    {
+                        await Task.WhenAny(connect, canceled.Task).ConfigureAwait(false);
                         token.ThrowIfCancellationRequested();
-                        // This factory is part of .NET Standard 2.0; framing,
-                        // masking, ping/pong and close parsing remain in .NET.
-#pragma warning disable 618
-                        Socket = WebSocket.CreateClientWebSocket(stream, null, 4096, 4096, TimeSpan.FromSeconds(20), false, new ArraySegment<byte>(new byte[16384]));
-#pragma warning restore 618
+                        await connect.ConfigureAwait(false);
                     }
                 }
+                finally { if (!tracked) ConnectSlots.Release(); }
             }
 
-            private static void ValidateUpgrade(string header, string key)
+            private async Task ObserveConnect(Task connect)
             {
-                string[] lines = header.Split(new[] { "\r\n" }, StringSplitOptions.None);
-                string[] status = lines[0].Split(' ');
-                if (status.Length < 2 || status[0] != "HTTP/1.1" || status[1] != "101")
-                    throw new WebSocketException("Gateway did not accept the WebSocket upgrade.");
-                var fields = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                for (int i = 1; i < lines.Length && lines[i].Length != 0; i++)
+                try { await connect.ConfigureAwait(false); }
+                catch (Exception) { /* Observe late failures after the session has stopped. */ }
+                finally
                 {
-                    int colon = lines[i].IndexOf(':');
-                    if (colon <= 0) throw new WebSocketException("Invalid WebSocket response header.");
-                    string name = lines[i].Substring(0, colon).Trim();
-                    if (fields.ContainsKey(name))
+                    try
                     {
-                        if (name.Equals("Upgrade", StringComparison.OrdinalIgnoreCase) || name.Equals("Connection", StringComparison.OrdinalIgnoreCase) || name.StartsWith("Sec-WebSocket-", StringComparison.OrdinalIgnoreCase))
-                            throw new WebSocketException("Duplicate WebSocket negotiation header.");
-                        continue; // Unrelated repeatable headers (for example Set-Cookie).
+                        lock (SocketGate)
+                        {
+                            // A runtime may publish its socket only after an
+                            // earlier Dispose. Close again when it finally exits.
+                            if (Disposed) { Socket.Abort(); Socket.Dispose(); }
+                        }
                     }
-                    fields.Add(name, lines[i].Substring(colon + 1).Trim());
+                    finally { ConnectSlots.Release(); }
                 }
-                string expected;
-                using (SHA1 hash = SHA1.Create())
-                    expected = Convert.ToBase64String(hash.ComputeHash(Encoding.ASCII.GetBytes(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")));
-                if (!fields.TryGetValue("Upgrade", out string upgrade) || !String.Equals(upgrade, "websocket", StringComparison.OrdinalIgnoreCase) ||
-                    !fields.TryGetValue("Connection", out string connection) || !Array.Exists(connection.Split(','), value => String.Equals(value.Trim(), "Upgrade", StringComparison.OrdinalIgnoreCase)) ||
-                    !fields.TryGetValue("Sec-WebSocket-Accept", out string accept) || accept != expected ||
-                    (fields.TryGetValue("Sec-WebSocket-Extensions", out string extensions) && extensions.Length != 0) ||
-                    (fields.TryGetValue("Sec-WebSocket-Protocol", out string protocol) && protocol.Length != 0))
-                    throw new WebSocketException("Invalid WebSocket upgrade negotiation.");
             }
 
             internal void Abort()
             {
                 lock (SocketGate)
                 {
-                    Socket?.Abort();
-                    Tcp.Close(); // Interrupt connect, TLS and upgrade reads too.
+                    Socket.Abort();
                 }
             }
 
             public void Dispose()
             {
-                Abort();
-                Socket?.Dispose();
-                Stream?.Dispose();
-                Tcp.Dispose();
+                lock (SocketGate)
+                {
+                    if (Disposed) return;
+                    Disposed = true;
+                    Socket.Abort();
+                    Socket.Dispose();
+                }
                 while (Incoming.TryDequeue(out _)) { }
                 while (Outgoing.TryDequeue(out byte[] bytes)) Array.Clear(bytes, 0, bytes.Length);
             }
@@ -282,7 +241,11 @@ namespace MuxyGateway
                             using (var timeout = CancellationTokenSource.CreateLinkedTokenSource(cycle.Token))
                             {
                                 timeout.CancelAfter(5000);
-                                await connection.ConnectAsync(session.Target, timeout.Token).ConfigureAwait(false);
+                                try { await connection.ConnectAsync(session.Target, timeout.Token).ConfigureAwait(false); }
+                                catch (OperationCanceledException) when (!cycle.IsCancellationRequested)
+                                {
+                                    throw new TimeoutException("Gateway connection did not complete within five seconds.");
+                                }
                             }
                             lock (Gate)
                             {
@@ -299,7 +262,7 @@ namespace MuxyGateway
                             receiver = ReceiveLoop(connection, cycle.Token);
                             await (await Task.WhenAny(sender, receiver).ConfigureAwait(false)).ConfigureAwait(false);
                         }
-                        catch (Exception error) when (error is WebSocketException || error is SocketException || error is AuthenticationException || error is IOException || error is OperationCanceledException || error is ObjectDisposedException)
+                        catch (Exception error) when (error is WebSocketException || error is SocketException || error is AuthenticationException || error is IOException || error is OperationCanceledException || error is ObjectDisposedException || error is TimeoutException)
                         {
                             if (!session.Lifetime.IsCancellationRequested)
                             {
