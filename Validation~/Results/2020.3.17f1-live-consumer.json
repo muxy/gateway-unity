@@ -1,0 +1,8 @@
+{
+    "unityVersion": "2020.3.17f1",
+    "timestampUtc": "2026-10-20T21:55:46.1095658Z",
+    "scope": "live-editor-custom-consumer-assembly-compilation",
+    "status": "passed",
+    "consumerAssembly": "Gateway.PackageConsumer",
+    "publicTypesPreserved": true
+}

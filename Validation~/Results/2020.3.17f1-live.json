@@ -1,0 +1,12 @@
+{
+  "unityVersion": "2020.3.17f1",
+  "timestampUtc": "2026-10-20T21:52:37.1167151Z",
+  "scope": "live-editor-package-compilation-and-utf8",
+  "status": "passed",
+  "installation": "existing-project-local-package",
+  "cleanProject": false,
+  "publicTypesPreserved": true,
+  "utf8StructMarshalling": true,
+  "tmpProvider": "com.unity.textmeshpro@3.0.6",
+  "uiProvider": "com.unity.ugui@1.0.0"
+}

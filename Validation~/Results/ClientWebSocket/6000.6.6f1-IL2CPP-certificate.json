@@ -1,0 +1,11 @@
+{
+  "unityVersion": "6000.6.6f1",
+  "backend": "IL2CPP",
+  "status": "passed",
+  "exceptionType": "WebSocketException",
+  "rejected": true,
+  "configurationInitialized": true,
+  "disconnected": true,
+  "stopCompleted": true,
+  "rawReportSha256": "C4B6EACEEB23E5FDE0CCB3E85509B32175740140E544AA9FD43E5D44BD936683"
+}

@@ -27,10 +27,12 @@ gameplay, see live stats, vote on key game decisions, and more.
 ### Unity and package dependencies
 
 The package targets Unity **2020.3.0f1 or newer**, using C# 8-compatible
-constructor syntax. Historical compilation results and the scope of the
-compatibility fixes are recorded in
+constructor syntax. Exact tested Editor versions and the limits of this first
+compatibility update are recorded in
 [compilation and package validation](Validation~/Compilation-And-Packages.md).
 Package import/compilation does not establish authenticated player or platform support.
+Windows Mono/IL2CPP player builds, production PIN/reconnect checks and their exact
+tested scope are recorded in [player compatibility](Validation~/Player-Compatibility.md).
 
 The package manifest requests its dependencies automatically:
 
@@ -53,8 +55,10 @@ assembly ownership, and existing prefab/script GUIDs are preserved by this updat
 Import TMP Essential Resources through **Window > TextMeshPro** if your UI project
 does not already contain them.
 
-An Editor-only build callback preserves the reflection-loaded configuration types
-used by Mono TLS, which can otherwise be removed by High managed stripping.
+The package's Editor build callback supplies linker preservation for Mono's TLS
+configuration types, including builds with High managed stripping. Keep the
+package's `Editor` folder when installing from an archive. No project-level
+`link.xml` or certificate-validation override is required.
 
 ## Using Gateway
 
@@ -105,7 +109,7 @@ but first lets take a look at the settings we add to MuxyGatewayManager.
 
 ### Setup MuxyGatewayManager
 
-> Game ID: Use `"gateway-testing"` for development, but before going live with an integration,
+> Game ID: Use the ID assigned to your integration. The recorded PIN-link validation used `"gamelink-testing"`; before going live,
 > you should request a permanent ID for your game by filling out the form
 > [here](https://www.muxy.io/gateway).
 
@@ -253,33 +257,52 @@ Messaging:
 Easily add the Gateway SDK to your game by creating an Entity to control the SDK
 lifecycle.
 
-> IMPORTANT: In this example `GameID` is set to the testing value
-> `"gateway-testing"`. This GameID is special-cased on Muxy's servers to allow
-> limited testing access. Before going live with an integration, you should
+> IMPORTANT: This example uses `"gamelink-testing"`, the game ID used in the
+> recorded PIN-link validation. Use the ID assigned to your own integration.
+> Before going live with an integration, you should
 > request a permanent ID for your game by filling out the form
 > [here](https://www.muxy.io/gateway).
 
 ```csharp
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 using MuxyGateway;
 
 public SDK SDK;
-public String GameID = "gateway-testing";
+public String GameID = "gamelink-testing";
 public bool Production;
 
-void Start()
+async void OnEnable()
 {
     SDK = new SDK(GameID);
-    SDK.RunInProduction();
+    try { await SDK.RunInProductionAsync(); }
+    catch (OperationCanceledException) { /* Disabled while connecting. */ }
+    catch (Exception error) { Debug.LogError("Gateway connection failed: " + error.GetType().Name); }
 }
 
 public void Update()
 {
-    SDK.Update();
+    SDK?.Update();
+}
+
+void OnDisable()
+{
+    SDK?.Dispose();
+    SDK = null;
 }
 ```
+
+Production and sandbox helpers use **WSS**, with TLS negotiation and normal certificate-chain and hostname validation handled by the runtime's `ClientWebSocket`. Call SDK methods, `Update`, and `Dispose` on the owning Unity/main thread. Keep calling `Update` while connected: it dispatches callbacks, handles reconnects, and extracts native payloads on that thread.
+
+`RunInProductionAsync` and `RunInSandboxAsync` complete after connection establishment and report initial connection errors to the caller. The existing void helpers remain available and observe failures; `LastConnectionError` records connection/reconnect errors, and `IsConnected` reports transport connectivity rather than authentication status.
+
+Use `await SDK.StopWebsocketTransportAsync()` to stop and join socket work while keeping the SDK available for a later connection. `Dispose()` permanently closes the transport, removes lifecycle subscriptions, and destroys the native instance and its callback handles. Both cleanup operations are idempotent. The prefab manager disposes its SDK on disable and creates a fresh instance on enable. Editor play-mode exit, assembly reload, and application quit also release the instance.
+
+Cleanup aborts/disposes the client and joins SDK send/receive work without waiting for a peer close handshake. Connection attempts have a five-second deadline, including time waiting for an available handshake slot. There is no custom TCP/TLS or HTTP upgrade implementation. `RunInCustomAsync` accepts explicit `ws://` endpoints for local tools and `wss://` endpoints for secure services; stage helpers never downgrade to plaintext.
+
+Some Unity runtimes leave an internal `ConnectAsync` pending when a TCP peer stays silent during TLS negotiation, even after cancellation, abort, and disposal. SDK stop/dispose does not wait for that operation. At most four handshakes may remain in flight across all transports in a managed domain; established connections do not consume slots. A pending operation retains its slot until it completes, its late error is observed, and a disposed client is closed again. If all slots are occupied, further attempts time out without opening another socket. This bounds the residual runtime issue within a domain; it does not guarantee OS socket release or a limit across Editor domain reloads. See [the standard-client report](Validation~/ClientWebSocket.md) for reproduction and current results. Proxy/redirect behavior is delegated to the runtime and is not validated here.
+
+Native diagnostic forwarding is off by default. `DebugLoggingEnabled` is an explicit opt-in; leave it disabled during credential exchange. See [shipping transport validation](Validation~/Shipping-Transport.md) for the tested flow and its limits.
 
 ### Authenticate Twitch Streamers
 

@@ -5,15 +5,20 @@
   "nativeInstanceConstructed": false,
   "networkAuthenticationAttempted": false,
   "observations": {
-    "unity": "2022.3.62f3",
-    "uiProvider": "com.unity.ugui@1.0.0",
-    "tmpProvider": "com.unity.textmeshpro@3.0.7",
-    "utf8StructMarshalling": "passed",
-    "sdkAssembly": "Muxy.Gateway",
     "status": "passed",
+    "utf8StructMarshalling": "passed",
+    "uiProvider": "com.unity.ugui@1.0.0",
+    "sdkAssembly": "Muxy.Gateway",
+    "tmpProvider": "com.unity.textmeshpro@3.0.7",
+    "unity": "2022.3.62f3",
     "consumerAssembly": "Gateway.PackageConsumer"
   },
   "dependencies": {
+    "com.unity.ugui": {
+      "depth": 1,
+      "source": "builtin",
+      "version": "1.0.0"
+    },
     "com.unity.modules.ui": {
       "depth": 2,
       "source": "builtin",
@@ -24,20 +29,15 @@
       "source": "builtin",
       "version": "1.0.0"
     },
-    "com.unity.ugui": {
+    "com.unity.textmeshpro": {
       "depth": 1,
-      "source": "builtin",
-      "version": "1.0.0"
+      "source": "registry",
+      "version": "3.0.7"
     },
     "com.muxy.gateway": {
       "depth": 0,
       "source": "local",
       "version": "file:D:/CODE/Muxy-Gateway-SDK/gateway-unity"
-    },
-    "com.unity.textmeshpro": {
-      "depth": 1,
-      "source": "registry",
-      "version": "3.0.7"
     },
     "com.unity.modules.imgui": {
       "depth": 2,
@@ -46,15 +46,15 @@
     }
   },
   "sourceSha256": {
-    "Prefabs/MuxyGatewayManager.cs": "FF8E99E94A80A3E951CE30A71D769745A19442463EB21D04576352291ED82D08",
-    "Muxy.Gateway.asmdef": "34FDA4A8F684D769F103DF38AA1A7713ECD9FA6A2DFA96D535A60C4E63830EE1",
-    "Runtime/MuxyGatewayVersion.cs": "EC3363EA75B5AAFC7DCF85FA01F3F96F7E47D38EE3BD096C1A59F9C6CEDF8CA9",
     "Prefabs/MuxyGatewayAuthentication.cs": "BBA5414B99516B18932EB4BCAB8E716A2A4DEADDC6C851DC64672329FE6FEB4C",
     "Runtime/MuxyLibraryImports.cs": "DD19FD1EE8E38268F56939C5E8A832567C803DE223051C8039A97A9043915A98",
-    "Runtime/MuxyWebsocketTransport.cs": "C51A07639F96B04720552BDA2AB0DDFF2A32E7BF5ADBE249FA647FC0D65ECFA8",
     "Prefabs/MuxyGatewayPolling.cs": "D93D1D5850C88486A0BEB9C43BA0E31068F3C4188AB9BD1356C85915915906BA",
-    "Prefabs/MuxyGatewayNotificationHistory.cs": "38BCD89F717374CF49882CF7C5878988508C8EED42246256E993B297136D955C",
+    "Prefabs/MuxyGatewayManager.cs": "FF8E99E94A80A3E951CE30A71D769745A19442463EB21D04576352291ED82D08",
+    "Runtime/MuxyGatewayVersion.cs": "EC3363EA75B5AAFC7DCF85FA01F3F96F7E47D38EE3BD096C1A59F9C6CEDF8CA9",
+    "Muxy.Gateway.asmdef": "34FDA4A8F684D769F103DF38AA1A7713ECD9FA6A2DFA96D535A60C4E63830EE1",
     "Runtime/MuxyGateway.cs": "808011BC4563E7EC78FC6348A7075477301EB7DE0166C7E8C9FE4386F4854365",
+    "Prefabs/MuxyGatewayNotificationHistory.cs": "38BCD89F717374CF49882CF7C5878988508C8EED42246256E993B297136D955C",
+    "Runtime/MuxyWebsocketTransport.cs": "C51A07639F96B04720552BDA2AB0DDFF2A32E7BF5ADBE249FA647FC0D65ECFA8",
     "package.json": "6F3A52D06B3ABF47799D523778F8C6635BCFFEC1B25EACA2AEFD2B686440FC34"
   }
 }

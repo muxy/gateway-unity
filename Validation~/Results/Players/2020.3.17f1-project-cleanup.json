@@ -1,0 +1,38 @@
+{
+  "cachedProduct": "My project (1)",
+  "restoredFiles": [
+    {
+      "baselineSha256": "CBFF4D4E3B214C911A374325C7697C85DB528F4D41B12FDE9C85B8693D0BDA5F",
+      "restoredSha256": "CBFF4D4E3B214C911A374325C7697C85DB528F4D41B12FDE9C85B8693D0BDA5F",
+      "relative": "Packages/manifest.json"
+    },
+    {
+      "baselineSha256": "268093F957CEC91E8277EE4753B35FB8B76D01A6D9A3876A2BB9EADE249CE204",
+      "restoredSha256": "268093F957CEC91E8277EE4753B35FB8B76D01A6D9A3876A2BB9EADE249CE204",
+      "relative": "Packages/packages-lock.json"
+    },
+    {
+      "baselineSha256": "510EF1F9BC12B8870A9132A26F1CE8451A761E234B98701012B10E42E62566F0",
+      "restoredSha256": "510EF1F9BC12B8870A9132A26F1CE8451A761E234B98701012B10E42E62566F0",
+      "relative": "ProjectSettings/ProjectSettings.asset"
+    },
+    {
+      "baselineSha256": "9B1F220053AE4608FF0205E61EB50F14DEFF611E3EC662F029D25117E6B8EA69",
+      "restoredSha256": "9B1F220053AE4608FF0205E61EB50F14DEFF611E3EC662F029D25117E6B8EA69",
+      "relative": "ProjectSettings/EditorBuildSettings.asset"
+    },
+    {
+      "baselineSha256": "36953CBF0221F1AD66F31D530F9A51B5684B595C46BE78927B8BBF27031E70CC",
+      "restoredSha256": "36953CBF0221F1AD66F31D530F9A51B5684B595C46BE78927B8BBF27031E70CC",
+      "relative": "ProjectSettings/GraphicsSettings.asset"
+    }
+  ],
+  "cachedBackend": "Mono2x",
+  "status": "passed",
+  "unityVersion": "2020.3.17f1",
+  "cachedStripping": "Disabled",
+  "sceneDirty": false,
+  "originalScene": "Assets/LEGO/Scenes/LEGO Tutorial.unity",
+  "cachedCompany": "DefaultCompany",
+  "temporaryAssetsRemoved": true
+}
