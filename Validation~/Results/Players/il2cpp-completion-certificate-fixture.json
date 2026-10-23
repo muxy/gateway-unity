@@ -1,0 +1,12 @@
+{
+  "subjectAlternativeNames": [
+    "DNS:localhost",
+    "IP:127.0.0.1"
+  ],
+  "protocol": "TLS1.2",
+  "subject": "CN=localhost",
+  "serverStopped": true,
+  "trustStoreModified": false,
+  "certificateSha256": "B7FDD640BF859917D7C1EC6F412C90FEAB9FFB31ADC0AFB2A56B7D83D3F19375",
+  "certificatePresentedTraceCount": 2
+}

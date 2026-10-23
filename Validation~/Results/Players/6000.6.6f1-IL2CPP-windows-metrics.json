@@ -1,0 +1,23 @@
+[
+  {
+    "privateBytes": 147243008,
+    "phase": "soak-baseline",
+    "workingSet": 78295040,
+    "timestampUtc": "2026-10-21T01:16:55.6955973Z",
+    "handles": 361
+  },
+  {
+    "privateBytes": 147148800,
+    "phase": "soak-midpoint",
+    "workingSet": 79192064,
+    "timestampUtc": "2026-10-21T01:16:55.8214465Z",
+    "handles": 361
+  },
+  {
+    "privateBytes": 147148800,
+    "phase": "soak-completed",
+    "workingSet": 79585280,
+    "timestampUtc": "2026-10-21T01:16:55.9453514Z",
+    "handles": 361
+  }
+]

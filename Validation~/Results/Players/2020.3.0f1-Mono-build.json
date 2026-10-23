@@ -1,0 +1,13 @@
+{
+    "unityVersion": "2020.3.0f1",
+    "backend": "Mono",
+    "timestampUtc": "2026-10-21T01:16:00.9160886Z",
+    "status": "passed",
+    "apiProfile": "NET_Standard_2_0",
+    "stripping": "High",
+    "failureType": "",
+    "errors": 0,
+    "warnings": 3,
+    "bytes": 64550502,
+    "seconds": 17.8262039
+}

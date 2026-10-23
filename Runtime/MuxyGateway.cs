@@ -1,4 +1,4 @@
-﻿using MuxyGateway.Imports;
+using MuxyGateway.Imports;
 using MuxyGateway.Imports.Schema;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -145,7 +145,7 @@ namespace MuxyGateway
         public string Username;
     }
 
-    public class SDK
+    public class SDK : IDisposable
     {
         private GatewaySDK Instance;
         private string GameID;
@@ -154,31 +154,62 @@ namespace MuxyGateway
         private GCHandle DebugMessage;
 
         WebsocketTransport Transport;
+        private bool DisposeRequested;
+        private int NativeDispatchDepth;
+        private readonly Dictionary<IntPtr, GCHandle> AuthenticationHandles = new Dictionary<IntPtr, GCHandle>();
+
+        public bool IsDisposed { get { return DisposeRequested; } }
+        public bool IsConnected { get { return !DisposeRequested && Transport.IsConnected; } }
+        public Exception LastConnectionError { get { return Transport.LastConnectionError; } }
+        /// <summary>Opt-in native diagnostics. Leave disabled when exchanging credentials.</summary>
+        public bool DebugLoggingEnabled { get; set; }
 
         public void Update()
         {
-            Transport.Update(this);
+            if (!DisposeRequested) Transport.Update(this);
         }
 
         public void StopWebsocketTransport()
         {
-            Transport.StopAsync();
+            Transport.Disconnect();
         }
+
+        public Task StopWebsocketTransportAsync() { return Transport.StopAsync(); }
 
         public async Task RunInCustomAsync(String uri)
         {
-            await Transport.Open(uri);
+            ThrowIfDisposed();
+            await Transport.Open(uri).ConfigureAwait(false);
             Transport.Run(this);
         }
 
+        public Task RunInSandboxAsync() { ThrowIfDisposed(); return Transport.OpenAndRunInSandbox(this); }
+        public Task RunInProductionAsync() { ThrowIfDisposed(); return Transport.OpenAndRunInProduction(this); }
+
         public void RunInSandbox()
         {
-            Transport.OpenAndRunInSandbox(this);
+            ObserveConnection(RunInSandboxAsync());
         }
 
         public void RunInProduction()
         {
-            Transport.OpenAndRunInProduction(this);
+            ObserveConnection(RunInProductionAsync());
+        }
+
+        private static async void ObserveConnection(Task connection)
+        {
+            try { await connection.ConfigureAwait(false); }
+            catch (OperationCanceledException) { }
+            catch (Exception error)
+            {
+                // Do not log endpoint query strings, payloads or credentials.
+                Console.Error.WriteLine("Gateway connection failed (" + error.GetType().Name + "). Await RunInProductionAsync/RunInSandboxAsync for errors.");
+            }
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (DisposeRequested) throw new ObjectDisposedException(nameof(SDK));
         }
 
         private class InvokeOnDebugMessageParameters
@@ -209,7 +240,7 @@ namespace MuxyGateway
                 return;
             }
 
-            if (args.SDK != null)
+            if (args.SDK != null && args.SDK.DebugLoggingEnabled)
             {
                 args.SDK.LogMessage(Message);
             }
@@ -226,18 +257,58 @@ namespace MuxyGateway
 
             DebugMessage = GCHandle.Alloc(args);
             Imported.MGW_SDK_OnDebugMessage(Instance, InvokeOnDebugMessage, GCHandle.ToIntPtr(DebugMessage));
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.playModeStateChanged += OnPlayModeChanged;
+            UnityEditor.EditorApplication.quitting += Dispose;
+            UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += Dispose;
+#elif UNITY_STANDALONE
+            Application.quitting += Dispose;
+#endif
         }
 
-        ~SDK()
+        /// <summary>
+        /// Stop socket tasks, detach lifecycle hooks, then destroy the native SDK
+        /// and its callback handles. Call on the owning/main thread; idempotent.
+        /// No network close handshake or Unity continuation is needed to join.
+        /// </summary>
+        public void Dispose()
         {
-            try
-            {
-                Transport.StopAsync().Wait();
-            }
-            finally
-            {
-                Imported.MGW_KillSDK(Instance);
-            }
+            if (DisposeRequested) return;
+            DisposeRequested = true;
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.playModeStateChanged -= OnPlayModeChanged;
+            UnityEditor.EditorApplication.quitting -= Dispose;
+            UnityEditor.AssemblyReloadEvents.beforeAssemblyReload -= Dispose;
+#elif UNITY_STANDALONE
+            Application.quitting -= Dispose;
+#endif
+            Transport.Dispose();
+            // A user callback may dispose its SDK while native ReceiveMessage
+            // is on the stack. Destroy it only after that dispatch returns.
+            if (NativeDispatchDepth == 0) ReleaseNativeResources();
+            GC.SuppressFinalize(this);
+        }
+
+#if UNITY_EDITOR
+        private void OnPlayModeChanged(UnityEditor.PlayModeStateChange state)
+        {
+            if (state == UnityEditor.PlayModeStateChange.ExitingPlayMode) Dispose();
+        }
+#endif
+
+        private void ReleaseNativeResources()
+        {
+            if (Instance.SDK == IntPtr.Zero) return;
+            Imported.MGW_SDK_DetachOnDebugMessage(Instance);
+            Imported.MGW_KillSDK(Instance);
+            Instance = default(GatewaySDK);
+            if (DebugMessage.IsAllocated) DebugMessage.Free();
+            if (PollDelegateHandle.IsAllocated) PollDelegateHandle.Free();
+            if (GameActionUsedDelegateHandle.IsAllocated) GameActionUsedDelegateHandle.Free();
+            if (BitsUsedDelegateHandle.IsAllocated) BitsUsedDelegateHandle.Free();
+            foreach (GCHandle handle in AuthenticationHandles.Values) if (handle.IsAllocated) handle.Free();
+            AuthenticationHandles.Clear();
+            GameActionCallbacks.Clear();
         }
 
         private void LogMessage(string Message)
@@ -254,18 +325,25 @@ namespace MuxyGateway
         #region Network
         public bool ReceiveMessage(String Message)
         {
+            ThrowIfDisposed();
             if (Message == null)
             {
                 return false;
             }
 
             byte[] Bytes = UTF8WithoutBOM.GetBytes(Message);
-            bool result = Imported.MGW_SDK_ReceiveMessage(Instance, Bytes, (uint)Bytes.Length) != 0;
-            return result;
+            NativeDispatchDepth++;
+            try { return Imported.MGW_SDK_ReceiveMessage(Instance, Bytes, (uint)Bytes.Length) != 0; }
+            finally
+            {
+                NativeDispatchDepth--;
+                if (DisposeRequested && NativeDispatchDepth == 0) ReleaseNativeResources();
+            }
         }
 
         public bool HasPayloads()
         {
+            ThrowIfDisposed();
             return Imported.MGW_SDK_HasPayloads(Instance) != 0;
         }
 
@@ -313,12 +391,19 @@ namespace MuxyGateway
 
         public void ForeachPayload(ForeachPayloadDelegate Delegate)
         {
+            ThrowIfDisposed();
             InvokeForeachPayloadParameters args = new InvokeForeachPayloadParameters();
             args.Callback = Delegate;
 
             GCHandle Handle = GCHandle.Alloc(args);
-            Imported.MGW_SDK_ForeachPayload(Instance, InvokeForeachPayload, GCHandle.ToIntPtr(Handle));
-            Handle.Free();
+            NativeDispatchDepth++;
+            try { Imported.MGW_SDK_ForeachPayload(Instance, InvokeForeachPayload, GCHandle.ToIntPtr(Handle)); }
+            finally
+            {
+                Handle.Free();
+                NativeDispatchDepth--;
+                if (DisposeRequested && NativeDispatchDepth == 0) ReleaseNativeResources();
+            }
         }
 
         private struct Version
@@ -366,6 +451,7 @@ namespace MuxyGateway
 
         public String GetSandboxURL()
         {
+            ThrowIfDisposed();
             Version v = ParseVersion(Constants.Version);
             string s = NativeString.StringFromUTF8AndDeallocate(Imported.MGW_SDK_GetProjectionSandboxURL(Instance, "gateway-unity", v.Major, v.Minor, v.Patch));
             return s;
@@ -373,6 +459,7 @@ namespace MuxyGateway
 
         public String GetProductionURL()
         {
+            ThrowIfDisposed();
             Version v = ParseVersion(Constants.Version);
             string s = NativeString.StringFromUTF8AndDeallocate(Imported.MGW_SDK_GetProjectionProductionURL(Instance, "gateway-unity", v.Major, v.Minor, v.Patch));
             return s;
@@ -380,6 +467,7 @@ namespace MuxyGateway
 
         public void HandleReconnect()
         {
+            ThrowIfDisposed();
             Imported.MGW_SDK_HandleReconnect(Instance);
         }
         #endregion
@@ -389,6 +477,7 @@ namespace MuxyGateway
         private class InvokeOnAuthenticateParameters
         {
             public OnAuthenticateDelegate Callback;
+            public SDK Owner;
         }
 
 #if UNITY_EDITOR || UNITY_STANDALONE
@@ -413,7 +502,9 @@ namespace MuxyGateway
                 return;
             }
 
-            if (args.Callback != null)
+            args.Owner.AuthenticationHandles.Remove(Data);
+            handle.Free();
+            try
             {
                 AuthenticationResponse Response = new AuthenticationResponse();
                 MGW_AuthenticateResponse resp = Marshal.PtrToStructure<MGW_AuthenticateResponse>(Msg);
@@ -423,32 +514,58 @@ namespace MuxyGateway
                 Response.TwitchUsername = NativeString.StringFromUTF8(resp.TwitchName);
                 Response.HasError = resp.HasError != 0;
 
-                args.Callback(Response);
+                args.Callback?.Invoke(Response);
             }
-
-            handle.Free();
+            catch (Exception error)
+            {
+                // Exceptions must not unwind across a reverse P/Invoke boundary.
+                Console.Error.WriteLine("Gateway authentication callback failed (" + error.GetType().Name + ").");
+            }
         }
 
         public void AuthenticateWithPIN(String PIN, OnAuthenticateDelegate Delegate)
         {
+            ThrowIfDisposed();
             InvokeOnAuthenticateParameters args = new InvokeOnAuthenticateParameters();
             args.Callback = Delegate;
+            args.Owner = this;
 
             GCHandle Handle = GCHandle.Alloc(args);
-            Imported.MGW_SDK_AuthenticateWithPIN(Instance, PIN, InvokeOnAuthenticate, GCHandle.ToIntPtr(Handle));
+            IntPtr key = GCHandle.ToIntPtr(Handle);
+            AuthenticationHandles.Add(key, Handle);
+            NativeDispatchDepth++;
+            try { Imported.MGW_SDK_AuthenticateWithPIN(Instance, PIN, InvokeOnAuthenticate, key); }
+            catch { if (AuthenticationHandles.Remove(key)) Handle.Free(); throw; }
+            finally
+            {
+                NativeDispatchDepth--;
+                if (DisposeRequested && NativeDispatchDepth == 0) ReleaseNativeResources();
+            }
         }
 
         public void AuthenticateWithRefreshToken(String Refresh, OnAuthenticateDelegate Delegate)
         {
+            ThrowIfDisposed();
             InvokeOnAuthenticateParameters args = new InvokeOnAuthenticateParameters();
             args.Callback = Delegate;
+            args.Owner = this;
 
             GCHandle Handle = GCHandle.Alloc(args);
-            Imported.MGW_SDK_AuthenticateWithRefreshToken(Instance, Refresh, InvokeOnAuthenticate, GCHandle.ToIntPtr(Handle));
+            IntPtr key = GCHandle.ToIntPtr(Handle);
+            AuthenticationHandles.Add(key, Handle);
+            NativeDispatchDepth++;
+            try { Imported.MGW_SDK_AuthenticateWithRefreshToken(Instance, Refresh, InvokeOnAuthenticate, key); }
+            catch { if (AuthenticationHandles.Remove(key)) Handle.Free(); throw; }
+            finally
+            {
+                NativeDispatchDepth--;
+                if (DisposeRequested && NativeDispatchDepth == 0) ReleaseNativeResources();
+            }
         }
 
         public void Deauthenticate()
         {
+            ThrowIfDisposed();
             if (Transport != null)
             {
                 Transport.Disconnect();
@@ -460,7 +577,7 @@ namespace MuxyGateway
         {
             get
             {
-                return Imported.MGW_SDK_IsAuthenticated(Instance) != 0;
+                return !DisposeRequested && Imported.MGW_SDK_IsAuthenticated(Instance) != 0;
             }
         }
         #endregion
@@ -468,6 +585,7 @@ namespace MuxyGateway
         #region Game Metadata
         public void SetGameMetadata(GameMetadata InMeta)
         {
+            ThrowIfDisposed();
             MGW_GameMetadata Meta = new MGW_GameMetadata();
             Meta.GameLogo = InMeta.Logo;
             Meta.GameName = InMeta.Name;
@@ -479,6 +597,7 @@ namespace MuxyGateway
 #if UNITY_EDITOR || UNITY_STANDALONE
         public void SetGameLogo(Texture2D texture)
         {
+            ThrowIfDisposed();
             MGW_GameMetadata meta = new MGW_GameMetadata();
             meta.GameLogo = ConvertTextureToBase64(texture);
 
@@ -522,6 +641,7 @@ namespace MuxyGateway
         #region Game Texts
         public void SetGameTexts(GameText[] Texts)
         {
+            ThrowIfDisposed();
             List<MGW_GameText> NativeTexts = new List<MGW_GameText>();
 
             foreach (GameText Text in Texts)
@@ -593,6 +713,7 @@ namespace MuxyGateway
 
         public void StartPoll(PollConfiguration Configuration)
         {
+            ThrowIfDisposed();
             MGW_PollConfiguration NativeConfig = new MGW_PollConfiguration();
 
             NativeConfig.Prompt = Configuration.Prompt;
@@ -646,15 +767,17 @@ namespace MuxyGateway
 
         public void StopPoll()
         {
+            ThrowIfDisposed();
             Imported.MGW_SDK_StopPoll(Instance);
         }
 
         #endregion
 
         #region Actions
-        private static Dictionary<string, MuxyGatewayGameActionUsedEvent> GameActionCallbacks;
+        private Dictionary<string, MuxyGatewayGameActionUsedEvent> GameActionCallbacks = new Dictionary<string, MuxyGatewayGameActionUsedEvent>();
         public void SetGameActions(GameAction[] Actions)
         {
+            ThrowIfDisposed();
             GameActionCallbacks = new Dictionary<string, MuxyGatewayGameActionUsedEvent>();
 
             List<MGW_Action> NativeActions = new List<MGW_Action>();
@@ -680,31 +803,37 @@ namespace MuxyGateway
 
         public void EnableGameAction(string ID)
         {
+            ThrowIfDisposed();
             Imported.MGW_SDK_EnableAction(Instance, ID);
         }
 
         public void DisableGameAction(string ID)
         {
+            ThrowIfDisposed();
             Imported.MGW_SDK_DisableAction(Instance, ID);
         }
 
         public void SetMaximumGameActionCount(string ID, int Count)
         {
+            ThrowIfDisposed();
             Imported.MGW_SDK_SetActionMaximumCount(Instance, ID, Count);
         }
 
         public void SetGameActionCount(string ID, int Count)
         {
+            ThrowIfDisposed();
             Imported.MGW_SDK_SetActionCount(Instance, ID, Count);
         }
 
         public void IncrementGameActionCount(string ID, int Delta)
         {
+            ThrowIfDisposed();
             Imported.MGW_SDK_IncrementActionCount(Instance, ID, Delta);
         }
 
         public void DecrementGameActionCount(string ID, int Delta)
         {
+            ThrowIfDisposed();
             Imported.MGW_SDK_DecrementActionCount(Instance, ID, Delta);
         }
 
@@ -712,6 +841,7 @@ namespace MuxyGateway
         private class InvokeOnActionUsedParameters
         {
             public OnGameActionUsedDelegate Callback;
+            public SDK Owner;
         }
 
 #if UNITY_EDITOR || UNITY_STANDALONE
@@ -748,9 +878,9 @@ namespace MuxyGateway
                 Used.Username = Value.Username;
 
                 MuxyGatewayGameActionUsedEvent Callback;
-                if (GameActionCallbacks.TryGetValue(Used.ActionID, out Callback))
+                if (args.Owner.GameActionCallbacks.TryGetValue(Used.ActionID, out Callback))
                 {
-                    Callback.Invoke(Used);
+                    Callback?.Invoke(Used);
                 }
                 args.Callback(Used);
             }
@@ -759,17 +889,21 @@ namespace MuxyGateway
         private GCHandle GameActionUsedDelegateHandle;
         public void OnGameActionUsed(OnGameActionUsedDelegate Delegate)
         {
+            ThrowIfDisposed();
             InvokeOnActionUsedParameters args = new InvokeOnActionUsedParameters();
             args.Callback = Delegate;
+            args.Owner = this;
 
-            // This is kinda sketch: OnActionUsed doesn't detach the previous
-            // callback after a call, so this leaks the GC Handle.
-            GameActionUsedDelegateHandle = GCHandle.Alloc(args);
-            Imported.MGW_SDK_OnActionUsed(Instance, InvokeOnActionUsed, GCHandle.ToIntPtr(GameActionUsedDelegateHandle));
+            GCHandle next = GCHandle.Alloc(args);
+            try { Imported.MGW_SDK_OnActionUsed(Instance, InvokeOnActionUsed, GCHandle.ToIntPtr(next)); }
+            catch { next.Free(); throw; }
+            if (GameActionUsedDelegateHandle.IsAllocated) GameActionUsedDelegateHandle.Free();
+            GameActionUsedDelegateHandle = next;
         }
 
         public void AcceptGameAction(GameActionUsed Used, string Description)
         {
+            ThrowIfDisposed();
             MGW_ActionUsed Native = new MGW_ActionUsed();
             Native.ActionID = Used.ActionID;
             Native.TransactionID = Used.TransactionID;
@@ -782,6 +916,7 @@ namespace MuxyGateway
 
         public void RefundGameAction(GameActionUsed Used, string Description)
         {
+            ThrowIfDisposed();
             MGW_ActionUsed Native = new MGW_ActionUsed();
             Native.ActionID = Used.ActionID;
             Native.TransactionID = Used.TransactionID;
@@ -840,13 +975,15 @@ namespace MuxyGateway
         private GCHandle BitsUsedDelegateHandle;
         public void OnBitsUsed(OnBitsUsedDelegate Delegate)
         {
+            ThrowIfDisposed();
             InvokeOnBitsUsedParameters args = new InvokeOnBitsUsedParameters();
             args.Callback = Delegate;
 
-            // This is kinda sketch: OnActionUsed doesn't detach the previous
-            // callback after a call, so this leaks the GC Handle.
-            BitsUsedDelegateHandle = GCHandle.Alloc(args);
-            Imported.MGW_SDK_OnBitsUsed(Instance, InvokeOnBitsUsed, GCHandle.ToIntPtr(BitsUsedDelegateHandle));
+            GCHandle next = GCHandle.Alloc(args);
+            try { Imported.MGW_SDK_OnBitsUsed(Instance, InvokeOnBitsUsed, GCHandle.ToIntPtr(next)); }
+            catch { next.Free(); throw; }
+            if (BitsUsedDelegateHandle.IsAllocated) BitsUsedDelegateHandle.Free();
+            BitsUsedDelegateHandle = next;
         }
         #endregion
     }

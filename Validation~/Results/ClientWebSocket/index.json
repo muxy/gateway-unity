@@ -1,0 +1,109 @@
+{
+  "certificate": {
+    "serverEventCount": 4,
+    "TLS": "1.2",
+    "trustStoreModified": false,
+    "SAN": [
+      "DNS:localhost",
+      "IP:127.0.0.1"
+    ],
+    "subject": "CN=localhost",
+    "certificateSha256": "E4A029DA74F9BC76729010B519578CAA07552BD0173689BD1874F49BCC04D0E4"
+  },
+  "timestampUtc": "2026-10-23T15:31:10.7677717Z",
+  "runtimeTransportSha256": "A45A14DF000C9A3528E42913EC34BD8FD1E4B68512B943ED2F782E5511479E3C",
+  "buildIdentityNote": "Builds began at 5b59182 with working-tree changes subsequently committed as ef29e0f; the tested transport source hashes match exactly.",
+  "editorResults": [
+    {
+      "maximumResidualHandshakes": 4,
+      "status": "passed",
+      "unityVersion": "2020.3.48f1",
+      "maximumStopMilliseconds": 50.005300000000005,
+      "checks": 46
+    },
+    {
+      "maximumResidualHandshakes": 4,
+      "status": "passed",
+      "unityVersion": "2022.3.62f3",
+      "maximumStopMilliseconds": 50.001000000000005,
+      "checks": 46
+    },
+    {
+      "maximumResidualHandshakes": 4,
+      "status": "passed",
+      "unityVersion": "2023.2.20f1",
+      "maximumStopMilliseconds": 50.002700000000004,
+      "checks": 46
+    },
+    {
+      "maximumResidualHandshakes": 4,
+      "status": "passed",
+      "unityVersion": "6000.0.85f1",
+      "maximumStopMilliseconds": 50.002900000000004,
+      "checks": 46
+    },
+    {
+      "maximumResidualHandshakes": 4,
+      "status": "passed",
+      "unityVersion": "6000.4.8f1",
+      "maximumStopMilliseconds": 50.0022,
+      "checks": 46
+    },
+    {
+      "maximumResidualHandshakes": 4,
+      "status": "passed",
+      "unityVersion": "6000.6.6f1",
+      "maximumStopMilliseconds": 50.003800000000005,
+      "checks": 46
+    }
+  ],
+  "minimumCompiler": {
+    "language": "C# 8",
+    "standaloneSymbols": "passed",
+    "existingNullableWarnings": 2,
+    "unityVersion": "2020.3.0f1",
+    "editorSymbols": "passed",
+    "api": ".NET Standard 2.0"
+  },
+  "freshLivePinAuthentication": "passed: Unity 6000.6.6f1 IL2CPP production PIN, refresh, automatic reconnect/reauthentication, stop/reopen and callback disposal",
+  "testedSdkCommit": "ef29e0fd8febb2eed7948de3840d5f77cc64d4a3",
+  "playerResults": [
+    {
+      "playerSha256": "E31C4B63CA00F5D3C62C595ECF00468F1EB96341DF8D2DA4D62AC83E510066F1",
+      "scope": "High-stripping-build-production-WSS-connection-untrusted-certificate-offline-callbacks-100-lifecycle-cycles",
+      "backend": "Mono",
+      "unityVersion": "2020.3.48f1",
+      "status": "passed"
+    },
+    {
+      "playerSha256": "8697103FA6AFA0D147EFEC69ACD8FE0FA27B78034DA5C1F80ACF9D0D6EA1A5BD",
+      "scope": "High-stripping-build-production-WSS-connection-untrusted-certificate-offline-callbacks-100-lifecycle-cycles",
+      "backend": "IL2CPP",
+      "unityVersion": "2020.3.48f1",
+      "status": "passed"
+    },
+    {
+      "playerSha256": "7C5B8F3ECAF9EF88A16646EACC9F817F327E3DDE3244CCC627BD2E273188247D",
+      "scope": "High-stripping-build-production-WSS-connection-untrusted-certificate-offline-callbacks-100-lifecycle-cycles",
+      "backend": "Mono",
+      "unityVersion": "6000.6.6f1",
+      "status": "passed"
+    },
+    {
+      "playerSha256": "5AE16E18272BE99348DB2A4E6450BBA3210710F8279357AB2F1F0B33CE520DD1",
+      "scope": "High-stripping-build-production-WSS-connection-untrusted-certificate-offline-callbacks-100-lifecycle-cycles",
+      "backend": "IL2CPP",
+      "unityVersion": "6000.6.6f1",
+      "status": "passed"
+    }
+  ],
+  "liveAuthentication": {
+    "backend": "IL2CPP",
+    "status": "passed",
+    "playerSha256": "5AE16E18272BE99348DB2A4E6450BBA3210710F8279357AB2F1F0B33CE520DD1",
+    "timestampUtc": "2026-10-23T15:37:08.1824092Z",
+    "pinTimestampMeaning": "request publication time, not original issuance",
+    "result": "6000.6.6f1-IL2CPP-live.json",
+    "unityVersion": "6000.6.6f1"
+  }
+}

@@ -1,0 +1,12 @@
+{
+    "unityVersion": "6000.6.6f1",
+    "backend": "IL2CPP",
+    "timestampUtc": "2026-10-23T15:27:10.3669067Z",
+    "status": "passed",
+    "failure": "",
+    "scope": "unauthenticated-production-WSS-connect-stop-reopen",
+    "connected": true,
+    "stopped": true,
+    "reopened": true,
+    "disposed": true
+}
