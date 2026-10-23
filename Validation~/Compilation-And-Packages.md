@@ -3,6 +3,9 @@
 Scope split: October 23, 2026. PR: [#15](https://github.com/muxy/gateway-unity/pull/15).
 Base: `fc9fb13da721f85d03f0a2f507d7620a0ff5212f`.
 
+Fresh post-split package/compiler and stripped-player results are recorded in
+[the October 23 compatibility rerun](Compatibility-Rerun-20261023.md).
+
 ## Required fixes in this PR
 
 - Expand the 13 target-typed constructors so Unity 2020.3's C# 8 compiler can parse the SDK and prefab scripts.
@@ -71,8 +74,9 @@ establish that the runtime/prefab compatibility source matches `e1c80fb`, the
 Editor preservation files match the existing implementation, and the transport
 branch retains the previously tested behavior changes.
 
-The historical reports above do not validate the exact newly combined
-compatibility-plus-linker snapshot. This PR does not claim live authentication,
-player/IL2CPP execution, every supported Unity patch, other operating systems,
-gameplay behavior, or a full current matrix. The broader results identify their
-own commits in the separate transport/lifecycle PR.
+The historical reports above predate the exact newly combined
+compatibility-plus-linker snapshot. The subsequent requested rerun establishes
+fresh package/compiler and stripped Mono/IL2CPP build/smoke results in its
+[separate report](Compatibility-Rerun-20261023.md), including the two remaining
+batch-license blocks. Live authentication, gameplay/network lifecycle behavior,
+every patch/platform and a full current matrix remain outside this PR's scope.

@@ -1,0 +1,6 @@
+<linker>
+  <assembly fullname="System.Configuration" preserve="all" ignoreIfMissing="1" />
+  <assembly fullname="System" ignoreIfMissing="1">
+    <type fullname="System.Net.Configuration.*" preserve="all" />
+  </assembly>
+</linker>
