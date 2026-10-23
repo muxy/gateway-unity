@@ -111,6 +111,27 @@ Builds began from `5b59182` plus working-tree changes committed as `ef29e0f`.
 Build/import source hashes match the tested transport exactly. The build identity
 files retain that original base commit rather than rewriting provenance.
 
+## Live PIN linking through the standard client
+
+After the initial report, the user supplied a fresh PIN. The existing rebuilt
+**6000.6.6f1 IL2CPP Windows x64 High-stripping player** passed
+[the complete live flow](Results/ClientWebSocket/6000.6.6f1-IL2CPP-live.json) through
+the SDK's normal production WSS transport:
+
+- PIN authentication and refresh through public callbacks.
+- Forced authenticated connection drop, automatic reconnect, and native
+  reauthentication through normal owning-thread dispatch.
+- Awaited stop, reopen, another refresh, and SDK disposal from the callback.
+- All callbacks on the owning thread, plus the probe's offline native fixtures and
+  100 disposal/component cycles.
+
+PIN authentication completed at **10:37:08 CDT on October 23, 2026**. The report's
+`pinRequestedAtUtc` is when the user's supplied code was published to the test
+runner, not its original issuance time; `pinAgeSeconds` measures only that interval
+to SDK submission. No PIN, JWT, or refresh-token value is included in the result.
+The player SHA-256 matches the current evidence index. This adds one current live
+authentication pass; it does not rerun the earlier 16-player authentication matrix.
+
 ## Reproduction
 
 From the repository root, using owned disposable fixtures:
@@ -136,12 +157,13 @@ untrusted local TLS listener. No trusted root or validation override is needed.
 
 ## Remaining scope
 
-Fresh live PIN/refresh authentication was **not rerun** for this revision: the
-connected Twitch browser loaded the dashboard configuration modal but not its
-extension UI/PIN. The real production WSS tests above establish connection and
-reopen, not authentication. Earlier live PIN results and the 16-player matrix in
+The connected Twitch browser loaded the dashboard configuration modal but not its
+extension UI/PIN, so the current live check used a code supplied directly by the
+user. Current PIN/refresh/reconnect authentication is established only for the
+6000.6.6f1 IL2CPP player above. Earlier live results and the 16-player matrix in
 [the October 20 report](Player-Compatibility.md) remain historical evidence for
-their explicitly named commit.
+their explicitly named commit. Credential-free connection tests on the other
+configurations do not establish authentication there.
 
 Other operating systems, every Unity patch, current runtime passes on 2020.3.0f1 and
 2020.3.17f1, the full 16-player matrix, sandbox authentication, real purchases,

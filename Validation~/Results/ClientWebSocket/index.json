@@ -65,7 +65,7 @@
     "editorSymbols": "passed",
     "api": ".NET Standard 2.0"
   },
-  "freshLivePinAuthentication": "not-rerun: Twitch configuration iframe did not load",
+  "freshLivePinAuthentication": "passed: Unity 6000.6.6f1 IL2CPP production PIN, refresh, automatic reconnect/reauthentication, stop/reopen and callback disposal",
   "testedSdkCommit": "ef29e0fd8febb2eed7948de3840d5f77cc64d4a3",
   "playerResults": [
     {
@@ -96,5 +96,14 @@
       "unityVersion": "6000.6.6f1",
       "status": "passed"
     }
-  ]
+  ],
+  "liveAuthentication": {
+    "backend": "IL2CPP",
+    "status": "passed",
+    "playerSha256": "5AE16E18272BE99348DB2A4E6450BBA3210710F8279357AB2F1F0B33CE520DD1",
+    "timestampUtc": "2026-10-23T15:37:08.1824092Z",
+    "pinTimestampMeaning": "request publication time, not original issuance",
+    "result": "6000.6.6f1-IL2CPP-live.json",
+    "unityVersion": "6000.6.6f1"
+  }
 }
