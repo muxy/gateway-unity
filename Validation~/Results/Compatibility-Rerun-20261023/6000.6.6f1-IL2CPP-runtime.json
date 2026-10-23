@@ -1,0 +1,13 @@
+{
+    "unityVersion": "6000.6.6f1",
+    "backend": "IL2CPP",
+    "timestampUtc": "2026-10-23T16:26:58.9438248Z",
+    "status": "passed",
+    "failure": "",
+    "scope": "compatibility-only-stripped-player-native-utf8-and-TLS-configuration",
+    "publicTypes": true,
+    "structUtf8": true,
+    "nativeLoaded": true,
+    "nativeUtf8Payload": true,
+    "configurationInitialized": true
+}

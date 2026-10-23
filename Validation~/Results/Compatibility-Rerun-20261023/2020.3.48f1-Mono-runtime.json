@@ -1,0 +1,13 @@
+{
+    "unityVersion": "2020.3.48f1",
+    "backend": "Mono",
+    "timestampUtc": "2026-10-23T16:26:57.7684264Z",
+    "status": "passed",
+    "failure": "",
+    "scope": "compatibility-only-stripped-player-native-utf8-and-TLS-configuration",
+    "publicTypes": true,
+    "structUtf8": true,
+    "nativeLoaded": true,
+    "nativeUtf8Payload": true,
+    "configurationInitialized": true
+}

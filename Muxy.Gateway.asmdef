@@ -1,7 +1,7 @@
 {
     "name": "Muxy.Gateway",
     "rootNamespace": "",
-    "references": ["Unity.TextMeshPro"],
+    "references": ["Unity.TextMeshPro", "UnityEngine.UI"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,

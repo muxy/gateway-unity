@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.IO;
 
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
+#if UNITY_EDITOR || UNITY_STANDALONE
 using UnityEngine;
 #endif
 
