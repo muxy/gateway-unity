@@ -4,6 +4,9 @@ Split date: October 23, 2026. This branch is stacked on the compatibility-only
 [PR #15](https://github.com/muxy/gateway-unity/pull/15). Review and merge the
 compatibility prerequisite first, then retarget this PR to `main` if necessary.
 
+The subsequently requested fresh builds, local lifecycle checks and live
+authentication results are in [the post-split rerun report](Transport-Rerun-20261023.md).
+
 ## Changes for this review
 
 The runtime difference from the compatibility branch is limited to:

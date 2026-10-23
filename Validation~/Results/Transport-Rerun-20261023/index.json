@@ -1,0 +1,52 @@
+{
+  "players": [
+    {
+      "backend": "Mono",
+      "build": "passed",
+      "unityVersion": "2020.3.48f1",
+      "playerSha256": "E31C4B63CA00F5D3C62C595ECF00468F1EB96341DF8D2DA4D62AC83E510066F1"
+    },
+    {
+      "backend": "IL2CPP",
+      "build": "passed",
+      "unityVersion": "2020.3.48f1",
+      "playerSha256": "8697103FA6AFA0D147EFEC69ACD8FE0FA27B78034DA5C1F80ACF9D0D6EA1A5BD"
+    },
+    {
+      "backend": "Mono",
+      "build": "passed",
+      "unityVersion": "6000.6.6f1",
+      "playerSha256": "7C5B8F3ECAF9EF88A16646EACC9F817F327E3DDE3244CCC627BD2E273188247D"
+    },
+    {
+      "backend": "IL2CPP",
+      "build": "passed",
+      "unityVersion": "6000.6.6f1",
+      "playerSha256": "5AE16E18272BE99348DB2A4E6450BBA3210710F8279357AB2F1F0B33CE520DD1"
+    }
+  ],
+  "timestampUtc": "2026-10-23T16:28:27.3083336Z",
+  "scope": "fresh-builds-two-local-lifecycle-suites-two-live-authentication-flows",
+  "liveChecks": [
+    {
+      "unityVersion": "2020.3.48f1",
+      "pinTimestampMeaning": "request publication, not original PIN issuance",
+      "result": "2020.3.48f1-Mono-live.json",
+      "pinSource": "user-supplied after Mac in-app browser reference was unavailable to remote PC tools",
+      "pinCallbackAtUtc": "2026-10-23T16:21:47.1527396Z",
+      "backend": "Mono",
+      "status": "passed"
+    },
+    {
+      "unityVersion": "6000.6.6f1",
+      "pinTimestampMeaning": "request publication, not original PIN issuance",
+      "result": "6000.6.6f1-IL2CPP-live.json",
+      "pinSource": "user-supplied after Mac in-app browser reference was unavailable to remote PC tools",
+      "pinCallbackAtUtc": "2026-10-23T16:22:29.2651299Z",
+      "backend": "IL2CPP",
+      "status": "passed"
+    }
+  ],
+  "shippingCodeUnchanged": true,
+  "testedSdkCommit": "a35baf6dc34deaba74a686d8e4f9630fdd630ae3"
+}

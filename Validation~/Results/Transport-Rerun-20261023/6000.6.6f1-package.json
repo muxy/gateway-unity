@@ -1,0 +1,93 @@
+{
+  "unityVersion": "6000.6.6f1",
+  "status": "passed",
+  "scope": "clean-package-import-consumer-compilation-and-utf8-struct-marshalling",
+  "packageSource": "file:D:/CODE/Muxy-Gateway-SDK/.gateway-validation/pr16-sdk",
+  "nativeInstanceConstructed": false,
+  "networkAuthenticationAttempted": false,
+  "observations": {
+    "uiProvider": "com.unity.ugui@2.6.0",
+    "sdkAssembly": "Muxy.Gateway",
+    "tmpProvider": "com.unity.ugui@2.6.0",
+    "utf8StructMarshalling": "passed",
+    "consumerAssembly": "Gateway.PackageConsumer",
+    "unity": "6000.6.6f1",
+    "status": "passed",
+    "linkerProcessor": "registered"
+  },
+  "dependencies": {
+    "com.muxy.gateway": {
+      "version": "file:D:/CODE/Muxy-Gateway-SDK/.gateway-validation/pr16-sdk",
+      "resolvedHash": null,
+      "source": "local",
+      "depth": 0
+    },
+    "com.unity.modules.physics": {
+      "version": "1.0.0",
+      "resolvedHash": null,
+      "source": "builtin",
+      "depth": 2
+    },
+    "com.unity.modules.ui": {
+      "version": "1.0.0",
+      "resolvedHash": null,
+      "source": "builtin",
+      "depth": 2
+    },
+    "com.unity.modules.audio": {
+      "version": "1.0.0",
+      "resolvedHash": null,
+      "source": "builtin",
+      "depth": 2
+    },
+    "com.unity.modules.physics2d": {
+      "version": "1.0.0",
+      "resolvedHash": null,
+      "source": "builtin",
+      "depth": 2
+    },
+    "com.unity.ugui": {
+      "version": "2.6.0",
+      "resolvedHash": null,
+      "source": "builtin",
+      "depth": 1
+    },
+    "com.unity.modules.imgui": {
+      "version": "1.0.0",
+      "resolvedHash": null,
+      "source": "builtin",
+      "depth": 2
+    },
+    "com.unity.textmeshpro": {
+      "version": "5.0.0",
+      "resolvedHash": null,
+      "source": "builtin",
+      "depth": 1
+    },
+    "com.unity.modules.physicscore2d": {
+      "version": "1.0.0",
+      "resolvedHash": null,
+      "source": "builtin",
+      "depth": 3
+    },
+    "com.unity.modules.imageconversion": {
+      "version": "1.0.0",
+      "resolvedHash": null,
+      "source": "builtin",
+      "depth": 1
+    }
+  },
+  "sourceSha256": {
+    "Prefabs/MuxyGatewayAuthentication.cs": "BBA5414B99516B18932EB4BCAB8E716A2A4DEADDC6C851DC64672329FE6FEB4C",
+    "Editor/GatewayLinkerProcessor.cs": "90339570532984B1E345049EF31709AA7435AF492AFCC299CD64F5014BDA4FBA",
+    "Prefabs/MuxyGatewayManager.cs": "0C940F5EE1AE1F80B9E02F41FE6E81EA482C4EFB5B572776A005B58BCEAB4CB8",
+    "Runtime/MuxyLibraryImports.cs": "DD19FD1EE8E38268F56939C5E8A832567C803DE223051C8039A97A9043915A98",
+    "package.json": "6F3A52D06B3ABF47799D523778F8C6635BCFFEC1B25EACA2AEFD2B686440FC34",
+    "Prefabs/MuxyGatewayPolling.cs": "D93D1D5850C88486A0BEB9C43BA0E31068F3C4188AB9BD1356C85915915906BA",
+    "Muxy.Gateway.asmdef": "34FDA4A8F684D769F103DF38AA1A7713ECD9FA6A2DFA96D535A60C4E63830EE1",
+    "Runtime/MuxyWebsocketTransport.cs": "A45A14DF000C9A3528E42913EC34BD8FD1E4B68512B943ED2F782E5511479E3C",
+    "Runtime/MuxyGatewayVersion.cs": "EC3363EA75B5AAFC7DCF85FA01F3F96F7E47D38EE3BD096C1A59F9C6CEDF8CA9",
+    "Runtime/MuxyGateway.cs": "996FC442988C72DB0F56C1384BFE9E3DFFD558AB125231078642BABA7B746C14",
+    "Prefabs/MuxyGatewayNotificationHistory.cs": "38BCD89F717374CF49882CF7C5878988508C8EED42246256E993B297136D955C"
+  }
+}
