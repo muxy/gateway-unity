@@ -13,8 +13,8 @@ ownership, UTF-8 struct round trips, and Editor linker callback registration.
 
 | Unity | Result | Evidence |
 |---|---|---|
-| 2020.3.0f1 | Blocked before import: batch license validation | [Report](Results/Compatibility-Rerun-20261023/2020.3.0f1-package.json) |
-| 2020.3.17f1 | Blocked before import: batch license validation | [Report](Results/Compatibility-Rerun-20261023/2020.3.17f1-package.json) |
+| 2020.3.0f1 | Passed after Hub license reactivation | [Report](Results/License-Repair-20261023/2020.3.0f1-package.json) |
+| 2020.3.17f1 | Passed after Hub license reactivation | [Report](Results/License-Repair-20261023/2020.3.17f1-package.json) |
 | 2020.3.48f1 | Passed | [Report](Results/Compatibility-Rerun-20261023/2020.3.48f1-package.json) |
 | 2022.3.62f3 | Passed | [Report](Results/Compatibility-Rerun-20261023/2022.3.62f3-package.json) |
 | 2023.2.20f1 | Passed | [Report](Results/Compatibility-Rerun-20261023/2023.2.20f1-package.json) |
@@ -22,15 +22,18 @@ ownership, UTF-8 struct round trips, and Editor linker callback registration.
 | 6000.4.8f1 | Passed | [Report](Results/Compatibility-Rerun-20261023/6000.4.8f1-package.json) |
 | 6000.6.6f1 | Passed | [Report](Results/Compatibility-Rerun-20261023/6000.6.6f1-package.json) |
 
-Both earliest Editors exited with Unity license activation/validation failures
-before package import. These are environmental blocks, not SDK compilation passes
-or failures. No license settings or user projects were modified to bypass them.
+Both earliest Editors initially exited with Unity license activation failures
+before package import. A subsequent Hub Personal reactivation created the missing
+legacy ULF license file, and fresh imports passed on both releases without SDK
+changes. See the [license repair and rerun](License-Repair-20261023.md). The original
+blocked reports are retained as historical evidence.
 
 The 2020.3.0f1 bundled compiler separately passed the current SDK/runtime and prefab
 source with C# 8 and .NET Standard 2.0 references under Editor and standalone
 symbols. It reused the established UI assembly references. Five existing warnings
 remain: two nullable annotations, one unawaited shutdown task, and two unused
-exception variables. Compiler results do not override the batch-import blocks.
+exception variables. The subsequent early-Editor package runs now establish
+clean-package compilation in those actual Editors as well.
 
 ## High-stripping Windows x64 players
 

@@ -2,13 +2,19 @@
   "imports": [
     {
       "unityVersion": "2020.3.0f1",
-      "reason": "unity-license-activation",
-      "status": "environment-blocked"
+      "reason": null,
+      "status": "passed",
+      "followUpReport": "../License-Repair-20261023/2020.3.0f1-package.json",
+      "previousStatus": "environment-blocked",
+      "followUpTestedSdkCommit": "7446772beafa11a08e2ca25704c38d248349e846"
     },
     {
       "unityVersion": "2020.3.17f1",
-      "reason": "unity-license-activation",
-      "status": "environment-blocked"
+      "reason": null,
+      "status": "passed",
+      "followUpReport": "../License-Repair-20261023/2020.3.17f1-package.json",
+      "previousStatus": "environment-blocked",
+      "followUpTestedSdkCommit": "7446772beafa11a08e2ca25704c38d248349e846"
     },
     {
       "unityVersion": "2020.3.48f1",
@@ -95,5 +101,6 @@
   ],
   "shippingCodeUnchanged": true,
   "timestampUtc": "2026-10-23T16:28:26.1755472Z",
-  "testedSdkCommit": "e2e85488d436f3ec29355c825bae71d087636532"
+  "testedSdkCommit": "e2e85488d436f3ec29355c825bae71d087636532",
+  "licenseRepairFollowUpUtc": "2026-10-23T17:50:26.0894149Z"
 }
