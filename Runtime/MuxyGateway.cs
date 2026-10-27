@@ -313,6 +313,15 @@ namespace MuxyGateway
 
         private void LogMessage(string Message)
         {
+            // Native diagnostics may contain authentication payloads. Keep
+            // credentials out of Console and player logs even when enabled.
+            if (Message != null &&
+                (Message.IndexOf("\"authenticate\"", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 Message.IndexOf("\"pin\"", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 Message.IndexOf("\"jwt\"", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 Message.IndexOf("token", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 Message.IndexOf("authorization", StringComparison.OrdinalIgnoreCase) >= 0))
+                Message = "Gateway authentication debug payload omitted.";
 #if UNITY_EDITOR
             Debug.Log(Message);
 #elif UNITY_STANDALONE
@@ -422,6 +431,10 @@ namespace MuxyGateway
                 return result;
             }
 
+            // Release tags may include a SemVer prerelease suffix (for example,
+            // v1.1.0-rc.1). The native URL API takes the numeric core only.
+            int suffix = str.IndexOf('-');
+            if (suffix >= 0) str = str.Substring(0, suffix);
             string[] parts = str.Split('.');
             if (parts.Length != 3)
             {

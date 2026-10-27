@@ -16,49 +16,14 @@ gameplay, see live stats, vote on key game decisions, and more.
 
 ## Install the SDK
 
-1. Create a new or load an existing Unity project.
-2. [Download Gateway](https://github.com/muxy/gateway-unity/releases)
-3. Unzip the package.
-4. In the Unity editor, launch the Package Manager from
-   `Window > Package Manager` in the main menu.
-5. Select `Add package from disk...` from the Add Package dropdown and select
-   the `package.json` file from the Gateway folder.
+Requires Unity 2020.3 or newer and Git on your `PATH`.
 
-### Unity and package dependencies
+1. In Unity, open **Window > Package Manager**.
+2. Select **+ > Add package from git URL**.
+3. Paste `https://github.com/muxy/gateway-unity.git#v1.1.0-rc.1`.
+4. Wait for compilation, then find **Muxy Gateway** and its prefabs under **Packages**.
 
-The package targets Unity **2020.3.0f1 or newer**, using C# 8-compatible
-constructor syntax. Exact tested Editor versions and the limits of this first
-compatibility update are recorded in
-[compilation and package validation](Validation~/Compilation-And-Packages.md).
-Package import/compilation does not establish authenticated player or platform support.
-Windows Mono/IL2CPP player builds, production PIN/reconnect checks and their exact
-tested scope are recorded in [player compatibility](Validation~/Player-Compatibility.md).
-
-The package manifest requests its dependencies automatically:
-
-| Dependency | Requested version | Purpose |
-|---|---|---|
-| `com.unity.textmeshpro` | `3.0.6` | Authentication, notification, and polling UI |
-| `com.unity.ugui` | `1.0.0` | Unity UI components |
-| `com.unity.modules.imageconversion` | `1.0.0` | PNG encoding for game logos |
-
-On Unity 2023.2 and newer, TextMeshPro is included in uGUI. These Editors supply
-a built-in TextMeshPro compatibility package and their own uGUI version; let
-Package Manager resolve those built-ins. Do not manually downgrade uGUI or copy
-an older TextMeshPro implementation into the project. Check the resolved versions
-in the project's `Packages/packages-lock.json`.
-
-The SDK and its bundled prefab scripts still share the **`Muxy.Gateway`** assembly,
-so these UI dependencies apply to both prefab and code integrations. Consumer
-scripts under a custom `.asmdef` must reference `Muxy.Gateway`. Public type names,
-assembly ownership, and existing prefab/script GUIDs are preserved by this update.
-Import TMP Essential Resources through **Window > TextMeshPro** if your UI project
-does not already contain them.
-
-The package's Editor build callback supplies linker preservation for Mono's TLS
-configuration types, including builds with High managed stripping. Keep the
-package's `Editor` folder when installing from an archive. No project-level
-`link.xml` or certificate-validation override is required.
+For scene setup, PIN authentication, actions, polls, and troubleshooting, follow the [Unity SDK walkthrough](https://muxy.github.io/github-pages/docs/unity-gateway-prefab-quickstart/). If your game scripts use an assembly definition, reference `Muxy.Gateway`.
 
 ## Using Gateway
 
