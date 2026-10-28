@@ -1,0 +1,45 @@
+name: Deploy Unity SDK documentation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Documentation~/**'
+      - '.github/workflows/docs-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Check out documentation
+        uses: actions/checkout@v6
+      - name: Set up Node for example verification
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify embedded C# examples
+        run: node 'Documentation~/tools/sync-examples.mjs' --check
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload static documentation
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: 'Documentation~'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

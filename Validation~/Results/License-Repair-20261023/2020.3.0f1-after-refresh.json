@@ -1,0 +1,6 @@
+{
+  "exitCode": 1,
+  "status": "environment-blocked",
+  "reason": "unity-license-activation",
+  "unityVersion": "2020.3.0f1"
+}

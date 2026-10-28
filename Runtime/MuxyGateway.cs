@@ -1,4 +1,4 @@
-﻿using MuxyGateway.Imports;
+using MuxyGateway.Imports;
 using MuxyGateway.Imports.Schema;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -155,6 +155,8 @@ namespace MuxyGateway
 
         WebsocketTransport Transport;
 
+        public GatewayTransportState TransportState { get { return Transport.ConnectionState; } }
+
         public void Update()
         {
             Transport.Update(this);
@@ -219,7 +221,7 @@ namespace MuxyGateway
         {
             Instance = Imported.MGW_MakeSDK(GameID);
             this.GameID = GameID;
-            this.Transport = new();
+            this.Transport = new WebsocketTransport();
 
             InvokeOnDebugMessageParameters args = new InvokeOnDebugMessageParameters();
             args.SDK = this;
@@ -242,6 +244,17 @@ namespace MuxyGateway
 
         private void LogMessage(string Message)
         {
+            // Native debug messages can include authentication requests and tokens.
+            // Never write those payloads to the Unity Console or player log.
+            if (Message != null &&
+                (Message.IndexOf("\"authenticate\"", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 Message.IndexOf("\"pin\"", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 Message.IndexOf("\"jwt\"", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 Message.IndexOf("token", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 Message.IndexOf("authorization", StringComparison.OrdinalIgnoreCase) >= 0))
+            {
+                Message = "Gateway authentication debug payload omitted.";
+            }
 #if UNITY_EDITOR
             Debug.Log(Message);
 #elif UNITY_STANDALONE
@@ -655,7 +668,7 @@ namespace MuxyGateway
         private static Dictionary<string, MuxyGatewayGameActionUsedEvent> GameActionCallbacks;
         public void SetGameActions(GameAction[] Actions)
         {
-            GameActionCallbacks = new();
+            GameActionCallbacks = new Dictionary<string, MuxyGatewayGameActionUsedEvent>();
 
             List<MGW_Action> NativeActions = new List<MGW_Action>();
 
