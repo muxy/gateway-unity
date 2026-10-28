@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 100001}
+  - component: {fileID: 100002}
+  m_Layer: 5
+  m_Name: MuxyHypelineMenu
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!224 &100001
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &100002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1d93b5878424328ae3095801eec87e1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  GatewayManager: {fileID: 0}
+  FoxArtwork: {fileID: 2800000, guid: a7d22486f4463e657bd2f2f6d76e2782, type: 3}
+  WordmarkArtwork: {fileID: 2800000, guid: 1bbebd9c6d7044aa855432c2b28a713c, type: 3}
+  GameDescription: Let your live audience interact with your game.
+  ShowTikTokComingSoon: 1
+  TwitchSetupUrl: https://dashboard.twitch.tv/extensions/i575hs2x9lb3u8hqujtezit03w1740
+  DisconnectedColor: {r: 0.67, g: 0.7, b: 0.76, a: 1}
+  ConnectingColor: {r: 1, g: 0.72, b: 0.22, a: 1}
+  ConnectedColor: {r: 0.3, g: 0.86, b: 0.52, a: 1}
+  ErrorColor: {r: 1, g: 0.36, b: 0.34, a: 1}
+  MenuButtonPosition: {x: 24, y: -24}
+  MenuButtonSize: {x: 300, y: 76}
+  OnPanelOpened:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPanelClosed:
+    m_PersistentCalls:
+      m_Calls: []

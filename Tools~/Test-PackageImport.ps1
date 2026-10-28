@@ -66,6 +66,7 @@ public static class GatewayPackageConsumer
     public static readonly Type[] PublicTypes =
     {
         typeof(SDK),
+        typeof(MuxyHypeline.SDK),
         typeof(GameMetadata),
         typeof(MuxyGatewayManager),
         typeof(MuxyGatewayAuthentication),
@@ -90,8 +91,11 @@ public static class GatewayPackageImportValidation
     {
         try
         {
-            if (GatewayPackageConsumer.PublicTypes.Length != 6)
+            if (GatewayPackageConsumer.PublicTypes.Length != 7)
                 throw new InvalidOperationException("Consumer assembly references were not loaded.");
+
+            if (!typeof(MuxyGateway.SDK).IsAssignableFrom(typeof(MuxyHypeline.SDK)))
+                throw new InvalidOperationException("Hypeline SDK must retain Gateway SDK compatibility.");
 
             foreach (Type type in GatewayPackageConsumer.PublicTypes)
             {

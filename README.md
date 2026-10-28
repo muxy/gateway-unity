@@ -1,10 +1,22 @@
-![Muxy_Gateway Logo](https://github.com/muxy/gateway-unity/assets/135379/cf68994a-cadc-40b6-a9e8-31a157c4317a)
+# Muxy Hypeline Unity SDK
 
 > The fastest way to make your game “Twitch friendly”
 
-[Muxy Gateway](https://muxy.io/gateway) is the smartest way to enhance your game
-with Twitch viewer interactivity. The Gateway extension lets viewers manipulate
+Muxy Hypeline brings Twitch viewer interactivity to your game using the existing
+[Muxy Gateway service and extension](https://muxy.io/gateway). The extension lets viewers manipulate
 gameplay, see live stats, vote on key game decisions, and more.
+
+For the creator-facing setup panel, see the [Hypeline Unity setup guide](Documentation~/Hypeline-Unity-Setup.md).
+The package remains `com.muxy.gateway` and its assembly remains `Muxy.Gateway`, so
+existing dependencies, scripts, prefabs, and saved logins continue to use their
+existing identities. The Twitch extension remains Muxy Gateway.
+
+New code can construct `new MuxyHypeline.SDK(gameID)`; it inherits the existing
+`MuxyGateway.SDK` API and uses the same `MuxyGateway` data types. Existing code
+can continue using `MuxyGateway.SDK` unchanged. For prefab integrations, continue
+using the existing `MuxyGatewayManager` with the `MuxyHypelineMenu` prefab. Avoid
+importing both namespaces unqualified when referring to `SDK`, because both
+contain a type with that name.
 
 ## Highlights
 
@@ -16,13 +28,17 @@ gameplay, see live stats, vote on key game decisions, and more.
 
 ## Install the SDK
 
+For a step-by-step installation, initialization, viewer-action, polling, and test
+guide, see the [new Unity developer documentation](Documentation~/README.md).
+It includes a static page ready for GitHub Pages and complete C# demo scripts.
+
 1. Create a new or load an existing Unity project.
-2. [Download Gateway](https://github.com/muxy/gateway-unity/releases)
+2. Obtain the Hypeline package from your distributor. The existing [Gateway releases](https://github.com/muxy/gateway-unity/releases) are historical versions and may not include these changes.
 3. Unzip the package.
 4. In the Unity editor, launch the Package Manager from
    `Window > Package Manager` in the main menu.
 5. Select `Add package from disk...` from the Add Package dropdown and select
-   the `package.json` file from the Gateway folder.
+   the `package.json` file from the package folder.
 
 ### Unity and package dependencies
 
@@ -56,9 +72,9 @@ does not already contain them.
 An Editor-only build callback preserves the reflection-loaded configuration types
 used by Mono TLS, which can otherwise be removed by High managed stripping.
 
-## Using Gateway
+## Using Hypeline
 
-There are two flows to choose from when using Gateway:
+There are two integration flows:
 
 ### Prefab flow
 

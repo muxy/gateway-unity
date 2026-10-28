@@ -110,12 +110,19 @@ public class MuxyGatewayManager : MonoBehaviour
     public void OpenAndRunSDK()
     {
         if (DidOpenAndRun) return;
+        if (SDK.TransportState == GatewayTransportState.Error)
+        {
+            SDK.StopWebsocketTransport();
+            SDK = new SDK(GameID);
+            SetupCallbacks();
+        }
         SDK.RunInProduction();
         DidOpenAndRun = true;
     }
 
     private void Update()
     {
+        if (SDK.TransportState == GatewayTransportState.Error) DidOpenAndRun = false;
         SDK.Update();
     }
 
@@ -128,6 +135,11 @@ public class MuxyGatewayManager : MonoBehaviour
     public bool IsAuthenticated()
     {
         return SDK.IsAuthenticated;
+    }
+
+    public GatewayTransportState TransportState
+    {
+        get { return SDK == null ? GatewayTransportState.Disconnected : SDK.TransportState; }
     }
 
     public void Deauthenticate()

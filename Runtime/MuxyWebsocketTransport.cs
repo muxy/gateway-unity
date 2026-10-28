@@ -22,8 +22,12 @@ namespace MuxyGateway
         Sandbox = 1
     };
 
+    public enum GatewayTransportState { Disconnected, Connecting, Connected, Reconnecting, Error }
+
     public class WebsocketTransport
     {
+        private volatile GatewayTransportState connectionState = GatewayTransportState.Disconnected;
+        public GatewayTransportState ConnectionState { get { return connectionState; } }
         private ClientWebSocket Websocket;
         private CancellationTokenSource UnboundedCancellationSource = new CancellationTokenSource();
         private static readonly Encoding UTF8Encoding = new UTF8Encoding(false);
@@ -112,12 +116,17 @@ namespace MuxyGateway
         public async Task Open(string uri)
         {
             TargetUri = new Uri(uri);
-
-            using (CancellationTokenSource src = TokenSource())
+            connectionState = GatewayTransportState.Connecting;
+            try
             {
-                await Websocket.ConnectAsync(TargetUri, src.Token)
-                    .ConfigureAwait(false);
+                if (Websocket.State != WebSocketState.None) Websocket = new ClientWebSocket();
+                using (CancellationTokenSource src = TokenSource())
+                {
+                    await Websocket.ConnectAsync(TargetUri, src.Token).ConfigureAwait(false);
+                }
+                connectionState = GatewayTransportState.Connected;
             }
+            catch { connectionState = GatewayTransportState.Error; throw; }
         }
 
         private async Task OpenAndRunInStage(SDK instance, Stage stage)
@@ -228,6 +237,7 @@ namespace MuxyGateway
         public async Task StopAsync()
         {
             Done = true;
+            connectionState = GatewayTransportState.Disconnected;
             UnboundedCancellationSource.Cancel();
 
             try
@@ -256,7 +266,7 @@ namespace MuxyGateway
             if (ReadThread != null)
             {
                 ReadThread.Join(TimeSpan.FromSeconds(5));
-                WriteThread = null;
+                ReadThread = null;
             }
 
             UnboundedCancellationSource = new CancellationTokenSource();
@@ -331,6 +341,8 @@ namespace MuxyGateway
             {
                 if (Websocket.State != WebSocketState.Open)
                 {
+                    if (!Reconnecting && connectionState != GatewayTransportState.Error)
+                        await AttemptReconnect(instance);
                     Thread.Sleep(100);
                     continue;
                 }
@@ -395,15 +407,16 @@ namespace MuxyGateway
             }
         }
 
-        private bool Reconnecting = false;
+        private volatile bool Reconnecting = false;
+        private readonly object ReconnectLock = new object();
         private async Task AttemptReconnect(MuxyGateway.SDK instance)
         {
-            if (Reconnecting)
+            lock (ReconnectLock)
             {
-                return;
+                if (Reconnecting || Done) return;
+                Reconnecting = true;
             }
-
-            Reconnecting = true;
+            connectionState = GatewayTransportState.Reconnecting;
             LogMessage("Attempting reconnect.");
 
             if (Websocket.State != WebSocketState.Aborted)
@@ -435,8 +448,10 @@ namespace MuxyGateway
                         await Websocket.ConnectAsync(TargetUri, src.Token)
                             .ConfigureAwait(false);
 
+                        if (Done) { Reconnecting = false; return; }
                         instance.HandleReconnect();
                         Reconnecting = false;
+                        connectionState = GatewayTransportState.Connected;
                         return;
                     }
                 }
@@ -452,9 +467,16 @@ namespace MuxyGateway
                     LogMessage(string.Format("Attempting to reconnect. attempt={0} wait={1}ms", i + 1, waitMillis));
                     Thread.Sleep(waitMillis);
                 }
+                catch (Exception)
+                {
+                    Reconnecting = false;
+                    connectionState = GatewayTransportState.Error;
+                    return;
+                }
 
                 i++;
             }
+            Reconnecting = false;
         }
     }
 }
