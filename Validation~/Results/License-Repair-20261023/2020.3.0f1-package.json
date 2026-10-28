@@ -1,0 +1,69 @@
+{
+  "unityVersion": "2020.3.0f1",
+  "status": "passed",
+  "scope": "clean-package-import-consumer-compilation-and-utf8-struct-marshalling",
+  "packageSource": "file:D:/CODE/Muxy-Gateway-SDK/gateway-unity",
+  "nativeInstanceConstructed": false,
+  "networkAuthenticationAttempted": false,
+  "observations": {
+    "linkerProcessor": "registered",
+    "tmpProvider": "com.unity.textmeshpro@3.0.6",
+    "sdkAssembly": "Muxy.Gateway",
+    "consumerAssembly": "Gateway.PackageConsumer",
+    "uiProvider": "com.unity.ugui@1.0.0",
+    "utf8StructMarshalling": "passed",
+    "status": "passed",
+    "unity": "2020.3.0f1"
+  },
+  "dependencies": {
+    "com.unity.modules.imgui": {
+      "version": "1.0.0",
+      "depth": 2,
+      "resolvedHash": null,
+      "source": "builtin"
+    },
+    "com.unity.modules.ui": {
+      "version": "1.0.0",
+      "depth": 2,
+      "resolvedHash": null,
+      "source": "builtin"
+    },
+    "com.unity.modules.imageconversion": {
+      "version": "1.0.0",
+      "depth": 1,
+      "resolvedHash": null,
+      "source": "builtin"
+    },
+    "com.unity.ugui": {
+      "version": "1.0.0",
+      "depth": 1,
+      "resolvedHash": null,
+      "source": "builtin"
+    },
+    "com.unity.textmeshpro": {
+      "version": "3.0.6",
+      "depth": 1,
+      "resolvedHash": null,
+      "source": "registry"
+    },
+    "com.muxy.gateway": {
+      "version": "file:D:/CODE/Muxy-Gateway-SDK/gateway-unity",
+      "depth": 0,
+      "resolvedHash": null,
+      "source": "local"
+    }
+  },
+  "sourceSha256": {
+    "Runtime/MuxyLibraryImports.cs": "DD19FD1EE8E38268F56939C5E8A832567C803DE223051C8039A97A9043915A98",
+    "Runtime/MuxyGatewayVersion.cs": "EC3363EA75B5AAFC7DCF85FA01F3F96F7E47D38EE3BD096C1A59F9C6CEDF8CA9",
+    "Runtime/MuxyGateway.cs": "808011BC4563E7EC78FC6348A7075477301EB7DE0166C7E8C9FE4386F4854365",
+    "Muxy.Gateway.asmdef": "34FDA4A8F684D769F103DF38AA1A7713ECD9FA6A2DFA96D535A60C4E63830EE1",
+    "Prefabs/MuxyGatewayAuthentication.cs": "BBA5414B99516B18932EB4BCAB8E716A2A4DEADDC6C851DC64672329FE6FEB4C",
+    "Editor/GatewayLinkerProcessor.cs": "90339570532984B1E345049EF31709AA7435AF492AFCC299CD64F5014BDA4FBA",
+    "Runtime/MuxyWebsocketTransport.cs": "C51A07639F96B04720552BDA2AB0DDFF2A32E7BF5ADBE249FA647FC0D65ECFA8",
+    "Prefabs/MuxyGatewayManager.cs": "FF8E99E94A80A3E951CE30A71D769745A19442463EB21D04576352291ED82D08",
+    "Prefabs/MuxyGatewayNotificationHistory.cs": "38BCD89F717374CF49882CF7C5878988508C8EED42246256E993B297136D955C",
+    "Prefabs/MuxyGatewayPolling.cs": "D93D1D5850C88486A0BEB9C43BA0E31068F3C4188AB9BD1356C85915915906BA",
+    "package.json": "6F3A52D06B3ABF47799D523778F8C6635BCFFEC1B25EACA2AEFD2B686440FC34"
+  }
+}

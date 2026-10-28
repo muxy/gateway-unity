@@ -1,0 +1,106 @@
+{
+  "imports": [
+    {
+      "unityVersion": "2020.3.0f1",
+      "reason": null,
+      "status": "passed",
+      "followUpReport": "../License-Repair-20261023/2020.3.0f1-package.json",
+      "previousStatus": "environment-blocked",
+      "followUpTestedSdkCommit": "7446772beafa11a08e2ca25704c38d248349e846"
+    },
+    {
+      "unityVersion": "2020.3.17f1",
+      "reason": null,
+      "status": "passed",
+      "followUpReport": "../License-Repair-20261023/2020.3.17f1-package.json",
+      "previousStatus": "environment-blocked",
+      "followUpTestedSdkCommit": "7446772beafa11a08e2ca25704c38d248349e846"
+    },
+    {
+      "unityVersion": "2020.3.48f1",
+      "reason": null,
+      "status": "passed"
+    },
+    {
+      "unityVersion": "2022.3.62f3",
+      "reason": null,
+      "status": "passed"
+    },
+    {
+      "unityVersion": "2023.2.20f1",
+      "reason": null,
+      "status": "passed"
+    },
+    {
+      "unityVersion": "6000.0.85f1",
+      "reason": null,
+      "status": "passed"
+    },
+    {
+      "unityVersion": "6000.4.8f1",
+      "reason": null,
+      "status": "passed"
+    },
+    {
+      "unityVersion": "6000.6.6f1",
+      "reason": null,
+      "status": "passed"
+    }
+  ],
+  "minimumCompiler": {
+    "api": ".NET Standard 2.0",
+    "unityVersion": "2020.3.0f1",
+    "checks": [
+      {
+        "logSha256": "647311E51784E2E52937294852D9080C20EE0B8727410C23D8F24006C21DDB3B",
+        "exitCode": 0,
+        "warnings": 5,
+        "mode": "editor",
+        "status": "passed"
+      },
+      {
+        "logSha256": "647311E51784E2E52937294852D9080C20EE0B8727410C23D8F24006C21DDB3B",
+        "exitCode": 0,
+        "warnings": 5,
+        "mode": "standalone",
+        "status": "passed"
+      }
+    ],
+    "language": "C#8"
+  },
+  "scope": "compatibility-only-no-managed-SDK-transport-no-live-authentication",
+  "players": [
+    {
+      "playerSha256": "E31C4B63CA00F5D3C62C595ECF00468F1EB96341DF8D2DA4D62AC83E510066F1",
+      "build": "passed",
+      "unityVersion": "2020.3.48f1",
+      "backend": "Mono",
+      "smoke": "passed"
+    },
+    {
+      "playerSha256": "8697103FA6AFA0D147EFEC69ACD8FE0FA27B78034DA5C1F80ACF9D0D6EA1A5BD",
+      "build": "passed",
+      "unityVersion": "2020.3.48f1",
+      "backend": "IL2CPP",
+      "smoke": "passed"
+    },
+    {
+      "playerSha256": "7C5B8F3ECAF9EF88A16646EACC9F817F327E3DDE3244CCC627BD2E273188247D",
+      "build": "passed",
+      "unityVersion": "6000.6.6f1",
+      "backend": "Mono",
+      "smoke": "passed"
+    },
+    {
+      "playerSha256": "5AE16E18272BE99348DB2A4E6450BBA3210710F8279357AB2F1F0B33CE520DD1",
+      "build": "passed",
+      "unityVersion": "6000.6.6f1",
+      "backend": "IL2CPP",
+      "smoke": "passed"
+    }
+  ],
+  "shippingCodeUnchanged": true,
+  "timestampUtc": "2026-10-23T16:28:26.1755472Z",
+  "testedSdkCommit": "e2e85488d436f3ec29355c825bae71d087636532",
+  "licenseRepairFollowUpUtc": "2026-10-23T17:50:26.0894149Z"
+}

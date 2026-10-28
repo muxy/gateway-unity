@@ -1,10 +1,22 @@
-![Muxy_Gateway Logo](https://github.com/muxy/gateway-unity/assets/135379/cf68994a-cadc-40b6-a9e8-31a157c4317a)
+# Muxy Hypeline Unity SDK
 
 > The fastest way to make your game “Twitch friendly”
 
-[Muxy Gateway](https://muxy.io/gateway) is the smartest way to enhance your game
-with Twitch viewer interactivity. The Gateway extension lets viewers manipulate
+Muxy Hypeline brings Twitch viewer interactivity to your game using the existing
+[Muxy Gateway service and extension](https://muxy.io/gateway). The extension lets viewers manipulate
 gameplay, see live stats, vote on key game decisions, and more.
+
+For the creator-facing setup panel, see the [Hypeline Unity setup guide](Documentation~/Hypeline-Unity-Setup.md).
+The package remains `com.muxy.gateway` and its assembly remains `Muxy.Gateway`, so
+existing dependencies, scripts, prefabs, and saved logins continue to use their
+existing identities. The Twitch extension remains Muxy Gateway.
+
+New code can construct `new MuxyHypeline.SDK(gameID)`; it inherits the existing
+`MuxyGateway.SDK` API and uses the same `MuxyGateway` data types. Existing code
+can continue using `MuxyGateway.SDK` unchanged. For prefab integrations, continue
+using the existing `MuxyGatewayManager` with the `MuxyHypelineMenu` prefab. Avoid
+importing both namespaces unqualified when referring to `SDK`, because both
+contain a type with that name.
 
 ## Highlights
 
@@ -16,17 +28,53 @@ gameplay, see live stats, vote on key game decisions, and more.
 
 ## Install the SDK
 
+For a step-by-step installation, initialization, viewer-action, polling, and test
+guide, see the [new Unity developer documentation](Documentation~/README.md).
+It includes a static page ready for GitHub Pages and complete C# demo scripts.
+
 1. Create a new or load an existing Unity project.
-2. [Download Gateway](https://github.com/muxy/gateway-unity/releases)
+2. Obtain the Hypeline package from your distributor. The existing [Gateway releases](https://github.com/muxy/gateway-unity/releases) are historical versions and may not include these changes.
 3. Unzip the package.
 4. In the Unity editor, launch the Package Manager from
    `Window > Package Manager` in the main menu.
 5. Select `Add package from disk...` from the Add Package dropdown and select
-   the `package.json` file from the Gateway folder.
+   the `package.json` file from the package folder.
 
-## Using Gateway
+### Unity and package dependencies
 
-There are two flows to choose from when using Gateway:
+The package targets Unity **2020.3.0f1 or newer**, using C# 8-compatible
+constructor syntax. Historical compilation results and the scope of the
+compatibility fixes are recorded in
+[compilation and package validation](Validation~/Compilation-And-Packages.md).
+Package import/compilation does not establish authenticated player or platform support.
+
+The package manifest requests its dependencies automatically:
+
+| Dependency | Requested version | Purpose |
+|---|---|---|
+| `com.unity.textmeshpro` | `3.0.6` | Authentication, notification, and polling UI |
+| `com.unity.ugui` | `1.0.0` | Unity UI components |
+| `com.unity.modules.imageconversion` | `1.0.0` | PNG encoding for game logos |
+
+On Unity 2023.2 and newer, TextMeshPro is included in uGUI. These Editors supply
+a built-in TextMeshPro compatibility package and their own uGUI version; let
+Package Manager resolve those built-ins. Do not manually downgrade uGUI or copy
+an older TextMeshPro implementation into the project. Check the resolved versions
+in the project's `Packages/packages-lock.json`.
+
+The SDK and its bundled prefab scripts still share the **`Muxy.Gateway`** assembly,
+so these UI dependencies apply to both prefab and code integrations. Consumer
+scripts under a custom `.asmdef` must reference `Muxy.Gateway`. Public type names,
+assembly ownership, and existing prefab/script GUIDs are preserved by this update.
+Import TMP Essential Resources through **Window > TextMeshPro** if your UI project
+does not already contain them.
+
+An Editor-only build callback preserves the reflection-loaded configuration types
+used by Mono TLS, which can otherwise be removed by High managed stripping.
+
+## Using Hypeline
+
+There are two integration flows:
 
 ### Prefab flow
 
@@ -239,7 +287,7 @@ public bool Production;
 
 void Start()
 {
-    SDK = new(GameID);
+    SDK = new SDK(GameID);
     SDK.RunInProduction();
 }
 
@@ -292,9 +340,9 @@ You can set your game's name, logo and a theme for the extension:
 ```csharp
 Texture2D GameLogo = Resources.Load<Texture2D>("Textures/Gateway/MyGameLogo.png");
 
-GameMetadata Meta = new();
+GameMetadata Meta = new GameMetadata();
 Meta.Name = "My awesome game!";
-Meta.Logo = SDK.ConvertTextureToImage(GameLogo);
+Meta.Logo = SDK.ConvertTextureToBase64(GameLogo);
 Meta.Theme = "default";
 
 SDK.SetGameMetadata(Meta);
@@ -376,7 +424,7 @@ Easily create a poll for Twitch viewers and receive immediate results in your
 game:
 
 ```csharp
-PollConfiguration Config = new();
+PollConfiguration Config = new PollConfiguration();
 Config.Mode = PollMode.Order; // PollMode.Chaos would allow everyone to vote as many times as they want
 Config.DurationInSeconds = 30;
 

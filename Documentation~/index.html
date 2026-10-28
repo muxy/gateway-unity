@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Install Muxy Hypeline in Unity, authenticate a Twitch channel, receive your first viewer action, run a poll, and test your integration.">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0d0d0d">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Carlito:wght@400;700&display=swap">
+  <title>Unity SDK walkthrough · Muxy Hypeline</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="#overview" aria-label="Muxy Hypeline documentation home"><img class="brand-logo" src="assets/muxy-logo.png" alt="" width="117" height="36"><span class="brand-divider" aria-hidden="true">/</span><span>Hypeline <small>Docs</small></span></a>
+  <div class="top-actions">
+    <button class="search-trigger" type="button" aria-haspopup="dialog"><span aria-hidden="true">⌕</span> Search docs <kbd>Ctrl K</kbd></button>
+    <a class="source-link" href="https://github.com/muxy/gateway-unity">SDK source <span aria-hidden="true">↗</span></a>
+    <button id="menu-toggle" class="icon-button" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar">☰</button>
+  </div>
+</header>
+<div class="layout">
+  <aside id="sidebar" class="sidebar" aria-label="Documentation navigation">
+    <div class="sdk-label"><span class="unity-icon" aria-hidden="true">◇</span> Unity SDK <span class="sdk-dot" aria-hidden="true"></span></div>
+    <p class="nav-group">GET STARTED</p>
+    <nav id="guide-nav">
+      <a href="#overview" class="active">Overview</a>
+      <a href="#before-you-start">Before you start</a>
+      <a href="#install"><span>01</span> Install the SDK</a>
+      <a href="#hypeline-prefabs">Hypeline menu &amp; alerts</a>
+      <a href="#scene"><span>02</span> Set up your scene</a>
+      <a href="#authenticate"><span>03</span> Connect a channel</a>
+      <a href="#first-action"><span>04</span> Receive a viewer action</a>
+      <a href="#game-data"><span>05</span> Send game data</a>
+      <a href="#polls"><span>06</span> Run a viewer poll</a>
+      <p class="nav-group">BUILD &amp; VERIFY</p>
+      <a href="#code-integration">Integrate with C#</a>
+      <a href="#testing">Test your integration</a>
+      <a href="#troubleshooting">Troubleshooting</a>
+      <a href="#production">Prepare for release</a>
+      <a href="#api-reference">API quick reference</a>
+      <p class="nav-group">RESOURCES</p>
+      <a href="#screenshots">Screenshot capture list</a>
+      <a href="https://github.com/muxy/gateway-unity/releases">SDK releases <span class="external">↗</span></a>
+    </nav>
+    <div class="sidebar-footer"><span class="status-dot"></span> Audience interaction, in your game.<br><a href="https://www.muxy.io/gateway">Explore Muxy Gateway ↗</a></div>
+  </aside>
+  <main id="main">
+    <div class="breadcrumb">SDKs <span>/</span> Unity <span>/</span> Getting started</div>
+    <section id="overview" class="hero" aria-labelledby="page-title">
+      <div class="eyebrow"><span></span> UNITY SDK WALKTHROUGH</div>
+      <h1 id="page-title">Bring your viewers<br>into the game.</h1>
+      <p class="lead">Connect your Unity game with Muxy Hypeline, using the existing Muxy Gateway service and Twitch extension. Go from a fresh install to your first Twitch viewer action, then add live game data and polls.</p>
+      <p>Existing <code>MuxyGateway</code> integrations continue to work. New code can also construct <code>MuxyHypeline.SDK</code>, using the same API and <code>MuxyGateway</code> data types. Set up the <a href="#hypeline-prefabs">Hypeline menu and interaction alerts</a> below, or read the dedicated <a href="hypeline-unity/">Hypeline Unity guide</a>.</p>
+      <div class="hero-meta"><span>Unity 2020.3+</span><span>C# · Prefabs or code</span><span>Desktop walkthrough</span></div>
+      <div class="hero-actions"><a class="button primary" href="#install">Start building <span aria-hidden="true">→</span></a><a class="text-link" href="#code-integration">Prefer C#? Jump to code ↗</a></div>
+      <div class="outcome"><div class="outcome-icon" aria-hidden="true">✓</div><div><strong>Your first integration</strong><p>A viewer selects <b>Spawn Healthpack</b> in the extension. Your Unity demo gains 10 health, and the updated value appears back in the extension.</p></div></div>
+      <div class="connection-map" aria-label="Viewers interact through the Twitch Gateway extension and Muxy Gateway service to reach the Unity SDK; game data returns through the same service."><div><small>AUDIENCE</small><strong>Twitch extension</strong><span>Actions &amp; votes</span></div><b aria-hidden="true">⇄</b><div><small>CONNECTION</small><strong>Muxy Gateway</strong><span>Authentication &amp; events</span></div><b aria-hidden="true">⇄</b><div><small>YOUR GAME</small><strong>Unity SDK</strong><span>Gameplay &amp; live data</span></div></div>
+      <p class="caption">The streamer connects a channel once. Viewers interact through the Gateway extension.</p>
+    </section>
+
+    <section id="before-you-start">
+      <div class="section-label">THE SETUP</div><h2>Before you start</h2>
+      <p>You should be comfortable adding GameObjects, editing Inspector fields, and attaching C# scripts. Start in a small test scene before connecting your production gameplay.</p>
+      <ul class="check-list"><li><strong>A Unity project.</strong> This checkout declares Unity 2020.3.0f1 as its minimum. Use a desktop target for this walkthrough.</li><li><strong>The SDK checkout or an appropriate release ZIP.</strong> Keep the native libraries and their <code>.meta</code> files with the package.</li><li><strong>A Twitch broadcaster account</strong> with permission to install and activate the Muxy Gateway extension on its channel.</li><li><strong>A viewer account or separate browser session</strong> to test the audience experience.</li><li><strong>A Game ID linked to this broadcaster.</strong> In the extension's Configure view, check <b>Linked Games</b> and use the exact ID shown there. The SDK README suggests <code>gateway-testing</code> for development, but this walkthrough's broadcaster had <code>gamelink-testing</code> linked. Request your own permanent ID from <a href="https://www.muxy.io/gateway">Muxy</a> before release.</li></ul>
+      <div class="callout"><strong>Match the guide to your SDK</strong><p>This guide follows the source in this checkout, including its Unity compatibility updates. The manifest currently says <code>0.0.1</code>; that value does not identify which compatibility fixes a ZIP contains. Record your release tag or commit and use the matching source. Older examples may use <code>Action</code> or <code>SetActions</code>; this checkout uses <code>GameAction</code> and <code>SetGameActions</code>.</p></div>
+      <details><summary>What has been validated?</summary><p>The checked-in October 23, 2026 reports record clean package compilation in Unity 2020.3.0f1, 2020.3.17f1, 2020.3.48f1, 2022.3.62f3, 2023.2.20f1, 6000.0.85f1, 6000.4.8f1, and 6000.6.6f1. Windows x64 Mono and IL2CPP builds and native smoke checks passed on 2020.3.48f1 and 6000.6.6f1.</p><p>On October 26, this walkthrough was performed in a Unity 6000.6.6f1 Windows project: the local package installed, the scene compiled, local Health changed from 50 to 60, live Twitch PIN authentication succeeded, a 30-second poll returned a final no-vote result, and a second Play session authenticated from the saved refresh token. A viewer action, viewer vote, and standalone player remain separate checks. Other desktop platforms need their own validation; WebGL, mobile, and consoles are outside this walkthrough. See the <a href="https://github.com/muxy/gateway-unity/pull/15">compatibility change and evidence</a>.</p></details>
+    </section>
+
+    <section id="install">
+      <div class="section-label">STEP 01</div><h2>Install the SDK</h2>
+      <ol class="steps"><li><strong>Get the package.</strong> Use this Hypeline checkout or a distributed package that includes the Hypeline prefabs. Historical <a href="https://github.com/muxy/gateway-unity/releases">Gateway releases</a> may not include them. If using a ZIP, extract it to a stable folder outside your Unity project's <code>Assets</code> folder. Locate the SDK's <code>package.json</code>.</li><li><strong>Open Package Manager.</strong> In Unity, open <b>Window → Package Manager</b> (in some newer Editors, <b>Window → Package Management → Package Manager</b>).</li><li><strong>Add the local package.</strong> Open the <b>+</b> or <b>Add</b> menu, choose <b>Add package from disk…</b> / <b>Install package from disk…</b>, and select the SDK's <code>package.json</code>. Select the manifest, rather than a prefab or the ZIP.</li><li><strong>Let Unity resolve dependencies.</strong> Wait for package resolution and script compilation. Check the Console for errors before continuing.</li><li><strong>Import TMP resources if needed.</strong> Use <b>Window → TextMeshPro → Import TMP Essential Resources</b> if the project does not have them. Import Essentials when prompted by a TMP UI component.</li></ol>
+      <div class="table-scroll"><table><caption>Dependencies declared by this checkout</caption><thead><tr><th>Package</th><th>Requested version</th><th>Used for</th></tr></thead><tbody><tr><td><code>com.unity.textmeshpro</code></td><td>3.0.6</td><td>Prefab UI text</td></tr><tr><td><code>com.unity.ugui</code></td><td>1.0.0</td><td>UI components</td></tr><tr><td><code>com.unity.modules.imageconversion</code></td><td>1.0.0</td><td>Logo PNG encoding</td></tr></tbody></table></div>
+      <p>On Unity 2023.2 and newer, let Package Manager resolve the Editor's built-in TextMeshPro compatibility package and uGUI version. Do not force older UI packages into a newer Editor. Check <code>Packages/packages-lock.json</code> for resolved versions. Both integration paths share the <code>Muxy.Gateway</code> assembly and its UI dependencies.</p>
+      <p>In the earlier Unity 6000.6.6f1 walkthrough, Package Manager showed Muxy Gateway 0.0.1 as a <b>Local</b> package and resolved uGUI 2.6.0 even though the manifest requests 1.0.0. This rebranded package is displayed as Muxy Hypeline. Check the first actual error if your project behaves differently.</p>
+      <p><strong>Using your own assembly definition?</strong> Add <code>Muxy.Gateway</code> to its Assembly Definition References. SDK types use <code>using MuxyGateway;</code>; the prefab components such as <code>MuxyGatewayManager</code> are in the global namespace.</p>
+      <figure class="capture" data-shot="01-package-manager"><div class="capture-placeholder"><span class="capture-number">01</span><div><strong>Package Manager · Muxy Hypeline installed</strong><span>Show the package details, version, and resolved dependencies.</span></div><span class="capture-tag">SCREENSHOT PENDING</span></div><figcaption>Expected: Muxy Hypeline is listed as a local package and the Console has no compilation errors. Older screenshots may show Muxy Gateway.</figcaption></figure>
+      <div class="checkpoint"><span>✓</span><p><strong>Checkpoint</strong> Find <b>Packages → Muxy Hypeline → Prefabs</b> in the Project window. Keep the package folder in place: a local installation references that folder.</p></div>
+    </section>
+
+    <section id="hypeline-prefabs">
+      <div class="section-label">HYPELINE PREFABS</div><h2>Add the menu and interaction alerts</h2>
+      <p>Use these prefabs to add a creator-facing <b>Stream Interactivity</b> button to a main menu and show viewer actions in the game. Both connect to the same manager and existing Muxy Gateway service.</p>
+      <ol class="steps">
+        <li><strong>Add the manager.</strong> Open <b>Packages → Muxy Hypeline → Prefabs</b> and drag <code>MuxyGatewayManager</code> into the scene Hierarchy. Reuse an existing manager if there is one; keep only one active. Set <b>Game ID</b> to the exact ID listed under <b>Linked Games</b> in the broadcaster's Twitch extension configuration.</li>
+        <li><strong>Add the menu.</strong> Drag <code>MuxyHypelineMenu</code> into the main-menu scene. Select it and drag the scene's manager into its <b>Gateway Manager</b> Inspector field. Enter a <b>Game Description</b> and adjust <b>Menu Button Position</b> and <b>Menu Button Size</b> to fit your menu.</li>
+        <li><strong>Add the alert.</strong> Drag <code>MuxyHypelineInteractionAlert</code> into the scene where viewer actions should appear. Select it and assign the same scene manager to <b>Gateway Manager</b> before Play mode. Adjust <b>Position</b>, <b>Size</b>, colors, <b>Play Sounds</b>, volume, or optional category sound clips in the Inspector.</li>
+        <li><strong>Prepare the UI.</strong> Keep exactly one EventSystem in the scene, with an input module compatible with the project's active input system. Import TMP Essential Resources if prompted. You can place the prefabs under a screen-space Canvas; without a parent Canvas, each creates an overlay Canvas at runtime. The menu button, panel, and alert cards are built during Play mode.</li>
+      </ol>
+      <div class="callout"><strong>Choose one connection interface</strong><p>The Hypeline menu provides its own connection panel. The <a href="#scene">older demo below</a> uses <code>MuxyGatewayAuthenticateUI</code> instead; don't add both interfaces or a second manager unless you intentionally need them. The Hypeline menu does not create an EventSystem. TikTok is a coming-soon label, not a working connection.</p></div>
+      <figure><img src="hypeline-images/unity-2020-wiring.png" alt="Hypeline menu Inspector with the scene's Gateway Manager assigned" loading="lazy"><figcaption>Assign the scene manager to the Hypeline menu; assign that same manager to the alert prefab.</figcaption></figure>
+      <h3>Connect a Twitch channel</h3>
+      <ol class="steps">
+        <li>In the broadcaster's Twitch Creator Dashboard, install and activate the existing <a href="https://dashboard.twitch.tv/extensions/i575hs2x9lb3u8hqujtezit03w1740">Muxy Gateway extension</a>. Open its <b>Configure</b> view, verify the linked Game ID, and select <b>Get New Code</b>.</li>
+        <li>Enter Play mode, select <b>Stream Interactivity</b>, enter the six-character code, and select <b>Connect</b>. Codes expire after five minutes; request a fresh code if needed.</li>
+        <li>Wait for the fox and text to show <b>Connected</b>. Gray indicates disconnected, amber connecting or reconnecting, and red a connection or authentication issue. A connected status verifies the connection, not a viewer action.</li>
+      </ol>
+      <figure><img src="hypeline-images/unity-2020-connected.png" alt="Hypeline connection panel showing connected status" loading="lazy"><figcaption>The creator connects through the Hypeline panel using the existing Twitch extension.</figcaption></figure>
+      <h3>Test an alert and handle the action</h3>
+      <ol class="steps">
+        <li>On the manager, register an action your game supports using the same ID as the viewer action. For the walkthrough, configure <code>healthpack</code> as <b>Spawn Healthpack</b>, with category <b>Help</b>, state <b>Available</b>, impact <code>1</code>, and count <code>65535</code>. The <a href="#first-action">viewer-action walkthrough</a> explains how to bind its gameplay callback.</li>
+        <li>From a separate viewer session, trigger the configured action in the Twitch extension. The alert listens to the manager's <code>OnAnyGameActionUsed</code> event and displays the viewer and action. By default it also logs the receipt to the Unity Console. Use an active Audio Listener and unmuted game audio to hear sounds.</li>
+        <li>Implement and bind a separate gameplay handler that performs the effect and accepts or refunds the transaction as appropriate. The alert only displays the receipt; it does not fulfill or acknowledge the action. You can call <code>ShowAlert(viewerName, actionName)</code> for a visual preview, but that does not send or test a Twitch interaction.</li>
+      </ol>
+      <figure><img src="hypeline-images/unity-2020-interaction-alert.png" alt="Viewer interaction alert displayed over a Unity game" loading="lazy"><figcaption>An interaction alert appears over the game after a viewer action arrives.</figcaption></figure>
+      <p>Alerts appear for six seconds and fade during the last second; newer alerts appear above older ones. For additional screenshots and Unity 6 notes, see the <a href="Hypeline-Unity-Setup.md">detailed Hypeline setup guide</a>.</p>
+    </section>
+
+    <section id="scene">
+      <div class="section-label">STEP 02</div><h2>Set up your scene</h2>
+      <p>This sample uses the older Gateway authentication prefab and a demo controller. If you already added the <a href="#hypeline-prefabs">Hypeline menu</a>, reuse its manager and skip adding the older authentication UI and its EventSystem. Alternatively, use the <a href="#code-integration">C# integration</a>. Use one SDK owner per integration.</p>
+      <ol class="steps"><li><strong>Create and save a test scene</strong> named <code>GatewayDemo</code>. In Unity 6, <b>File → New Scene → Basic (URP)</b> works for this demo; the existing sample scene can stay untouched.</li><li><strong>Add <code>MuxyGatewayManager.prefab</code></strong> from the package's <code>Prefabs</code> folder to the Hierarchy. Set its <b>Game ID</b> to an exact ID shown under <b>Linked Games</b> in the broadcaster's Gateway Configure view before entering Play mode. This walkthrough used <code>gamelink-testing</code>; use the ID linked to your account.</li><li><strong>Set Game Metadata → Name</strong> to <code>Gateway Unity Demo</code>. Set <b>Theme</b> to <code>default</code>. Leave <b>Logo</b> empty for this first test; in this checkout it is an encoded string, rather than a Texture2D Inspector slot.</li><li><strong>Add <code>MuxyGatewayAuthenticateUI.prefab</code>.</strong> In its <code>MuxyGatewayAuthentication</code> component, assign the scene's manager to <b>Gateway Manager</b>. The Inspector object picker can find the scene instance if dragging does not work. Set references before pressing Play; the UI subscribes in <code>OnEnable</code>.</li><li><strong>Keep exactly one EventSystem.</strong> The authentication prefab contains one. Expand its hierarchy and check before adding another. An extra scene EventSystem produced Unity's duplicate EventSystem warning in this walkthrough; remove the extra if you see it.</li><li><strong>Match the EventSystem input module to your project.</strong> In Unity 6 with the new Input System active, expand the authentication prefab and select its <b>EventSystem</b>. If the Inspector warns that <b>Standalone Input Module</b> will not work, select <b>Replace with InputSystemUIInputModule</b>. Do this outside Play mode and save the scene; Play mode changes revert. This fixed an unclickable PIN field in the walkthrough.</li><li><strong>Create one Game Text.</strong> On the manager, expand <b>Game Texts</b> and add element 0: <b>Label</b> = <code>Health</code>, <b>Value</b> = <code>50</code>, <b>Icon</b> = <code>fa-solid:heart</code>. The tutorial script updates this element by index.</li><li><strong>Add the demo behavior.</strong> Download <a href="examples/GatewayPrefabDemo.cs" download>GatewayPrefabDemo.cs</a> into your project's <code>Assets/Scripts</code> folder. If you copied it while Unity was open and Add Component cannot find it, use <b>Assets → Refresh</b> and wait for compilation. Attach it to a new GameObject named <code>GatewayDemoController</code> and assign its <b>Gateway Manager</b> field to the scene manager.</li><li><strong>Enable the demo's IMGUI input.</strong> In <b>Edit → Project Settings → Player → Other Settings</b>, set <b>Active Input Handling</b> to <b>Both</b> if the project uses the new Input System only. The demo's <code>OnGUI</code> buttons read legacy input. Unity may request an Editor restart after this change.</li></ol>
+      <figure class="capture" data-shot="02-scene-wiring"><div class="capture-placeholder"><span class="capture-number">02</span><div><strong>Scene Hierarchy + authentication Inspector</strong><span>Show the manager, auth prefab, demo controller, and assigned manager reference.</span></div><span class="capture-tag">SCREENSHOT PENDING</span></div><figcaption>The authentication UI's Gateway Manager field references the scene manager; the prefab includes the EventSystem.</figcaption></figure>
+      <figure class="capture" data-shot="02-input-module"><div class="capture-placeholder"><span class="capture-number">02B</span><div><strong>EventSystem · Unity 6 input module</strong><span>Show Input System UI Input Module on the authentication prefab's EventSystem.</span></div><span class="capture-tag">SCREENSHOT PENDING</span></div><figcaption>Replace the incompatible Standalone Input Module outside Play mode, then save the scene.</figcaption></figure>
+      <details class="code-details"><summary>View the complete prefab demo script <span>C#</span></summary><div class="code-heading"><span>GatewayPrefabDemo.cs</span><a href="examples/GatewayPrefabDemo.cs" download>Download</a></div><!-- example:GatewayPrefabDemo.cs --><pre><code class="language-csharp">using MuxyGateway;
+using UnityEngine;
+
+// Tutorial scene only: use the prefab manager as the sole SDK owner.
+public class GatewayPrefabDemo : MonoBehaviour
+{
+    public MuxyGatewayManager GatewayManager;
+    private int health = 50;
+    private string status = "Enter a PIN in the Gateway authentication UI.";
+
+    private void OnEnable()
+    {
+        if (GatewayManager == null)
+        {
+            Debug.LogError("Assign Gateway Manager before enabling the demo.");
+            enabled = false;
+            return;
+        }
+        GatewayManager.OnAuthentication.AddListener(OnAuthentication);
+    }
+
+    private void OnDisable()
+    {
+        if (GatewayManager != null)
+            GatewayManager.OnAuthentication.RemoveListener(OnAuthentication);
+    }
+
+    private void OnAuthentication(AuthenticationResponse response)
+    {
+        status = response.HasError ? "Authentication failed. Request a fresh PIN."
+                                  : "Authenticated. Try Spawn Healthpack in the extension.";
+        if (!response.HasError) PublishHealth();
+    }
+
+    // Wire the action's Dynamic GameActionUsed event to this public method.
+    public void OnHealthpack(GameActionUsed used)
+    {
+        if (used.ActionID != "healthpack") return;
+        ApplyHealth();
+        GatewayManager.AcceptGameAction(used, "Added up to 10 health.");
+        status = "Viewer action received: healthpack.";
+        Debug.Log("Gateway viewer action received: healthpack.");
+    }
+
+    private void ApplyHealth()
+    {
+        health = Mathf.Min(100, health + 10);
+        if (GatewayManager.IsAuthenticated()) PublishHealth();
+    }
+
+    private void PublishHealth()
+    {
+        // The guide creates Health as Game Texts element 0.
+        GameText text = GatewayManager.GetGameTextAt(0);
+        text.Value = health.ToString();
+        GatewayManager.SetGameTextAt(text, 0);
+    }
+
+    public void StartDemoPoll()
+    {
+        if (!GatewayManager.IsAuthenticated()) return;
+        PollConfiguration config = new PollConfiguration
+        {
+            Prompt = "Where should we go next?",
+            Mode = PollMode.Order,
+            DurationInSeconds = 30
+        };
+        config.Options.Add("Forest");
+        config.Options.Add("Desert");
+        config.Options.Add("Ice Cave");
+        config.OnPollUpdate = update =&gt;
+        {
+            // The manager does not forward this delegate automatically.
+            GatewayManager.OnPollUpdate.Invoke(update);
+            if (!update.IsFinal) return;
+            status = update.Count &gt; 0 &amp;&amp; update.Winner &gt;= 0 &amp;&amp;
+                     update.Winner &lt; config.Options.Count
+                ? "Poll winner: " + config.Options[update.Winner]
+                : "Poll ended without a usable winner.";
+            Debug.Log(status);
+        };
+        GatewayManager.SetPollConfiguration(config);
+        GatewayManager.StartPoll();
+    }
+
+    private void OnGUI()
+    {
+        GUILayout.BeginArea(new Rect(16, 16, 440, 190), GUI.skin.box);
+        GUILayout.Label("Gateway prefab demo | Health: " + health);
+        GUILayout.Label(status);
+        if (GUILayout.Button("Local test: add 10 health")) ApplyHealth();
+        GUI.enabled = GatewayManager != null &amp;&amp; GatewayManager.IsAuthenticated();
+        if (GUILayout.Button("Start 30-second viewer poll")) StartDemoPoll();
+        GUI.enabled = true;
+        GUILayout.EndArea();
+    }
+}</code></pre><!-- /example:GatewayPrefabDemo.cs --></details>
+      <div class="callout"><strong>How initialization works</strong><p>The manager constructs <code>SDK(GameID)</code> in <code>OnEnable</code>, pumps <code>SDK.Update()</code> every frame, and starts the production transport when authenticating with a PIN or saved refresh token. A development Game ID and the sandbox transport are separate concepts: this prefab calls <code>RunInProduction()</code>, even when you use a development Game ID.</p></div>
+    </section>
+
+    <section id="authenticate">
+      <div class="section-label">STEP 03</div><h2>Connect a Twitch channel</h2>
+      <p>The streamer authenticates the game to their channel. Viewers use the extension on that channel; they do not enter the streamer's PIN in your game. The steps below use the older authentication prefab; if you use the Hypeline menu, follow its <a href="#hypeline-prefabs">connection instructions</a> instead.</p>
+      <ol class="steps"><li><strong>Install Muxy Gateway on the broadcaster's channel.</strong> Open the <a href="https://dashboard.twitch.tv/extensions/i575hs2x9lb3u8hqujtezit03w1740">Gateway extension dashboard</a>. Sign in as the broadcaster, install the extension, and activate it in an available slot offered by Twitch. Check <b>My Extensions → Activated</b> for its green status and placement.</li><li><strong>Open the extension's configuration.</strong> Select <b>Configure</b> on the active extension. Check <b>Linked Games</b> against the manager's exact Game ID. Select <b>Get New Code</b> for a six-character configuration PIN. The SDK README says PINs expire after five minutes; use it promptly and request another if it expires. Use the copy control or read carefully; <code>7</code> and <code>Z</code> looked similar in this walkthrough.</li><li><strong>Enter Play mode in Unity.</strong> Enter that PIN in the authentication prefab's input and select its authenticate button. Wait for the result instead of submitting repeatedly.</li><li><strong>Confirm success in the game.</strong> The authentication UI switches to its success group. The demo should display <code>Authenticated. Try Spawn Healthpack in the extension.</code></li></ol>
+      <figure class="capture" data-shot="03-extension-active"><div class="capture-placeholder"><span class="capture-number">03A</span><div><strong>Twitch My Extensions · Gateway active</strong><span>Gateway appears in Activated with a green status and Overlay 1 placement.</span></div><span class="capture-tag">SCREENSHOT PENDING</span></div><figcaption>The broadcaster's channel already had Gateway 1.0.0 installed and active as Overlay 1 in this walkthrough.</figcaption></figure>
+      <figure class="capture" data-shot="03-extension-pin"><div class="capture-placeholder"><span class="capture-number">03B</span><div><strong>Twitch extension · configuration PIN</strong><span>Find Get New Code and check Linked Games. The PIN is masked.</span></div><span class="capture-tag">SCREENSHOT PENDING</span></div><figcaption>Gateway Configure view with the PIN hidden using its eye control. The manager's Game ID must match an entry under Linked Games.</figcaption></figure>
+      <figure class="capture" data-shot="04-authenticated"><div class="capture-placeholder"><span class="capture-number">04</span><div><strong>Unity Game view · authenticated</strong><span>Show the prefab's success state and the demo's authenticated message.</span></div><span class="capture-tag">SCREENSHOT PENDING</span></div><figcaption>Successful live authentication with the broadcaster's linked Game ID. The PIN field is no longer shown.</figcaption></figure>
+      <div class="callout warning"><strong>Keep authentication output private</strong><p>An earlier native debug message printed the outgoing PIN in Unity Console during this walkthrough. This checkout now omits credential-bearing native debug payloads, but older packages and existing logs may still contain PINs or tokens. Clear the Console before screenshots, inspect logs before sharing them, and never include the code in documentation.</p></div>
+      <h3>Test a fresh login and a returning streamer</h3>
+      <p>The prefab manager saves the refresh token in <code>PlayerPrefs</code> under <code>MuxyGatewayRefreshToken</code> and attempts refresh-token authentication on the next enable. For a fresh-PIN test, remove that key <em>before entering Play mode</em> using your development tooling, then request a fresh PIN. Do not clear all PlayerPrefs.</p>
+      <p>After a successful login, stop and restart Play mode to test returning-streamer authentication. A failed refresh attempt clears the stored token; show the PIN flow again. The current prefab stores this credential in PlayerPrefs, which is not encrypted secure storage. For a shipping integration, review token storage for your target platform.</p>
+      <div class="callout warning"><strong>Retest disconnect and reauthentication</strong><p>This checkout's manager creates a new SDK in <code>Deauthenticate()</code> without reattaching its action/Bits callbacks. Do not treat a successful disconnect button click as proof that the next session is healthy. For this walkthrough, restart Play mode before reconnecting and verify the full disconnect/reconnect path separately before release.</p></div>
+    </section>
+
+    <section id="first-action">
+      <div class="section-label">STEP 04</div><h2>Receive your first viewer action</h2>
+      <p>Leave Play mode before editing the scene. On <code>MuxyGatewayManager</code>, expand <b>Game Actions</b> and add one element with these values:</p>
+      <div class="table-scroll"><table><thead><tr><th>Inspector field</th><th>Value</th><th>Why it matters</th></tr></thead><tbody><tr><td>ID</td><td><code>healthpack</code></td><td>Stable, unique ID used by your handler</td></tr><tr><td>Name</td><td>Spawn Healthpack</td><td>The label viewers select</td></tr><tr><td>Description</td><td>Add up to 10 health to the player.</td><td>Explains the gameplay effect</td></tr><tr><td>Category</td><td>Help</td><td>Groups the action by effect</td></tr><tr><td>State</td><td>Available</td><td>Makes the action selectable</td></tr><tr><td>Impact</td><td>1</td><td>A small effect on gameplay; the Inspector range is 1–5</td></tr><tr><td>Icon</td><td><code>fa-solid:heart</code></td><td>Extension icon identifier</td></tr><tr><td>Count</td><td><code>65535</code></td><td>The value of <code>GameAction.InfiniteCount</code></td></tr></tbody></table></div>
+      <p>In the action's <b>On Game Action Used</b> UnityEvent, select <b>+</b>, drag in <code>GatewayDemoController</code>, then choose <b>GatewayPrefabDemo → OnHealthpack</b> under <b>Dynamic GameActionUsed</b>. Use the dynamic event so the received transaction reaches the handler.</p>
+      <figure class="capture" data-shot="05-action-inspector"><div class="capture-placeholder"><span class="capture-number">05</span><div><strong>Manager Inspector · healthpack + callback</strong><span>Expand the action fields and show the Dynamic GameActionUsed event binding.</span></div><span class="capture-tag">SCREENSHOT PENDING</span></div><figcaption>Keep the ID and event target legible. An unbound callback leaves the game without its intended effect.</figcaption></figure>
+      <h3>Prove the complete round trip</h3>
+      <ol class="steps"><li>Enter Play mode and check that the PIN UI renders and health starts at <b>50</b>. The viewer poll button stays disabled until authentication.</li><li>Use <b>Local test: add 10 health</b> once. Health should become <b>60</b>, even before you have a PIN. This verifies the demo's game logic only. Restart Play mode to reset health to 50.</li><li>Authenticate with the broadcaster's fresh PIN, then open the channel's active Gateway extension in a viewer session. Confirm the demo title, Health text, and Spawn Healthpack action appear. Test under the channel conditions Twitch requires for that extension placement.</li><li>Select <b>Spawn Healthpack</b> through the extension. Follow its available test/interaction flow. If a purchase is involved, review the Twitch confirmation and cost; this guide does not assume a free-purchase simulator.</li><li>Confirm Unity shows <b>Health: 60</b>, the demo status says <code>Viewer action received: healthpack.</code>, and the extension's Health value becomes <b>60</b>.</li></ol>
+      <p class="caption">The broadcaster channel was offline during this walkthrough. Its viewer page did not display the active overlay, so the viewer action remains unverified. Run this step while the channel is live and the extension is visible to a viewer.</p>
+      <figure class="capture" data-shot="04-local-test"><div class="capture-placeholder"><span class="capture-number">04A</span><div><strong>Unity Game view · local health test</strong><span>The demo's local button changes Health from 50 to 60 with a clear Console.</span></div><span class="capture-tag">SCREENSHOT PENDING</span></div><figcaption>This confirms local demo logic and UI input. It does not show a viewer action or authenticated Gateway session.</figcaption></figure>
+      <div class="code-heading"><span>What the demo handler does</span></div><pre><code class="language-csharp">public void OnHealthpack(GameActionUsed used)
+{
+    if (used.ActionID != "healthpack") return;
+    ApplyHealth();
+    GatewayManager.AcceptGameAction(used, "Added up to 10 health.");
+}</code></pre>
+      <p><code>AcceptGameAction</code> reports fulfillment. If your real game cannot perform an action, use <code>RefundGameAction</code> with the received event and a useful reason instead. Do not accept and refund the same transaction. Before shipping, deduplicate transaction IDs so repeated delivery cannot apply gameplay twice; the demo keeps the handler small and does not implement durable transaction tracking.</p>
+      <figure class="capture" data-shot="06-action-roundtrip"><div class="capture-placeholder"><span class="capture-number">06</span><div><strong>Viewer extension + Unity · health 50 → 60</strong><span>Capture the selected action, game result, and updated extension value together.</span></div><span class="capture-tag">SCREENSHOT PENDING</span></div><figcaption>This is the key proof image: viewer interaction changes the game and game data returns to the extension.</figcaption></figure>
+      <div class="checkpoint"><span>✓</span><p><strong>Checkpoint</strong> A viewer-triggered event changed Unity gameplay. A local button click or an authentication success alone does not pass this checkpoint.</p></div>
+    </section>
+
+    <section id="game-data">
+      <div class="section-label">STEP 05</div><h2>Keep viewers up to date</h2>
+      <p>Game Texts are labeled values in the extension. Use them for the current level, player health, difficulty, or loadout. The demo sends Health after authentication and whenever health changes.</p>
+      <pre><code class="language-csharp">// Update the Health entry created at index 0 in the manager.
+GameText healthText = GatewayManager.GetGameTextAt(0);
+healthText.Value = "60";
+GatewayManager.SetGameTextAt(healthText, 0);
+
+// Add or clear entries, then submit the whole list.
+GatewayManager.AddGameText(new GameText
+{
+    Label = "Level", Value = "Forest", Icon = "fa-solid:dungeon"
+});
+GatewayManager.SubmitGameTexts();</code></pre>
+      <p><code>AddGameText()</code> and <code>ClearGameTexts()</code> change the manager's local list; call <code>SubmitGameTexts()</code> after these operations. The code-only SDK uses <code>SetGameTexts(GameText[])</code> to publish the complete list. Send meaningful state changes instead of resending identical data every frame.</p>
+      <h3>Enable actions only when they can run</h3>
+      <pre><code class="language-csharp">// Prefab manager: call when pausing / resuming valid gameplay.
+GatewayManager.SetAllGameActionStates(GameActionState.Unavailable);
+GatewayManager.SetAllGameActionStates(GameActionState.Available);
+
+// After editing a manager action, explicitly submit the list.
+GameAction action = GatewayManager.GetGameActionAt(0);
+action.State = GameActionState.Hidden;
+GatewayManager.SetGameActionAt(action, 0);
+GatewayManager.SubmitGameActions();</code></pre>
+      <p>Use <b>Unavailable</b> for a visible action viewers cannot currently use and <b>Hidden</b> when it should not appear. Keep IDs unique. Choose finite counts for disruptive mechanics and restore availability only after the next scene or match is ready.</p>
+      <details><summary>Add a game logo</summary><p>Import a readable texture in a supported format: RGB24, RGBA32, or ARGB32. Enable <b>Read/Write</b> and choose a compatible texture format in its import settings. Use the SDK's static conversion helper:</p><pre><code class="language-csharp">GameMetadata metadata = GatewayManager.GetGameMetadata();
+metadata.Logo = SDK.ConvertTextureToBase64(yourReadableTexture);
+GatewayManager.SetGameMetadata(metadata);</code></pre><p>Here <code>yourReadableTexture</code> is your own assigned <code>Texture2D</code>. Retain the existing metadata when changing the logo.</p></details>
+    </section>
+
+    <section id="polls">
+      <div class="section-label">STEP 06</div><h2>Let viewers choose what happens next</h2>
+      <p>The demo's <b>Start 30-second viewer poll</b> button publishes a poll with Forest, Desert, and Ice Cave options. It uses <code>PollMode.Order</code> for one vote per viewer; <code>PollMode.Chaos</code> allows repeated voting. A duration of <code>0</code> is infinite, so use a positive duration for this test.</p>
+      <ol class="steps"><li>While authenticated, select the demo's poll button once.</li><li>In the viewer extension, select a poll option and submit a vote.</li><li>After 30 seconds, verify the demo reports the winning option. With zero votes, it reports no usable winner.</li><li>Apply a gameplay decision only on a final update, and validate the result before indexing an options list. Decide how your game should handle ties and no votes; the demo uses the reported winner when valid.</li></ol>
+      <figure class="capture" data-shot="07-poll-no-votes"><div class="capture-placeholder"><span class="capture-number">07A</span><div><strong>Unity poll · no-vote result</strong><span>Show the final callback when no viewers voted.</span></div><span class="capture-tag">SCREENSHOT PENDING</span></div><figcaption>The live 30-second poll completed with no viewer votes and the demo reported no usable winner. A viewer vote remains a separate test.</figcaption></figure>
+      <h3>Optional: show the bundled polling UI</h3>
+      <p>Outside Play mode, add <code>MuxyGatewayPolling.prefab</code> and assign its <b>Gateway Manager</b>. The demo's poll callback contains this bridge:</p>
+      <pre><code class="language-csharp">config.OnPollUpdate = update =&gt;
+{
+    GatewayManager.OnPollUpdate.Invoke(update);
+    if (!update.IsFinal) return;
+    // Validate vote count and winner before applying game logic.
+};</code></pre>
+      <p><code>MuxyGatewayManager.StartPoll()</code> passes its configuration to the SDK; it does not automatically forward <code>PollConfiguration.OnPollUpdate</code> into the manager's UnityEvent. The widget listens to that UnityEvent, so the bridge is required.</p>
+      <div class="callout warning"><strong>Use callback data as your test result</strong><p>The current polling prefab does not initialize its countdown from the configured duration and assumes usable result indices. For initial testing, use the demo status and SDK callback as the result. Validate or customize the widget's timer and zero-vote handling before using it in a shipped game.</p></div>
+      <figure class="capture" data-shot="07-poll-result"><div class="capture-placeholder"><span class="capture-number">07</span><div><strong>Viewer poll + final result in Unity</strong><span>Show the three options, a submitted vote, and the final winner message.</span></div><span class="capture-tag">SCREENSHOT PENDING</span></div><figcaption>Use the demo's final result message as the proof of the completed poll.</figcaption></figure>
+      <details><summary>Optional: action notifications</summary><p>Add <code>MuxyGatewayNotifications.prefab</code>, assign its <b>Gateway Manager</b>, and keep <b>Auto Add Action Messages</b> enabled to use the provided template. Its script is <code>MuxyGatewayNotificationHistory</code>.</p><p>The current implementation has mismatched child-component lookups in its add/clear paths and maps <code>Cost</code> and <code>UserID</code> template fields to the action ID. Validate and customize it before relying on its display. The core action test above uses demo status and game state, so it does not depend on this optional widget.</p></details>
+    </section>
+
+    <section id="code-integration">
+      <div class="section-label">ALTERNATIVE PATH</div><h2>Integrate directly with C#</h2>
+      <p>Use this path for custom authentication and game UI. Create a separate scene without <code>MuxyGatewayManager</code> or its UI prefabs. Add <a href="examples/GatewayCodeDemo.cs" download>GatewayCodeDemo.cs</a> to <code>Assets/Scripts</code>, attach it to one active GameObject, replace its example <b>Game ID</b> with an exact ID in the broadcaster's <b>Linked Games</b>, and enter Play mode. The demo draws a minimal PIN field and status panel using Unity IMGUI.</p>
+      <div class="table-scroll"><table><thead><tr><th>Lifecycle step</th><th>Your code owns</th></tr></thead><tbody><tr><td>Initialize</td><td>Create <code>new SDK(gameID)</code> once per active owner.</td></tr><tr><td>Connect</td><td>Call <code>RunInProduction()</code>. Authentication is a separate step.</td></tr><tr><td>Process events</td><td>Call <code>sdk.Update()</code> every frame on the Unity main thread.</td></tr><tr><td>Authenticate</td><td>Call <code>AuthenticateWithPIN</code> and check <code>response.HasError</code>.</td></tr><tr><td>Publish</td><td>After success, register callbacks and send metadata, actions, and texts.</td></tr><tr><td>Shut down</td><td>Call <code>StopWebsocketTransport()</code> when the owner is disabled.</td></tr></tbody></table></div>
+      <details class="code-details"><summary>View the complete code integration <span>C#</span></summary><div class="code-heading"><span>GatewayCodeDemo.cs</span><a href="examples/GatewayCodeDemo.cs" download>Download</a></div><!-- example:GatewayCodeDemo.cs --><pre><code class="language-csharp">using MuxyGateway;
+using UnityEngine;
+
+// Alternative to the prefab manager. Do not run both integrations together.
+public class GatewayCodeDemo : MonoBehaviour
+{
+    [SerializeField] private string gameID = "gateway-testing";
+    private SDK sdk;
+    private string pin = "";
+    private string status = "Request a PIN from the Gateway extension configuration.";
+    private int health = 50;
+    private bool authenticationPending;
+
+    private void OnEnable()
+    {
+        sdk = new SDK(gameID);
+        sdk.RunInProduction();
+    }
+
+    private void Update()
+    {
+        if (sdk != null) sdk.Update();
+    }
+
+    public void Authenticate(string enteredPIN)
+    {
+        if (sdk == null || authenticationPending || sdk.IsAuthenticated) return;
+        enteredPIN = enteredPIN.Trim();
+        if (enteredPIN.Length != 6)
+        {
+            status = "Enter the six-character PIN from the extension.";
+            return;
+        }
+        authenticationPending = true;
+        status = "Authenticating...";
+        sdk.AuthenticateWithPIN(enteredPIN, response =&gt;
+        {
+            authenticationPending = false;
+            pin = "";
+            if (response.HasError)
+            {
+                status = "Authentication failed. Request a fresh PIN and retry.";
+                return;
+            }
+            PublishSetup();
+            status = "Authenticated. Try Spawn Healthpack in the extension.";
+        });
+    }
+
+    private void PublishSetup()
+    {
+        sdk.SetGameMetadata(new GameMetadata
+        {
+            Name = "Gateway Unity Demo", Logo = "", Theme = "default"
+        });
+        GameAction action = new GameAction
+        {
+            ID = "healthpack",
+            Name = "Spawn Healthpack",
+            Description = "Add up to 10 health to the player.",
+            Icon = "fa-solid:heart",
+            Category = GameActionCategory.Help,
+            State = GameActionState.Available,
+            Impact = 1,
+            Count = GameAction.InfiniteCount,
+            OnGameActionUsed = new MuxyGatewayGameActionUsedEvent()
+        };
+        action.OnGameActionUsed.AddListener(OnHealthpack);
+        sdk.SetGameActions(new[] { action });
+        // Register the global callback too: it enables native action delivery
+        // and dispatch to the per-action UnityEvent in this SDK revision.
+        sdk.OnGameActionUsed(used =&gt;
+            Debug.Log("Gateway action callback received."));
+        PublishHealth();
+    }
+
+    private void OnHealthpack(GameActionUsed used)
+    {
+        health = Mathf.Min(100, health + 10);
+        PublishHealth();
+        sdk.AcceptGameAction(used, "Added up to 10 health.");
+        status = "Viewer action received: healthpack.";
+    }
+
+    private void PublishHealth()
+    {
+        sdk.SetGameTexts(new[]
+        {
+            new GameText { Label = "Health", Value = health.ToString(),
+                           Icon = "fa-solid:heart" }
+        });
+    }
+
+    public void StartDemoPoll()
+    {
+        if (sdk == null || !sdk.IsAuthenticated) return;
+        PollConfiguration config = new PollConfiguration
+        {
+            Prompt = "Where should we go next?", Mode = PollMode.Order,
+            DurationInSeconds = 30
+        };
+        config.Options.Add("Forest");
+        config.Options.Add("Desert");
+        config.Options.Add("Ice Cave");
+        config.OnPollUpdate = update =&gt;
+        {
+            if (!update.IsFinal) return;
+            status = update.Count &gt; 0 &amp;&amp; update.Winner &gt;= 0 &amp;&amp;
+                     update.Winner &lt; config.Options.Count
+                ? "Poll winner: " + config.Options[update.Winner]
+                : "Poll ended without a usable winner.";
+        };
+        sdk.StartPoll(config);
+    }
+
+    private void OnGUI()
+    {
+        GUILayout.BeginArea(new Rect(16, 16, 440, 230), GUI.skin.box);
+        GUILayout.Label("Gateway code demo | Health: " + health);
+        GUILayout.Label(status);
+        if (sdk != null &amp;&amp; !sdk.IsAuthenticated)
+        {
+            pin = GUILayout.TextField(pin, 6);
+            GUI.enabled = !authenticationPending;
+            if (GUILayout.Button("Authenticate")) Authenticate(pin);
+        }
+        GUI.enabled = sdk != null &amp;&amp; sdk.IsAuthenticated;
+        if (GUILayout.Button("Start 30-second viewer poll")) StartDemoPoll();
+        GUI.enabled = true;
+        GUILayout.EndArea();
+    }
+
+    private void OnDisable()
+    {
+        if (sdk != null) sdk.StopWebsocketTransport();
+        sdk = null;
+        authenticationPending = false;
+        pin = "";
+    }
+}</code></pre><!-- /example:GatewayCodeDemo.cs --></details>
+      <p><strong>Important for this revision:</strong> initialize each action's <code>OnGameActionUsed</code> UnityEvent before submitting it. Also register the SDK's global <code>OnGameActionUsed</code> delegate; native action delivery dispatches per-action events from inside that callback. Avoid applying the same gameplay effect in both callbacks.</p>
+      <h3>Add returning-streamer authentication</h3>
+      <p>The code demo intentionally asks for a fresh PIN on each enable. For a persistent login, load your platform's stored refresh token and pass it to <code>AuthenticateWithRefreshToken</code>. In either authentication callback, save the latest <code>response.RefreshToken</code> after success. Tokens can change on use. On failure, clear the unusable saved token and offer the PIN flow.</p>
+      <p>Keep tokens and PINs out of logs, source control, analytics, and screenshots. <code>sdk.IsAuthenticated</code> is a property; the prefab wrapper exposes <code>GatewayManager.IsAuthenticated()</code> as a method.</p>
+      <div class="callout"><strong>Lifecycle limits to account for</strong><p>This checkout's <code>RunInProduction()</code> and <code>StopWebsocketTransport()</code> return <code>void</code>; they do not give your caller an awaitable completion result. The demo calls the available shutdown API, but it does not establish safe rapid disable/re-enable behavior or automatic reconnect. Test network loss, scene changes, logout, shutdown, and subsequent login on your chosen SDK revision.</p></div>
+    </section>
+
+    <section id="testing">
+      <div class="section-label">VERIFY YOUR INTEGRATION</div><h2>Test beyond a successful login</h2>
+      <p>Use the following checks in order. Keep the Console visible and record the SDK tag/commit, Unity version, operating system, scripting backend, and managed stripping level for each run.</p>
+      <div class="test-list">
+        <label><input type="checkbox"><span><strong>01 · Clean install</strong> Install into a fresh project. Package resolution and consumer script compilation finish without errors.</span></label>
+        <label><input type="checkbox"><span><strong>02 · Fresh PIN</strong> Start without the stored refresh token, enter a fresh PIN, and receive a successful authentication callback.</span></label>
+        <label><input type="checkbox"><span><strong>03 · Invalid PIN</strong> Submit an invalid or expired PIN. Show an error, keep viewer features gated, and allow a fresh-PIN retry.</span></label>
+        <label><input type="checkbox"><span><strong>04 · Local behavior</strong> Use the prefab demo's local button. Health changes by 10, capped at 100. This verifies game logic only.</span></label>
+        <label><input type="checkbox"><span><strong>05 · Viewer action</strong> Trigger healthpack through the extension. Health changes from 50 to 60 once, fulfillment is reported, and the extension updates to 60.</span></label>
+        <label><input type="checkbox"><span><strong>06 · Action gating</strong> Disable an action while gameplay is unavailable. Confirm the extension reflects the state, then restore it.</span></label>
+        <label><input type="checkbox"><span><strong>07 · Poll</strong> Submit a vote, receive interim/final updates, and apply a decision only on a valid final result. Repeat with no votes.</span></label>
+        <label><input type="checkbox"><span><strong>08 · Returning login</strong> Restart the prefab scene. Confirm refresh authentication and then repeat an action. Test logout and fresh login separately.</span></label>
+        <label><input type="checkbox"><span><strong>09 · Lifecycle and network</strong> Test connectivity loss, scene transitions, disable/re-enable, repeated Play sessions, and app exit. Verify callbacks do not duplicate and no stale connection remains.</span></label>
+        <label><input type="checkbox"><span><strong>10 · Standalone player</strong> Build and run your actual target/backend/stripping configuration. Repeat authentication, action, poll, and shutdown checks outside the Editor.</span></label>
+      </div>
+      <p class="caption">Checkboxes are a session checklist in this page, not automated test results. Refreshing resets them.</p>
+      <h3>Build the test scene</h3>
+      <p>Add <code>GatewayDemo</code> to the enabled scenes in <b>File → Build Settings</b>, or the scene list of your active <b>Build Profile</b> in Unity 6. Select the desktop target, architecture, and backend you intend to ship. Build and run it, then repeat the live checks using a fresh or deliberately stored login.</p>
+      <p>Keep the SDK's native libraries enabled for the matching platform and architecture. This package includes an Editor linker callback that preserves reflection-loaded Mono TLS configuration types. Verify a stripped player as well as a development build; import/compilation success does not prove native loading, authenticated networking, or gameplay delivery.</p>
+    </section>
+
+    <section id="troubleshooting">
+      <div class="section-label">WHEN SOMETHING DOESN'T CONNECT</div><h2>Troubleshooting</h2>
+      <p>Start with the first failed checkpoint. Fix compilation before authentication, and authentication before viewer actions.</p>
+      <details><summary>Unity cannot find SDK types or UI assemblies</summary><p>Confirm Muxy Gateway is installed, its dependencies resolved, and the Console's first error is addressed. Add <code>Muxy.Gateway</code> to any consumer <code>.asmdef</code>. Use <code>using MuxyGateway;</code>. On newer Editors, let Package Manager select built-in UI providers. If you see unsupported C# constructor syntax or UTF-8 marshalling enum errors on Unity 2020.3, confirm you installed the compatibility-updated revision.</p></details>
+      <details><summary>The prefab UI is blank, unstyled, or unclickable</summary><p>Import TMP Essential Resources and keep exactly one active EventSystem with an input module compatible with the project. The Hypeline menu does not create an EventSystem; the older Gateway authentication prefab contains one. In Unity 6 with the new Input System, replace an incompatible Standalone Input Module with Input System UI Input Module outside Play mode and save. Confirm canvases are enabled, no other UI blocks raycasts, and the Gateway Manager reference is assigned before Play. Hypeline UI is created at runtime; the older authentication UI scripts locate prefab children by name.</p></details>
+      <details><summary>The Console floods with UnityEngine.Input errors in Play mode</summary><p>The tutorial's <code>OnGUI</code> buttons use legacy input. In <b>Player → Other Settings → Active Input Handling</b>, select <b>Both</b> for this demo and restart the Editor if Unity asks. The Unity 6.6 test project was initially set to <b>Input System Package</b> only; switching to Both removed the recurring <code>InvalidOperationException</code> errors.</p></details>
+      <details><summary>Twitch's Configure modal is empty</summary><p>First confirm Gateway is active under <b>My Extensions</b>, then reload the Twitch dashboard and open <b>Configure</b> again from the active extension. In this walkthrough the modal initially appeared blank, then rendered its Configuration PIN, Linked Games, and Actions controls after the broadcaster reopened it. If it remains blank, report the extension version and configuration state to Muxy or Twitch support; a PIN must come from the extension configuration.</p></details>
+      <details><summary>PIN authentication fails or never finishes</summary><p>Request a fresh PIN on the same broadcaster channel, remove whitespace, and compare the manager's Game ID character for character with <b>Linked Games</b> in the extension Configure view. Check ambiguous code characters using the copy control. A mistyped code produced <code>403 Forbidden / Invalid authorization token</code> in this walkthrough; the exact code authenticated successfully. Confirm the SDK transport started and <code>SDK.Update()</code> runs each frame. Inspect the Console for native-load or connection errors, but do not share logs until PINs and tokens have been removed. This revision starts its transport asynchronously without exposing a connection-ready result, so a silent callback does not by itself prove the PIN is invalid. Restart the test scene before retrying a stalled connection.</p></details>
+      <details><summary>I am authenticated, but the viewer sees no game or actions</summary><p>Confirm the extension is activated on the same channel. Reopen the viewer session under the conditions required by the extension's placement. Check that metadata and actions were published after authentication, action IDs are unique, state is Available, and count is usable. With the prefab route, set Inspector values before Play and submit runtime list edits explicitly.</p></details>
+      <details><summary>The action appears, but nothing happens in Unity</summary><p>Check <code>healthpack</code> spelling and the Dynamic GameActionUsed binding to <code>GatewayPrefabDemo.OnHealthpack</code>. In code, create the per-action UnityEvent and register the global SDK action callback. Keep <code>SDK.Update()</code> running. Check for exceptions in your handler. Do not use a local test button as evidence of a delivered viewer transaction.</p></details>
+      <details><summary>A poll appears in the extension, but the Unity widget stays hidden</summary><p>Assign the widget's manager and forward the configuration delegate to <code>GatewayManager.OnPollUpdate.Invoke(update)</code>, as shown in the demo. Confirm you received poll updates. Use the callback's final state to judge completion; the bundled countdown display requires further validation.</p></details>
+      <details><summary>It works in the Editor but fails in a player</summary><p>Check the player log's first failure. For <code>DllNotFoundException</code>, verify the native library exists and its plugin import settings match the target. For <code>EntryPointNotFoundException</code>, check that managed code and native binaries came from the same SDK package. Compare architecture, backend, and stripping level. Retain the package's Editor linker callback. A TLS configuration initialization error and an actual network/certificate negotiation error require separate diagnosis.</p></details>
+      <details><summary>Callbacks duplicate, re-login breaks, or shutdown hangs</summary><p>Use one manager or code integration, not both. Remove event listeners when custom components are disabled. Test a fresh process, then isolate scene reload, manager disable/re-enable, and logout. In the Unity 6.6 walkthrough, stopping Play mode logged <code>The WebSocket is not connected</code> during transport shutdown; the next clean Play run had no Console errors. The prefab's logout callback setup and transport lifecycle still need separate release testing.</p></details>
+    </section>
+
+    <section id="production">
+      <div class="section-label">THE NEXT MILESTONE</div><h2>Prepare for release</h2>
+      <ul class="check-list"><li>Replace your development Game ID with your permanent linked Game ID and verify the production extension experience with Muxy.</li><li>Use your own connection, PIN, failure, logout, and recovery UI. Review refresh-token storage and replace the prefab's PlayerPrefs approach where appropriate.</li><li>Gate actions during menus, loading, pause, and unavailable gameplay. Make fulfillment idempotent by transaction ID and handle failures with a refund path.</li><li>Define poll timeout, no-vote, and tie behavior. Validate optional widgets before relying on them.</li><li>Complete the live test checklist in the player for every platform/backend you support. Include reconnect and repeated-session tests.</li><li>Record the exact SDK revision, Unity version, native binaries, and resolved dependencies used for the build.</li></ul>
+      <p>For support, use <a href="mailto:support+unity@muxy.io">support+unity@muxy.io</a> from the package manifest or <a href="https://github.com/muxy/gateway-unity/issues">open an SDK issue</a>. Include reproduction steps and redacted errors. Never attach PINs, JWTs, refresh tokens, or unredacted account information.</p>
+    </section>
+
+    <section id="api-reference">
+      <div class="section-label">KEEP THIS HANDY</div><h2>API quick reference</h2>
+      <div class="table-scroll"><table><thead><tr><th>Task</th><th>Prefab manager</th><th>Code-only SDK</th></tr></thead><tbody><tr><td>Initialize / connect</td><td>Manager <code>OnEnable</code>; <code>OpenAndRunSDK()</code></td><td><code>new SDK(id)</code>; <code>RunInProduction()</code></td></tr><tr><td>Authenticate PIN</td><td><code>AuthenticateWithPIN(pin)</code>; listen to <code>OnAuthentication</code></td><td><code>AuthenticateWithPIN(pin, callback)</code></td></tr><tr><td>Check authentication</td><td><code>IsAuthenticated()</code></td><td><code>IsAuthenticated</code> property</td></tr><tr><td>Publish text</td><td><code>GetGameTextAt(index); SetGameTextAt(text, index)</code></td><td><code>SetGameTexts(texts)</code></td></tr><tr><td>Publish actions</td><td><code>SubmitGameActions()</code></td><td><code>SetGameActions(actions)</code></td></tr><tr><td>Receive all actions</td><td><code>OnAnyGameActionUsed</code> event</td><td><code>OnGameActionUsed(callback)</code></td></tr><tr><td>Fulfill / refund</td><td colspan="2"><code>AcceptGameAction(used, description)</code> / <code>RefundGameAction(used, description)</code></td></tr><tr><td>Configure / start poll</td><td><code>SetPollConfiguration(config)</code>; <code>StartPoll()</code></td><td><code>StartPoll(config)</code></td></tr><tr><td>Stop poll</td><td colspan="2"><code>StopPoll()</code></td></tr><tr><td>Shut down transport</td><td>Manager <code>OnDisable</code></td><td><code>StopWebsocketTransport()</code></td></tr></tbody></table></div>
+      <p class="caption">This is an integration reference, not a complete API specification. Match names and behavior to your SDK revision.</p>
+    </section>
+
+    <section id="screenshots">
+      <div class="section-label">HELP ILLUSTRATE THE GUIDE</div><h2>Screenshots to capture</h2>
+      <p>Nine real screenshots are included; select one to open it at full size. The two remaining captures require a live viewer action and a submitted viewer vote. Each placeholder above marks its intended position.</p>
+      <div class="table-scroll"><table><thead><tr><th># / filename</th><th>What it shows</th></tr></thead><tbody><tr><td><code>01-package-manager.jpg</code></td><td>Captured: Unity Package Manager with Muxy Gateway installed locally.</td></tr><tr><td><code>02-scene-wiring.jpg</code></td><td>Captured: scene Hierarchy and authentication Inspector with Gateway Manager assigned.</td></tr><tr><td><code>02-input-module.png</code></td><td>Captured: the saved Unity 6 EventSystem with Input System UI Input Module.</td></tr><tr><td><code>03-extension-active.png</code></td><td>Captured: Twitch My Extensions showing Gateway active in Overlay 1.</td></tr><tr><td><code>03-extension-pin.png</code></td><td>Captured: masked configuration PIN, Get New Code, and Linked Games.</td></tr><tr><td><code>04-authenticated.png</code></td><td>Captured: Unity Game view after a successful live PIN callback.</td></tr><tr><td><code>04-local-test.jpg</code></td><td>Captured: Unity Game view after the local test button changes Health to 60, with no Console errors.</td></tr><tr><td><code>05-action-inspector.jpg</code></td><td>Captured: healthpack action fields and its OnHealthpack callback binding.</td></tr><tr><td><code>06-action-roundtrip.png</code></td><td>Needed: viewer's Spawn Healthpack action, Unity Health: 60, and extension Health = 60 after a real action.</td></tr><tr><td><code>07-poll-no-votes.png</code></td><td>Captured: final callback from a live 30-second poll with no viewer votes.</td></tr><tr><td><code>07-poll-result.png</code></td><td>Needed: viewer poll options/vote and Unity's final winner message.</td></tr></tbody></table></div>
+      <p><strong>Optional:</strong> capture an invalid-PIN error with a clear retry path, the code demo's initial PIN UI, and a standalone player showing a successful viewer action. Notification and timer screenshots should follow widget validation.</p>
+      <p>Use PNG or JPEG at native resolution, preferably 1600 pixels wide or more, with readable UI text. Frame the relevant window, use the same Unity theme throughout, and cover PINs, tokens, account/email details, browser bookmarks, and private project paths. No stock images or promotional hero art are needed.</p>
+      <p>See the <a href="SCREENSHOTS.md">capture brief</a> for exact framing and how to add the finished files. Place approved images in <code>assets/screenshots/</code> and register them in <code>assets/screenshots.json</code>; this page replaces each matching placeholder automatically.</p>
+    </section>
+    <footer class="page-footer"><div><strong>muxy <span>/ Hypeline</span></strong><p>Build something your audience can play a part in.</p></div><a href="#overview">Back to top ↑</a><p class="footer-note">Guide prepared October 26, 2026 · Examples follow this SDK checkout.<br><a href="https://github.com/muxy/gateway-unity">Source</a> · <a href="https://www.muxy.io/gateway">Muxy Gateway</a> · <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages">GitHub Pages deployment reference</a></p></footer>
+  </main>
+  <aside class="on-this-page" aria-label="Guide milestones"><span class="nav-group">YOUR PATH TO CONNECTED</span><a href="#install"><i>1</i> Install</a><a href="#scene"><i>2</i> Initialize</a><a href="#authenticate"><i>3</i> Authenticate</a><a href="#first-action"><i>4</i> Interact</a><a href="#testing"><i>5</i> Verify</a><div class="rail-note"><span>START SMALL</span><p>One channel.<br>One action.<br>A working round trip.</p></div><a class="capture-link" href="#screenshots">Screenshot brief ↗</a></aside>
+</div>
+<dialog id="search-dialog" aria-labelledby="search-label"><div class="search-header"><label id="search-label" for="search-input">Search this guide</label><button id="search-close" class="icon-button" type="button" aria-label="Close search">×</button></div><input id="search-input" type="search" placeholder="Try “authentication”, “poll”, or “IL2CPP”…" autocomplete="off"><p id="search-count" aria-live="polite"></p><div id="search-results"></div><p class="caption">Search titles and guide content · Esc to close</p></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
