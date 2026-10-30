@@ -224,3 +224,15 @@ dialog::backdrop{background:rgba(13,13,13,.8)}
 .image-viewer-header button{border:var(--hairline);background:var(--surface);padding:4px 14px}
 .image-viewer-content{height:calc(100% - 57px);overflow:auto;text-align:center}
 .image-viewer-content img{display:block;max-width:none;height:auto;margin:auto}
+
+/* Searchable icon-name reference. */
+.icon-catalog{margin:24px 0;padding:18px;border:var(--hairline);background:var(--surface)}
+.icon-catalog summary{color:var(--teal);font-weight:700;cursor:pointer}
+.icon-catalog[open] summary{margin-bottom:16px}
+.icon-controls{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:16px 0}
+.icon-controls input,.icon-controls select{color:var(--text);background:var(--ground);border:var(--hairline);padding:8px;min-width:180px}
+.icon-table{width:100%}.icon-table td:first-child{width:60px}.icon-table td:last-child{width:100px}
+.icon-table svg{display:block;width:24px;height:24px;fill:currentColor;color:var(--teal)}
+.icon-table button,.icon-pages button{border:var(--hairline);background:var(--ground);color:var(--teal);padding:5px 12px}
+.icon-table button:hover,.icon-pages button:hover{color:var(--ink)}
+.icon-pages{display:flex;align-items:center;gap:14px;margin-top:14px}.icon-pages button:disabled{opacity:.4;cursor:default}

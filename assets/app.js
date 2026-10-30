@@ -136,3 +136,64 @@ if (screenshotLinks.length && typeof HTMLDialogElement !== "undefined" && HTMLDi
     viewer.showModal();
   }));
 }
+
+// The catalog is generated from the icon sprites packaged with the extension.
+(() => {
+  const catalog = document.querySelector("#game-text-icons");
+  if (!catalog) return;
+  const search = catalog.querySelector("#icon-search");
+  const set = catalog.querySelector("#icon-set");
+  const count = catalog.querySelector("#icon-count");
+  const rows = catalog.querySelector("#icon-results");
+  const pageLabel = catalog.querySelector("#icon-page");
+  const previous = catalog.querySelector("#icon-prev");
+  const next = catalog.querySelector("#icon-next");
+  const pageSize = 60;
+  let names = [], page = 0, loaded = false;
+  function render() {
+    const query = search.value.trim().toLowerCase();
+    const filtered = names.filter(name => name.startsWith(set.value) && name.toLowerCase().includes(query));
+    const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
+    page = Math.min(page, pages - 1);
+    count.textContent = `${filtered.length.toLocaleString()} icon${filtered.length === 1 ? "" : "s"} found.`;
+    pageLabel.textContent = `Page ${page + 1} of ${pages}`;
+    previous.disabled = page === 0;
+    next.disabled = page + 1 >= pages;
+    rows.replaceChildren();
+    filtered.slice(page * pageSize, (page + 1) * pageSize).forEach(name => {
+      const [prefix, id] = name.split(":");
+      const file = prefix === "mdi" ? "mdi/regular.svg" : `fa/${prefix.slice(3)}.svg`;
+      const row = document.createElement("tr");
+      const cell = document.createElement("td");
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", prefix === "mdi" ? "0 0 24 24" : "0 0 512 512");
+      svg.setAttribute("aria-hidden", "true");
+      const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+      use.setAttribute("href", `assets/icon-library/${file}#${id}`);
+      svg.append(use); cell.append(svg);
+      const nameCell = document.createElement("td");
+      const code = document.createElement("code"); code.textContent = name; nameCell.append(code);
+      const copyCell = document.createElement("td");
+      const button = document.createElement("button"); button.type = "button"; button.textContent = "Copy";
+      button.setAttribute("aria-label", `Copy ${name}`);
+      button.addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(name); toast("Icon name copied"); }
+        catch { toast("Copy unavailable. Select the icon name and copy it manually."); }
+      });
+      copyCell.append(button); row.append(cell, nameCell, copyCell); rows.append(row);
+    });
+  }
+  catalog.addEventListener("toggle", async () => {
+    if (!catalog.open || loaded) return;
+    count.textContent = "Loading icon library…";
+    try {
+      const response = await fetch("assets/icon-library/icons.json");
+      if (!response.ok) throw new Error("Icon library unavailable");
+      names = await response.json(); loaded = true; render();
+    } catch { count.textContent = "Could not load the icon library. Close and reopen this section to retry."; }
+  });
+  search.addEventListener("input", () => { page = 0; if (loaded) render(); });
+  set.addEventListener("change", () => { page = 0; if (loaded) render(); });
+  previous.addEventListener("click", () => { page--; render(); });
+  next.addEventListener("click", () => { page++; render(); });
+})();

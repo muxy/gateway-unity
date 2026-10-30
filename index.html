@@ -253,13 +253,22 @@ GameText healthText = HypelineManager.GetGameTextAt(0);
 healthText.Value = "60";
 HypelineManager.SetGameTextAt(healthText, 0);
 
-// Add or clear entries, then submit the whole list.
+// Add an entry, then submit the whole list.
 HypelineManager.AddGameText(new GameText
 {
     Label = "Level", Value = "Forest", Icon = "fa-solid:dungeon"
 });
 HypelineManager.SubmitGameTexts();</code></pre>
-      <p><code>AddGameText()</code> and <code>ClearGameTexts()</code> change the manager's local list; call <code>SubmitGameTexts()</code> after these operations. The code-only SDK uses <code>SetGameTexts(GameText[])</code> to publish the complete list. Send meaningful state changes instead of resending identical data every frame.</p>
+      <details id="game-text-icons" class="icon-catalog">
+        <summary>Browse Game Text and action icon names</summary>
+        <p>Search the 2,977 icons included in the Hypeline extension. Copy a name into a Game Text or action's <b>Icon</b> field. Game Info icons require the updated Twitch extension; an older hosted version displays the text without the icon.</p>
+        <div class="icon-controls"><label for="icon-search">Search icons</label><input id="icon-search" type="search" placeholder="Try heart, shield, or forest" autocomplete="off"><label for="icon-set">Icon set</label><select id="icon-set"><option value="">All sets</option><option value="fa-solid:">Font Awesome solid</option><option value="fa-regular:">Font Awesome regular</option><option value="mdi:">Material icons</option></select></div>
+        <p id="icon-count" role="status" aria-live="polite">Open this section to load the icon library.</p>
+        <div class="table-scroll"><table class="icon-table"><thead><tr><th scope="col">Icon</th><th scope="col">Name to enter</th><th scope="col">Copy</th></tr></thead><tbody id="icon-results"></tbody></table></div>
+        <div class="icon-pages"><button id="icon-prev" type="button">Previous</button><span id="icon-page"></span><button id="icon-next" type="button">Next</button></div>
+        <noscript><p>Enable JavaScript to search this icon library.</p></noscript>
+      </details>
+      <p><code>AddGameText()</code> and <code>ClearGameTexts()</code> change the manager's local list; call <code>SubmitGameTexts()</code> to publish a nonempty list. The code-only SDK uses <code>SetGameTexts(GameText[])</code> to publish the complete list. Some native SDK versions do not send an empty list, so it may not clear previously published values; replace them with the new game's fields and verify the viewer display. Send meaningful state changes instead of resending identical data every frame.</p>
       <h3>Enable actions only when they can run</h3>
       <pre><code class="language-csharp">// Prefab manager: call when pausing / resuming valid gameplay.
 HypelineManager.SetAllGameActionStates(GameActionState.Unavailable);
