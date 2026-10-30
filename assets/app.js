@@ -192,6 +192,11 @@ if (screenshotLinks.length && typeof HTMLDialogElement !== "undefined" && HTMLDi
       names = await response.json(); loaded = true; render();
     } catch { count.textContent = "Could not load the icon library. Close and reopen this section to retry."; }
   });
+  // Direct links reveal the searchable table, including when the URL is opened with its fragment.
+  function openLinkedCatalog() { if (window.location.hash === "#game-text-icons") catalog.open = true; }
+  document.querySelectorAll('a[href="#game-text-icons"]').forEach(link => link.addEventListener("click", () => { catalog.open = true; }));
+  window.addEventListener("hashchange", openLinkedCatalog);
+  openLinkedCatalog();
   search.addEventListener("input", () => { page = 0; if (loaded) render(); });
   set.addEventListener("change", () => { page = 0; if (loaded) render(); });
   previous.addEventListener("click", () => { page--; render(); });
