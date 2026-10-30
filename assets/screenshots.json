@@ -1,16 +1,4 @@
 {
-  "01-package-manager": {
-    "file": "01-package-manager.jpg",
-    "alt": "Unity Package Manager showing Muxy Gateway 0.0.1 installed as a local package with its dependencies."
-  },
-  "02-scene-wiring": {
-    "file": "02-scene-wiring.jpg",
-    "alt": "GatewayDemo scene Hierarchy with the Gateway manager, authentication prefab, and demo controller; the authentication Inspector references the scene manager."
-  },
-  "02-input-module": {
-    "file": "02-input-module.png",
-    "alt": "Unity EventSystem inside the authentication prefab with Input System UI Input Module in the Inspector, replacing the incompatible Standalone Input Module."
-  },
   "03-extension-active": {
     "file": "03-extension-active.png",
     "alt": "Twitch My Extensions showing Muxy Gateway active with a green status in Overlay 1."
@@ -18,21 +6,5 @@
   "03-extension-pin": {
     "file": "03-extension-pin.png",
     "alt": "Twitch Gateway configuration showing a masked configuration PIN, Get New Code control, linked games, and action category switches."
-  },
-  "04-authenticated": {
-    "file": "04-authenticated.png",
-    "alt": "Unity Game view showing Authentication Successful and the Gateway demo's authenticated status with its linked Game ID in the manager Inspector."
-  },
-  "04-local-test": {
-    "file": "04-local-test.jpg",
-    "alt": "Unity Game view showing Gateway prefab demo Health 60 after the local test button, the PIN entry UI, and a Console with no errors."
-  },
-  "05-action-inspector": {
-    "file": "05-action-inspector.jpg",
-    "alt": "Gateway manager Inspector with the healthpack action configured and GatewayPrefabDemo.OnHealthpack bound to its On Game Action Used event."
-  },
-  "07-poll-no-votes": {
-    "file": "07-poll-no-votes.png",
-    "alt": "Authenticated Unity Gateway demo after a 30-second poll reports Poll ended without a usable winner when no viewer votes were submitted."
   }
 }

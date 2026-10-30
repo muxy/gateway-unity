@@ -2,11 +2,11 @@ using MuxyGateway;
 using UnityEngine;
 
 // Tutorial scene only: use the prefab manager as the sole SDK owner.
-public class GatewayPrefabDemo : MonoBehaviour
+public class HypelineActionDemo : MonoBehaviour
 {
     public MuxyGatewayManager GatewayManager;
     private int health = 50;
-    private string status = "Enter a PIN in the Gateway authentication UI.";
+    private string status = "Open Stream Interactivity and connect with your Twitch code.";
 
     private void OnEnable()
     {
@@ -85,8 +85,8 @@ public class GatewayPrefabDemo : MonoBehaviour
 
     private void OnGUI()
     {
-        GUILayout.BeginArea(new Rect(16, 16, 440, 190), GUI.skin.box);
-        GUILayout.Label("Gateway prefab demo | Health: " + health);
+        GUILayout.BeginArea(new Rect(16, Screen.height - 206, 440, 190), GUI.skin.box);
+        GUILayout.Label("Hypeline action test | Health: " + health);
         GUILayout.Label(status);
         if (GUILayout.Button("Local test: add 10 health")) ApplyHealth();
         GUI.enabled = GatewayManager != null && GatewayManager.IsAuthenticated();

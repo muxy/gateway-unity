@@ -5,20 +5,20 @@ This guide adds a main-menu connection button, Twitch setup panel, and fox conne
 ## 1. Install the SDK
 
 1. In Unity, open **Window → Package Manager**.
-2. Add the Muxy Unity package. To test the local development copy, use **Add package from disk** and select its `package.json`. For a distributed package, use the package URL or release supplied by Muxy.
+2. Choose **Add package from git URL** and enter `https://github.com/jrslyce/gateway-unity.git#codex/hypeline-developer-readiness`. This is a development branch; record the resolved commit for your test. Alternatively, choose **Add package from disk** and select a local SDK checkout's `package.json`.
 3. Wait for package import and compilation. In the Project window, open **Packages → Muxy Hypeline → Prefabs**.
-4. Import **TMP Essential Resources** if Unity prompts you. The scene must contain one EventSystem, configured for the project's active input system.
+4. The scene must contain one EventSystem, configured for the project's active input system. The included Hypeline prefabs use Unity UI and do not require TextMesh Pro.
 
 ![Unity 2020 package prefab folder](hypeline-images/unity-2020-prefabs.png)
 
 ## 2. Add and wire the prefabs
 
 1. Drag **MuxyGatewayManager** from the Prefabs folder into the Hierarchy. If the scene already has a manager, reuse it; only one should be active.
-2. Select the manager and enter the game ID linked to the broadcaster in Twitch's extension configuration. Set game metadata and configure the actions your game supports.
+2. Select the manager. Its Game ID defaults to `gamelink-testing`; configure game metadata and the actions your game supports. Existing managers with an empty Game ID use the same testing ID at runtime.
 3. Drag **MuxyHypelineMenu** into the Hierarchy. Select it, then drag the scene's manager into its **Gateway Manager** field.
 4. Enter a **Game Description** that tells creators what viewers can do in your game. The TikTok coming-soon label and the artwork and colors are configurable in the Inspector.
 5. Set **Menu Button Position** to fit your menu. In the tested LEGO scene the default overlapped the existing top-left HUD; changing Y from `-24` to `-170` made the button visible. This value is an example, not a universal setting.
-6. The UI is created when the game runs, so the button and panel do not appear as editable children in the prefab before Play mode. The root may be placed under an existing Canvas; if it has no Canvas parent, the component creates an overlay Canvas at runtime.
+6. Expand the menu prefab in the Hierarchy to edit **Stream Interactivity** and **Hypeline Panel → Card**. Place the menu under a Canvas to see it in the Scene view, and use the Rect Tool to position or resize its children. Toggle the panel GameObject off in edit mode to work on the launcher; the script opens and closes the panel at runtime. Older hierarchies rebuild at runtime; replace the scene instance with the updated prefab to edit the new hierarchy, and review any custom child overrides.
 
 ![Manager assigned in the Hypeline inspector](hypeline-images/unity-2020-wiring.png)
 
@@ -26,13 +26,11 @@ This guide adds a main-menu connection button, Twitch setup panel, and fox conne
 
 1. On the broadcaster's Twitch Creator Dashboard, install and activate the existing Muxy Gateway extension in a supported slot.
 2. Open the extension's **Configure** view. Verify the game ID under **Linked Games**, and get the six-character code.
-3. Enter Play mode, select **Stream Interactivity**, enter the code, and select **Connect**. Codes expire after five minutes; use **Get New Code** in the extension configuration if necessary.
+3. Enter Play mode and select **Stream Interactivity**. Use **Open Twitch** to install and activate the extension, then **Open configuration** to return to the extension page and choose **Configure**. Enter the code and select **Connect**. Codes expire after five minutes; use **Get New Code** in the extension configuration if necessary.
 4. The fox and label display **Connected** after the transport is open and authentication succeeds. The panel can disconnect the creator or open the Twitch setup page.
 5. Use a separate viewer session to activate a configured action in the Twitch extension and observe the result in the game. A successful connection alone does not verify an action callback.
 
-![Hypeline panel running in Unity 2020](hypeline-images/unity-2020-panel.png)
-
-![Hypeline connected in Unity 2020](hypeline-images/unity-2020-connected.png)
+The redesigned panel shows **You are connected** after successful authentication. The menu fox stays green while connected.
 
 Gray means not connected; amber means connecting or reconnecting; green means connected; red means a connection or authentication issue. These colors are paired with text labels. A newly added menu does not automatically create game actions: configure actions and their handlers on the manager or in game code.
 
@@ -51,37 +49,16 @@ In the LEGO test scene, **Test Neutral Alert** and **Test Hinder Alert** are zer
 
 ## Unity 6
 
-The package uses Unity's resolved uGUI/TextMeshPro packages. Do not manually downgrade uGUI or copy an old TextMeshPro package into the project. The component contains a Unity 6-specific TextMeshPro wrapping setting; older SDK copies with `enableWordWrapping` can fail to compile in Unity 6. Use the updated package.
+The package uses Unity's resolved uGUI package for its built-in text and input components. TextMesh Pro and TMP Essential Resources are not required by these prefabs.
 
-In the tested Unity 6.6 demo, the manager and demo controller were already in the scene:
-
-1. Add **MuxyHypelineMenu** and assign the existing manager.
-2. The existing authentication prefab contains an EventSystem as a sibling of its Canvas. Disable the old authentication **Canvas** if replacing its UI, while keeping that EventSystem enabled.
-3. Select the EventSystem and use **Input System UI Input Module** for a new-Input-System-only project. The tested scene already had this module configured. Do not add a second EventSystem.
-4. Move the Hypeline button away from the demo's top-left controls; the test used Y `-550`. Adjust this to your own layout.
-5. Run the scene. The existing saved session reauthenticated automatically, the fox turned green, and the panel reported **Connected**.
-
-![Unity 6 EventSystem input module](hypeline-images/unity-6-input-system.png)
-
-![Unity 6 connected panel](hypeline-images/unity-6-connected.png)
+1. Add one **MuxyGatewayManager** and **MuxyHypelineMenu** to your scene, then assign the manager to the menu.
+2. Keep one active EventSystem. For a new-Input-System-only project, use **Input System UI Input Module**.
+3. Adjust the Hypeline button position to fit your menu. Enter Play mode, open **Stream Interactivity**, and follow the Twitch setup steps.
+4. Confirm the panel reports **You are connected** and the menu fox turns green. Check the `Hypeline:` Console messages if a connection fails or stalls.
 
 ## Verification and limitations
 
-- Unity 2020.3.0f1: local package imported; manager and menu were assigned; the menu opened in Play mode and connected using a fresh Twitch configuration code. The LEGO scene's existing HUD required a position adjustment. After registering `healthpack` and assigning the alert, a zero-cost Twitch action displayed the viewer and action and logged receipt. A LEGO-specific sample handler then spawned a visible healthpack beside the minifigure during a live Twitch action; the transaction was acknowledged. The LEGO tutorial has no health system, so this sample pickup does not heal. The handler is in the LEGO test project's Assets, and the scene setup must be saved there.
-- The public [Unity Gateway tutorial](https://docs.muxy.io/docs/unity-gateway-tutorial) contains older sample API names and syntax. Use the package's current API and the [maintained prefab quickstart](https://muxy.github.io/github-pages/docs/unity-gateway-prefab-quickstart/) when following along.
-- Unity 6000.6.6f1: authenticated automatically with an existing saved session. The free **Spawn Healthpack** Twitch action changed demo health from 50 to 60, and the extension's Game Info showed Health 60. A viewer voted Forest in a 30-second poll, and the game reported Forest as the winner.
-- The interaction alert script also compiled in Unity 6000.6.6f1 with no compiler errors; its live interaction test was performed in Unity 2020.
-- The Twitch configuration modal initially appeared blank and eventually loaded after a delay. Its precise cause was not determined. Do not record codes or tokens in screenshots, source control, or logs.
-- The tested Unity 2020 LEGO scene also produced unrelated LEGO tutorial and `AliveAction` errors; the Hypeline panel still opened. Test a clean project if diagnosing those scene-specific errors.
-- The existing manager stores refresh tokens in `PlayerPrefs`; that storage is not encrypted. This component does not add WebGL support.
-
-![Unity receives a viewer healthpack action](hypeline-images/unity-6-viewer-action.png)
-
-![A Twitch action spawned a healthpack beside the LEGO minifigure](hypeline-images/unity-2020-healthpack-spawn.png)
-
-![Game information reflects the changed health](hypeline-images/twitch-game-info.png)
-
-![Viewer vote](hypeline-images/twitch-poll.png)
-
-![Unity receives the poll result](hypeline-images/unity-6-poll-result.png)
-
+- The redesigned menu and its open/close behavior were checked in Unity 6000.0.85f1. The package also imported and compiled in Unity 2022.3.62f3. Historical validation is recorded in [verification](VERIFICATION.md); it should not be treated as a live test of the current redesigned panel.
+- Test a fresh connection and a real viewer action in your own project and target player. A connected indicator or visual alert does not prove the gameplay effect or transaction was fulfilled.
+- The manager stores refresh tokens in `PlayerPrefs`, which is not encrypted. This package does not add WebGL support.
+- If connection stalls, review the `Hypeline:` Console messages. After a timeout, restart Play mode and request a fresh code. Never share PINs or tokens.

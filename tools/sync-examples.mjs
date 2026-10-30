@@ -3,7 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 const root = new URL("../", import.meta.url);
 const pageURL = new URL("index.html", root);
 let html = await readFile(pageURL, "utf8");
-for (const name of ["GatewayPrefabDemo.cs", "GatewayCodeDemo.cs"]) {
+for (const name of ["HypelineActionDemo.cs", "GatewayCodeDemo.cs"]) {
   const code = (await readFile(new URL(`examples/${name}`, root), "utf8")).trimEnd();
   const escaped = code.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
   const start = `<!-- example:${name} -->`;

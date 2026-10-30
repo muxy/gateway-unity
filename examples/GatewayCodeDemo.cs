@@ -4,7 +4,7 @@ using UnityEngine;
 // Alternative to the prefab manager. Do not run both integrations together.
 public class GatewayCodeDemo : MonoBehaviour
 {
-    [SerializeField] private string gameID = "gateway-testing";
+    [SerializeField] private string gameID = "gamelink-testing";
     private SDK sdk;
     private string pin = "";
     private string status = "Request a PIN from the Gateway extension configuration.";
