@@ -47,26 +47,26 @@
       <p class="nav-group">RESOURCES</p>
       <a href="https://github.com/jrslyce/gateway-unity/tree/codex/hypeline-developer-readiness">Hypeline SDK source <span class="external">↗</span></a>
     </nav>
-    <div class="sidebar-footer"><span class="status-dot"></span> Audience interaction, in your game.<br><a href="https://www.muxy.io/gateway">Explore Muxy Gateway ↗</a></div>
+    <div class="sidebar-footer"><span class="status-dot"></span> Audience interaction, in your game.<br><a href="https://www.muxy.io/gateway">Explore Hypeline ↗</a></div>
   </aside>
   <main id="main">
     <div class="breadcrumb">SDKs <span>/</span> Unity <span>/</span> Getting started</div>
     <section id="overview" class="hero" aria-labelledby="page-title">
       <div class="eyebrow"><span></span> UNITY SDK WALKTHROUGH</div>
       <h1 id="page-title">Bring your viewers<br>into the game.</h1>
-      <p class="lead">Connect your Unity game with Muxy Hypeline, using the existing Muxy Gateway service and Twitch extension. Go from a fresh install to your first Twitch viewer action, then add live game data and polls.</p>
-      <p>Existing <code>MuxyGateway</code> integrations continue to work. New code can also construct <code>MuxyHypeline.SDK</code>, using the same API and <code>MuxyGateway</code> data types. Set up the <a href="#hypeline-prefabs">Hypeline menu and interaction alerts</a> below.</p>
+      <p class="lead">Connect your Unity game with Muxy Hypeline and the Twitch extension. Go from a fresh install to your first Twitch viewer action, then add live game data and polls.</p>
+      <p>Use the Hypeline SDK to connect your game, publish actions and game data, and receive viewer interactions. Set up the <a href="#hypeline-prefabs">Hypeline menu and interaction alerts</a> below.</p>
       <div class="hero-meta"><span>Unity 2020.3+</span><span>C# · Prefabs or code</span><span>Desktop walkthrough</span></div>
       <div class="hero-actions"><a class="button primary" href="#install">Start building <span aria-hidden="true">→</span></a><a class="text-link" href="#code-integration">Prefer C#? Jump to code ↗</a></div>
       <div class="outcome"><div class="outcome-icon" aria-hidden="true">✓</div><div><strong>Your first integration</strong><p>A viewer selects <b>Spawn Healthpack</b> in the extension. Your Unity demo gains 10 health, and the updated value appears back in the extension.</p></div></div>
-      <div class="connection-map" aria-label="Viewers interact through the Twitch Gateway extension and Muxy Gateway service to reach the Unity SDK; game data returns through the same service."><div><small>AUDIENCE</small><strong>Twitch extension</strong><span>Actions &amp; votes</span></div><b aria-hidden="true">⇄</b><div><small>CONNECTION</small><strong>Muxy Gateway</strong><span>Authentication &amp; events</span></div><b aria-hidden="true">⇄</b><div><small>YOUR GAME</small><strong>Unity SDK</strong><span>Gameplay &amp; live data</span></div></div>
-      <p class="caption">The streamer connects a channel once. Viewers interact through the Gateway extension.</p>
+      <div class="connection-map" aria-label="Viewers interact through the Twitch extension and Hypeline service to reach the Unity SDK; game data returns through the same service."><div><small>AUDIENCE</small><strong>Twitch extension</strong><span>Actions &amp; votes</span></div><b aria-hidden="true">⇄</b><div><small>CONNECTION</small><strong>Hypeline</strong><span>Authentication &amp; events</span></div><b aria-hidden="true">⇄</b><div><small>YOUR GAME</small><strong>Unity SDK</strong><span>Gameplay &amp; live data</span></div></div>
+      <p class="caption">The streamer connects a channel once. Viewers interact through the Twitch extension.</p>
     </section>
 
     <section id="before-you-start">
       <div class="section-label">THE SETUP</div><h2>Before you start</h2>
       <p>You should be comfortable adding GameObjects, editing Inspector fields, and attaching C# scripts. Start in a small test scene before connecting your production gameplay.</p>
-      <ul class="check-list"><li><strong>A Unity project.</strong> Use Unity 2020.3 or newer and a desktop target for this walkthrough.</li><li><strong>The Hypeline SDK.</strong> Install it using the Git URL below, or use a local SDK checkout.</li><li><strong>A Twitch broadcaster account</strong> with permission to install and activate the Muxy Gateway extension on its channel.</li><li><strong>A viewer account or separate browser session</strong> to test the audience experience.</li></ul>
+      <ul class="check-list"><li><strong>A Unity project.</strong> Use Unity 2020.3 or newer and a desktop target for this walkthrough.</li><li><strong>The Hypeline SDK.</strong> Install it using the Git URL below, or use a local SDK checkout.</li><li><strong>A Twitch broadcaster account</strong> with permission to install and activate the Twitch extension on its channel.</li><li><strong>A viewer account or separate browser session</strong> to test the audience experience.</li></ul>
       <details><summary>What has been validated?</summary><p>The redesigned menu has been checked in Unity 6, and the package has compiled in Unity 2022. Test authentication, viewer actions, reconnects, and the standalone player on each platform you intend to support. A successful package import or connected indicator does not prove the full viewer-action flow.</p></details>
     </section>
 
@@ -74,14 +74,14 @@
       <div class="section-label">STEP 01</div><h2>Install the SDK</h2>
       <ol class="steps"><li><strong>Open Package Manager.</strong> In Unity, open <b>Window → Package Manager</b> (in newer Editors, <b>Window → Package Management → Package Manager</b>).</li><li><strong>Add Hypeline.</strong> Open the <b>+</b> or <b>Add</b> menu, choose <b>Add package from git URL</b>, and enter <code>https://github.com/jrslyce/gateway-unity.git#codex/hypeline-developer-readiness</code>. Alternatively, choose <b>Add package from disk</b> and select the SDK checkout's <code>package.json</code>.</li><li><strong>Let Unity finish.</strong> Wait for package resolution and script compilation. Check the Console for errors before continuing.</li></ol>
       <div class="table-scroll"><table><caption>Hypeline dependencies</caption><thead><tr><th>Package</th><th>Requested version</th><th>Used for</th></tr></thead><tbody><tr><td><code>com.unity.ugui</code></td><td>1.0.0</td><td>UI components</td></tr><tr><td><code>com.unity.modules.imageconversion</code></td><td>1.0.0</td><td>Logo PNG encoding</td></tr><tr><td><code>com.unity.modules.audio</code></td><td>1.0.0</td><td>Interaction alert sounds</td></tr></tbody></table></div>
-      <p>The prefabs use uGUI text and input components and do not require TextMesh Pro. Existing customized scene instances or prefab variants may still need their TMP components migrated. Both integration paths share the <code>Muxy.Gateway</code> assembly.</p>
-      <p><strong>Using your own assembly definition?</strong> Add <code>Muxy.Gateway</code> to its Assembly Definition References. SDK types use <code>using MuxyGateway;</code>; the prefab components such as <code>MuxyHypelineManager</code> are in the global namespace.</p>
+      <p>The prefabs use uGUI text and input components and do not require TextMesh Pro. Both integration paths share the <code>Muxy.Hypeline</code> assembly.</p>
+      <p><strong>Using your own assembly definition?</strong> Add <code>Muxy.Hypeline</code> to its Assembly Definition References. SDK types use <code>using MuxyHypeline;</code>; the prefab components such as <code>MuxyHypelineManager</code> are in the global namespace.</p>
       <div class="checkpoint"><span>✓</span><p><strong>Checkpoint</strong> Find <b>Packages → Muxy Hypeline → Prefabs</b> in the Project window. If installed from disk, keep the package folder in place.</p></div>
     </section>
 
     <section id="hypeline-prefabs">
       <div class="section-label">HYPELINE PREFABS</div><h2>Add the menu and interaction alerts</h2>
-      <p>Use these prefabs to add a creator-facing <b>Stream Interactivity</b> button to a main menu and show viewer actions in the game. Both connect to the same manager and existing Muxy Gateway service.</p>
+      <p>Use these prefabs to add a creator-facing <b>Stream Interactivity</b> button to a main menu and show viewer actions in the game. Both connect to the same manager and existing Hypeline service.</p>
       <ol class="steps">
         <li><strong>Add the manager.</strong> Open <b>Packages → Muxy Hypeline → Prefabs</b> and drag <code>MuxyHypelineManager</code> into the scene Hierarchy. Reuse an existing manager if there is one; keep only one active. Select the manager in the scene Hierarchy, expand <b>Game Metadata</b> in the Inspector, and configure your game name and actions. Package assets are read-only; edit the scene instance.</li>
         <li><strong>Add the menu.</strong> Drag <code>MuxyHypelineMenu</code> into the main-menu scene. Select it and drag the scene's manager into its <b>Hypeline Manager</b> Inspector field. Enter a <b>Game Description</b> and adjust <b>Menu Button Position</b> and <b>Menu Button Size</b> to fit your menu. The Twitch indicator lights up when connected; TikTok remains dim while its integration is coming soon.</li>
@@ -91,7 +91,7 @@
       <div class="callout"><strong>One manager, one EventSystem</strong><p>Use the Hypeline menu for creator connections and assign it the scene's single manager. Keep exactly one active EventSystem with the appropriate input module. TikTok is coming soon; Twitch is the available connection.</p></div>
       <h3>Connect a Twitch channel</h3>
       <ol class="steps">
-        <li>In the broadcaster's Twitch Creator Dashboard, install and activate the existing <a href="https://dashboard.twitch.tv/extensions/i575hs2x9lb3u8hqujtezit03w1740">Muxy Gateway extension</a>. Open its <b>Configure</b> view and select <b>Get New Code</b>.</li>
+        <li>In the broadcaster's Twitch Creator Dashboard, install and activate the existing <a href="https://dashboard.twitch.tv/extensions/i575hs2x9lb3u8hqujtezit03w1740">Twitch extension</a>. Open its <b>Configure</b> view and select <b>Get New Code</b>.</li>
         <li>Enter Play mode, select <b>Stream Interactivity</b>, enter the six-character code, and select <b>Connect</b>. Codes expire after five minutes; request a fresh code if needed.</li>
         <li>Wait for the fox and text to show <b>Connected</b>. Gray indicates disconnected, amber connecting or reconnecting, and red a connection or authentication issue. A connected status verifies the connection, not a viewer action.</li>
       </ol>
@@ -109,31 +109,31 @@
       <div class="section-label">STEP 02</div><h2>Set up your Hypeline scene</h2>
       <p>Use the <a href="#hypeline-prefabs">Hypeline menu</a> as the connection interface and one <code>MuxyHypelineManager</code> prefab as the SDK owner. Its component is named <code>MuxyHypelineManager</code>. You can add these prefabs to an existing game or a fresh test scene.</p>
       <ol class="steps"><li><strong>Add the manager and menu.</strong> Drag <code>MuxyHypelineManager</code> and <code>MuxyHypelineMenu</code> into the scene and assign the manager to the menu's <b>Hypeline Manager</b> field before Play mode. </li><li><strong>Prepare input.</strong> Keep exactly one active EventSystem with an input module compatible with your project. The Hypeline menu does not create an EventSystem.</li><li><strong>Set game metadata.</strong> Select the manager in the scene Hierarchy, expand <b>Game Metadata</b> in the Inspector, and set a game name and theme. A logo texture is optional for the first test. The prefab in the package is read-only; edit its scene instance.</li><li><strong>Add a Health game text.</strong> In the manager's <b>Game Texts</b>, create element 0 with <b>Label</b> = <code>Health</code>, <b>Value</b> = <code>50</code>, and <b>Icon</b> = <code>fa-solid:heart</code>. The sample updates this entry.</li><li><strong>Add the action sample.</strong> Download <a href="examples/HypelineActionDemo.cs" download>HypelineActionDemo.cs</a> into <code>Assets/Scripts</code>. Attach it to a new <code>HypelineDemoController</code> GameObject and assign the same manager. This optional sample provides health and poll test controls; it does not create a second connection interface.</li><li><strong>Enable input for the optional sample.</strong> Its debug buttons use Unity's legacy IMGUI input. If your project uses only the new Input System, select <b>Both</b> in <b>Player → Other Settings → Active Input Handling</b> and restart the Editor if prompted. This is required by the sample controls, not by the Hypeline panel.</li></ol>
-      <details class="code-details"><summary>View the Hypeline action sample script <span>C#</span></summary><div class="code-heading"><span>HypelineActionDemo.cs</span><a href="examples/HypelineActionDemo.cs" download>Download</a></div><!-- example:HypelineActionDemo.cs --><pre><code class="language-csharp">using MuxyGateway;
+      <details class="code-details"><summary>View the Hypeline action sample script <span>C#</span></summary><div class="code-heading"><span>HypelineActionDemo.cs</span><a href="examples/HypelineActionDemo.cs" download>Download</a></div><!-- example:HypelineActionDemo.cs --><pre><code class="language-csharp">using MuxyHypeline;
 using UnityEngine;
 
 // Tutorial scene only: use the prefab manager as the sole SDK owner.
 public class HypelineActionDemo : MonoBehaviour
 {
-    public MuxyHypelineManager GatewayManager;
+    public MuxyHypelineManager HypelineManager;
     private int health = 50;
     private string status = "Open Stream Interactivity and connect with your Twitch code.";
 
     private void OnEnable()
     {
-        if (GatewayManager == null)
+        if (HypelineManager == null)
         {
-            Debug.LogError("Assign Gateway Manager before enabling the demo.");
+            Debug.LogError("Assign Hypeline Manager before enabling the demo.");
             enabled = false;
             return;
         }
-        GatewayManager.OnAuthentication.AddListener(OnAuthentication);
+        HypelineManager.OnAuthentication.AddListener(OnAuthentication);
     }
 
     private void OnDisable()
     {
-        if (GatewayManager != null)
-            GatewayManager.OnAuthentication.RemoveListener(OnAuthentication);
+        if (HypelineManager != null)
+            HypelineManager.OnAuthentication.RemoveListener(OnAuthentication);
     }
 
     private void OnAuthentication(AuthenticationResponse response)
@@ -148,28 +148,28 @@ public class HypelineActionDemo : MonoBehaviour
     {
         if (used.ActionID != "healthpack") return;
         ApplyHealth();
-        GatewayManager.AcceptGameAction(used, "Added up to 10 health.");
+        HypelineManager.AcceptGameAction(used, "Added up to 10 health.");
         status = "Viewer action received: healthpack.";
-        Debug.Log("Gateway viewer action received: healthpack.");
+        Debug.Log("Hypeline viewer action received: healthpack.");
     }
 
     private void ApplyHealth()
     {
         health = Mathf.Min(100, health + 10);
-        if (GatewayManager.IsAuthenticated()) PublishHealth();
+        if (HypelineManager.IsAuthenticated()) PublishHealth();
     }
 
     private void PublishHealth()
     {
         // The guide creates Health as Game Texts element 0.
-        GameText text = GatewayManager.GetGameTextAt(0);
+        GameText text = HypelineManager.GetGameTextAt(0);
         text.Value = health.ToString();
-        GatewayManager.SetGameTextAt(text, 0);
+        HypelineManager.SetGameTextAt(text, 0);
     }
 
     public void StartDemoPoll()
     {
-        if (!GatewayManager.IsAuthenticated()) return;
+        if (!HypelineManager.IsAuthenticated()) return;
         PollConfiguration config = new PollConfiguration
         {
             Prompt = "Where should we go next?",
@@ -182,7 +182,7 @@ public class HypelineActionDemo : MonoBehaviour
         config.OnPollUpdate = update =&gt;
         {
             // The manager does not forward this delegate automatically.
-            GatewayManager.OnPollUpdate.Invoke(update);
+            HypelineManager.OnPollUpdate.Invoke(update);
             if (!update.IsFinal) return;
             status = update.Count &gt; 0 &amp;&amp; update.Winner &gt;= 0 &amp;&amp;
                      update.Winner &lt; config.Options.Count
@@ -190,8 +190,8 @@ public class HypelineActionDemo : MonoBehaviour
                 : "Poll ended without a usable winner.";
             Debug.Log(status);
         };
-        GatewayManager.SetPollConfiguration(config);
-        GatewayManager.StartPoll();
+        HypelineManager.SetPollConfiguration(config);
+        HypelineManager.StartPoll();
     }
 
     private void OnGUI()
@@ -200,7 +200,7 @@ public class HypelineActionDemo : MonoBehaviour
         GUILayout.Label("Hypeline action test | Health: " + health);
         GUILayout.Label(status);
         if (GUILayout.Button("Local test: add 10 health")) ApplyHealth();
-        GUI.enabled = GatewayManager != null &amp;&amp; GatewayManager.IsAuthenticated();
+        GUI.enabled = HypelineManager != null &amp;&amp; HypelineManager.IsAuthenticated();
         if (GUILayout.Button("Start 30-second viewer poll")) StartDemoPoll();
         GUI.enabled = true;
         GUILayout.EndArea();
@@ -212,7 +212,7 @@ public class HypelineActionDemo : MonoBehaviour
     <section id="authenticate">
       <div class="section-label">STEP 03</div><h2>Connect a Twitch channel</h2>
       <p>The broadcaster connects their own channel through the Hypeline menu. Viewers do not enter the broadcaster's code.</p>
-      <ol class="steps"><li>Enter Play mode and select <b>Stream Interactivity</b>.</li><li>Select <b>Open Twitch</b>, then install and activate the Muxy Gateway extension on the broadcaster's channel.</li><li>Select <b>Open configuration</b>. On the extension page, choose <b>Configure</b> and generate a six-character code. Both buttons open the extension page; Configure is selected in Twitch.</li><li>Enter the fresh code in the Hypeline panel and choose <b>Connect</b>. Codes expire after five minutes.</li><li>Wait for <b>You are connected</b> and the green fox on the game menu. The Console reports connection and authentication stages without printing the code. TikTok remains a coming-soon label.</li></ol>
+      <ol class="steps"><li>Enter Play mode and select <b>Stream Interactivity</b>.</li><li>Select <b>Open Twitch</b>, then install and activate the Twitch extension on the broadcaster's channel.</li><li>Select <b>Open configuration</b>. On the extension page, choose <b>Configure</b> and generate a six-character code. Both buttons open the extension page; Configure is selected in Twitch.</li><li>Enter the fresh code in the Hypeline panel and choose <b>Connect</b>. Codes expire after five minutes.</li><li>Wait for <b>You are connected</b> and the green fox on the game menu. The Console reports connection and authentication stages without printing the code. TikTok remains a coming-soon label.</li></ol>
       <div class="callout warning"><strong>If connection stalls</strong><p>The logo fill and countdown show the 8-second wait, not measured connection progress. The panel shows a warning if no authentication response arrives during that time. A response may still arrive. To retry, select <b>Try again</b> to reset the connection, then get a fresh code. Inspect the <code>Hypeline:</code> Console messages for transport and authentication timings. Keep PINs, tokens, and credential-bearing logs out of screenshots and messages.</p></div>
       <p>The manager can restore a saved session using a refresh token stored in PlayerPrefs, which is not encrypted. Test a fresh login, a returning login, and disconnect/reconnect on each target platform.</p>
     </section>
@@ -223,13 +223,13 @@ public class HypelineActionDemo : MonoBehaviour
       <div class="table-scroll"><table><thead><tr><th>Inspector field</th><th>Value</th><th>Why it matters</th></tr></thead><tbody><tr><td>ID</td><td><code>healthpack</code></td><td>Stable, unique ID used by your handler</td></tr><tr><td>Name</td><td>Spawn Healthpack</td><td>The label viewers select</td></tr><tr><td>Description</td><td>Add up to 10 health to the player.</td><td>Explains the gameplay effect</td></tr><tr><td>Category</td><td>Help</td><td>Groups the action by effect</td></tr><tr><td>State</td><td>Available</td><td>Makes the action selectable</td></tr><tr><td>Impact</td><td>1</td><td>A small effect on gameplay; the Inspector range is 1–5</td></tr><tr><td>Icon</td><td><code>fa-solid:heart</code></td><td>Extension icon identifier</td></tr><tr><td>Count</td><td><code>65535</code></td><td>The value of <code>GameAction.InfiniteCount</code></td></tr></tbody></table></div>
       <p>In the action's <b>On Game Action Used</b> UnityEvent, select <b>+</b>, drag in <code>HypelineDemoController</code>, then choose <b>HypelineActionDemo → OnHealthpack</b> under <b>Dynamic GameActionUsed</b>. Use the dynamic event so the received transaction reaches the handler.</p>
       <h3>Prove the complete round trip</h3>
-      <ol class="steps"><li>Enter Play mode, open the Hypeline panel, and check that the sample health starts at <b>50</b>. The viewer poll button stays disabled until authentication.</li><li>Use <b>Local test: add 10 health</b> once. Health should become <b>60</b>, even before you have a PIN. This verifies the demo's game logic only. Restart Play mode to reset health to 50.</li><li>Authenticate with the broadcaster's fresh PIN, then open the channel's active Gateway extension in a viewer session. Confirm the demo title, Health text, and Spawn Healthpack action appear. Test under the channel conditions Twitch requires for that extension placement.</li><li>Select <b>Spawn Healthpack</b> through the extension. Follow its available test/interaction flow. If a purchase is involved, review the Twitch confirmation and cost; this guide does not assume a free-purchase simulator.</li><li>Confirm Unity shows <b>Health: 60</b>, the demo status says <code>Viewer action received: healthpack.</code>, and the extension's Health value becomes <b>60</b>.</li></ol>
+      <ol class="steps"><li>Enter Play mode, open the Hypeline panel, and check that the sample health starts at <b>50</b>. The viewer poll button stays disabled until authentication.</li><li>Use <b>Local test: add 10 health</b> once. Health should become <b>60</b>, even before you have a PIN. This verifies the demo's game logic only. Restart Play mode to reset health to 50.</li><li>Authenticate with the broadcaster's fresh PIN, then open the channel's active Twitch extension in a viewer session. Confirm the demo title, Health text, and Spawn Healthpack action appear. Test under the channel conditions Twitch requires for that extension placement.</li><li>Select <b>Spawn Healthpack</b> through the extension. Follow its available test/interaction flow. If a purchase is involved, review the Twitch confirmation and cost; this guide does not assume a free-purchase simulator.</li><li>Confirm Unity shows <b>Health: 60</b>, the demo status says <code>Viewer action received: healthpack.</code>, and the extension's Health value becomes <b>60</b>.</li></ol>
       <p class="caption">Test while the extension is visible to a viewer on the broadcaster's channel. A local button click alone does not verify a viewer action.</p>
       <div class="code-heading"><span>What the demo handler does</span></div><pre><code class="language-csharp">public void OnHealthpack(GameActionUsed used)
 {
     if (used.ActionID != "healthpack") return;
     ApplyHealth();
-    GatewayManager.AcceptGameAction(used, "Added up to 10 health.");
+    HypelineManager.AcceptGameAction(used, "Added up to 10 health.");
 }</code></pre>
       <p><code>AcceptGameAction</code> reports fulfillment. If your real game cannot perform an action, use <code>RefundGameAction</code> with the received event and a useful reason instead. Do not accept and refund the same transaction. Before shipping, deduplicate transaction IDs so repeated delivery cannot apply gameplay twice; the demo keeps the handler small and does not implement durable transaction tracking.</p>
       <div class="checkpoint"><span>✓</span><p><strong>Checkpoint</strong> A viewer-triggered event changed Unity gameplay. A local button click or an authentication success alone does not pass this checkpoint.</p></div>
@@ -239,31 +239,31 @@ public class HypelineActionDemo : MonoBehaviour
       <div class="section-label">STEP 05</div><h2>Keep viewers up to date</h2>
       <p>Game Texts are labeled values in the extension. Use them for the current level, player health, difficulty, or loadout. The demo sends Health after authentication and whenever health changes.</p>
       <pre><code class="language-csharp">// Update the Health entry created at index 0 in the manager.
-GameText healthText = GatewayManager.GetGameTextAt(0);
+GameText healthText = HypelineManager.GetGameTextAt(0);
 healthText.Value = "60";
-GatewayManager.SetGameTextAt(healthText, 0);
+HypelineManager.SetGameTextAt(healthText, 0);
 
 // Add or clear entries, then submit the whole list.
-GatewayManager.AddGameText(new GameText
+HypelineManager.AddGameText(new GameText
 {
     Label = "Level", Value = "Forest", Icon = "fa-solid:dungeon"
 });
-GatewayManager.SubmitGameTexts();</code></pre>
+HypelineManager.SubmitGameTexts();</code></pre>
       <p><code>AddGameText()</code> and <code>ClearGameTexts()</code> change the manager's local list; call <code>SubmitGameTexts()</code> after these operations. The code-only SDK uses <code>SetGameTexts(GameText[])</code> to publish the complete list. Send meaningful state changes instead of resending identical data every frame.</p>
       <h3>Enable actions only when they can run</h3>
       <pre><code class="language-csharp">// Prefab manager: call when pausing / resuming valid gameplay.
-GatewayManager.SetAllGameActionStates(GameActionState.Unavailable);
-GatewayManager.SetAllGameActionStates(GameActionState.Available);
+HypelineManager.SetAllGameActionStates(GameActionState.Unavailable);
+HypelineManager.SetAllGameActionStates(GameActionState.Available);
 
 // After editing a manager action, explicitly submit the list.
-GameAction action = GatewayManager.GetGameActionAt(0);
+GameAction action = HypelineManager.GetGameActionAt(0);
 action.State = GameActionState.Hidden;
-GatewayManager.SetGameActionAt(action, 0);
-GatewayManager.SubmitGameActions();</code></pre>
+HypelineManager.SetGameActionAt(action, 0);
+HypelineManager.SubmitGameActions();</code></pre>
       <p>Use <b>Unavailable</b> for a visible action viewers cannot currently use and <b>Hidden</b> when it should not appear. Keep IDs unique. Choose finite counts for disruptive mechanics and restore availability only after the next scene or match is ready.</p>
-      <details><summary>Add a game logo</summary><p>Import a readable texture in a supported format: RGB24, RGBA32, or ARGB32. Enable <b>Read/Write</b> and choose a compatible texture format in its import settings. Use the SDK's static conversion helper:</p><pre><code class="language-csharp">GameMetadata metadata = GatewayManager.GetGameMetadata();
+      <details><summary>Add a game logo</summary><p>Import a readable texture in a supported format: RGB24, RGBA32, or ARGB32. Enable <b>Read/Write</b> and choose a compatible texture format in its import settings. Use the SDK's static conversion helper:</p><pre><code class="language-csharp">GameMetadata metadata = HypelineManager.GetGameMetadata();
 metadata.Logo = SDK.ConvertTextureToBase64(yourReadableTexture);
-GatewayManager.SetGameMetadata(metadata);</code></pre><p>Here <code>yourReadableTexture</code> is your own assigned <code>Texture2D</code>. Retain the existing metadata when changing the logo.</p></details>
+HypelineManager.SetGameMetadata(metadata);</code></pre><p>Here <code>yourReadableTexture</code> is your own assigned <code>Texture2D</code>. Retain the existing metadata when changing the logo.</p></details>
     </section>
 
     <section id="polls">
@@ -274,29 +274,28 @@ GatewayManager.SetGameMetadata(metadata);</code></pre><p>Here <code>yourReadable
       <p>Outside Play mode, add <code>MuxyHypelinePolling.prefab</code> and assign its <b>Hypeline Manager</b>. Adjust its position and winner display duration in the Inspector.</p><p>To preview without connecting, enter Play mode, select the polling instance in the Hierarchy, and click <b>Start Test Poll</b>. A favorite-color poll appears and receives simulated votes automatically. Use <b>Add Sample Vote</b> or <b>Finish Test Poll</b> to control it. This preview stays local and does not start a live poll or send votes.</p><p>For a live poll, the demo's callback contains this bridge:</p>
       <pre><code class="language-csharp">config.OnPollUpdate = update =&gt;
 {
-    GatewayManager.OnPollUpdate.Invoke(update);
+    HypelineManager.OnPollUpdate.Invoke(update);
     if (!update.IsFinal) return;
     // Validate vote count and winner before applying game logic.
 };</code></pre>
       <p><code>MuxyHypelineManager.StartPoll()</code> passes its configuration to the SDK; it does not automatically forward <code>PollConfiguration.OnPollUpdate</code> into the manager's UnityEvent. The widget listens to that UnityEvent, so the bridge is required.</p>
       <p>The widget shows vote counts, percentages, and the final winner when the callback provides one. The live display does not show a countdown; use the final callback to decide when the poll has ended.</p>
-      <details><summary>Optional: action notifications</summary><p>Add <code>MuxyHypelineLegacyNotifications.prefab</code>, assign its <b>Hypeline Manager</b>, and keep <b>Auto Add Action Messages</b> enabled to use the provided template. Its component is <code>MuxyHypelineLegacyNotifications</code>.</p><p>The current implementation has mismatched child-component lookups in its add/clear paths and maps <code>Cost</code> and <code>UserID</code> template fields to the action ID. Validate and customize it before relying on its display. The core action test above uses demo status and game state, so it does not depend on this optional widget.</p></details>
     </section>
 
     <section id="code-integration">
       <div class="section-label">ALTERNATIVE PATH</div><h2>Integrate directly with C#</h2>
-      <p>Use this path for custom authentication and game UI. Create a separate scene without <code>MuxyHypelineManager</code> or its UI prefabs. Add <a href="examples/GatewayCodeDemo.cs" download>GatewayCodeDemo.cs</a> to <code>Assets/Scripts</code>, attach it to one active GameObject, and enter Play mode. The demo draws a minimal PIN field and status panel using Unity IMGUI.</p>
+      <p>Use this path for custom authentication and game UI. Create a separate scene without <code>MuxyHypelineManager</code> or its UI prefabs. Add <a href="examples/HypelineCodeDemo.cs" download>HypelineCodeDemo.cs</a> to <code>Assets/Scripts</code>, attach it to one active GameObject, and enter Play mode. The demo draws a minimal PIN field and status panel using Unity IMGUI.</p>
       <div class="table-scroll"><table><thead><tr><th>Lifecycle step</th><th>Your code owns</th></tr></thead><tbody><tr><td>Initialize</td><td>Create <code>new SDK(gameID)</code> once per active owner.</td></tr><tr><td>Connect</td><td>Call <code>RunInProduction()</code>. Authentication is a separate step.</td></tr><tr><td>Process events</td><td>Call <code>sdk.Update()</code> every frame on the Unity main thread.</td></tr><tr><td>Authenticate</td><td>Call <code>AuthenticateWithPIN</code> and check <code>response.HasError</code>.</td></tr><tr><td>Publish</td><td>After success, register callbacks and send metadata, actions, and texts.</td></tr><tr><td>Shut down</td><td>Call <code>StopWebsocketTransport()</code> when the owner is disabled.</td></tr></tbody></table></div>
-      <details class="code-details"><summary>View the complete code integration <span>C#</span></summary><div class="code-heading"><span>GatewayCodeDemo.cs</span><a href="examples/GatewayCodeDemo.cs" download>Download</a></div><!-- example:GatewayCodeDemo.cs --><pre><code class="language-csharp">using MuxyGateway;
+      <details class="code-details"><summary>View the complete code integration <span>C#</span></summary><div class="code-heading"><span>HypelineCodeDemo.cs</span><a href="examples/HypelineCodeDemo.cs" download>Download</a></div><!-- example:HypelineCodeDemo.cs --><pre><code class="language-csharp">using MuxyHypeline;
 using UnityEngine;
 
 // Alternative to the prefab manager. Do not run both integrations together.
-public class GatewayCodeDemo : MonoBehaviour
+public class HypelineCodeDemo : MonoBehaviour
 {
     [SerializeField] private string gameID = "gamelink-testing";
     private SDK sdk;
     private string pin = "";
-    private string status = "Request a PIN from the Gateway extension configuration.";
+    private string status = "Request a code from the Twitch extension configuration.";
     private int health = 50;
     private bool authenticationPending;
 
@@ -340,7 +339,7 @@ public class GatewayCodeDemo : MonoBehaviour
     {
         sdk.SetGameMetadata(new GameMetadata
         {
-            Name = "Gateway Unity Demo", Logo = "", Theme = "default"
+            Name = "Hypeline Unity Demo", Logo = "", Theme = "default"
         });
         GameAction action = new GameAction
         {
@@ -352,14 +351,14 @@ public class GatewayCodeDemo : MonoBehaviour
             State = GameActionState.Available,
             Impact = 1,
             Count = GameAction.InfiniteCount,
-            OnGameActionUsed = new MuxyGatewayGameActionUsedEvent()
+            OnGameActionUsed = new MuxyHypelineGameActionUsedEvent()
         };
         action.OnGameActionUsed.AddListener(OnHealthpack);
         sdk.SetGameActions(new[] { action });
         // Register the global callback too: it enables native action delivery
         // and dispatch to the per-action UnityEvent in this SDK revision.
         sdk.OnGameActionUsed(used =&gt;
-            Debug.Log("Gateway action callback received."));
+            Debug.Log("Hypeline action callback received."));
         PublishHealth();
     }
 
@@ -405,7 +404,7 @@ public class GatewayCodeDemo : MonoBehaviour
     private void OnGUI()
     {
         GUILayout.BeginArea(new Rect(16, 16, 440, 230), GUI.skin.box);
-        GUILayout.Label("Gateway code demo | Health: " + health);
+        GUILayout.Label("Hypeline code demo | Health: " + health);
         GUILayout.Label(status);
         if (sdk != null &amp;&amp; !sdk.IsAuthenticated)
         {
@@ -426,11 +425,11 @@ public class GatewayCodeDemo : MonoBehaviour
         authenticationPending = false;
         pin = "";
     }
-}</code></pre><!-- /example:GatewayCodeDemo.cs --></details>
+}</code></pre><!-- /example:HypelineCodeDemo.cs --></details>
       <p><strong>For action callbacks:</strong> initialize each action's <code>OnGameActionUsed</code> UnityEvent before submitting it. Also register the SDK's global <code>OnGameActionUsed</code> delegate; native action delivery dispatches per-action events from inside that callback. Avoid applying the same gameplay effect in both callbacks.</p>
       <h3>Add returning-streamer authentication</h3>
       <p>The code demo intentionally asks for a fresh PIN on each enable. For a persistent login, load your platform's stored refresh token and pass it to <code>AuthenticateWithRefreshToken</code>. In either authentication callback, save the latest <code>response.RefreshToken</code> after success. Tokens can change on use. On failure, clear the unusable saved token and offer the PIN flow.</p>
-      <p>Keep tokens and PINs out of logs, source control, analytics, and screenshots. <code>sdk.IsAuthenticated</code> is a property; the prefab wrapper exposes <code>GatewayManager.IsAuthenticated()</code> as a method.</p>
+      <p>Keep tokens and PINs out of logs, source control, analytics, and screenshots. <code>sdk.IsAuthenticated</code> is a property; the manager component exposes <code>HypelineManager.IsAuthenticated()</code> as a method.</p>
       <div class="callout"><strong>Lifecycle limits to account for</strong><p><code>RunInProduction()</code> and <code>StopWebsocketTransport()</code> return <code>void</code>; they do not provide an awaitable completion result. Test network loss, scene changes, logout, shutdown, and subsequent login in your target player.</p></div>
     </section>
 
@@ -458,8 +457,7 @@ public class GatewayCodeDemo : MonoBehaviour
     <section id="troubleshooting">
       <div class="section-label">WHEN SOMETHING DOESN'T CONNECT</div><h2>Troubleshooting</h2>
       <p>Start with the first failed checkpoint. Fix compilation before authentication, and authentication before viewer actions.</p>
-      <details><summary>Unity cannot find SDK types or UI assemblies</summary><p>Confirm Muxy Hypeline is installed, its dependencies have resolved, and address the Console's first error. Add <code>Muxy.Gateway</code> to any consumer <code>.asmdef</code>, and use <code>using MuxyGateway;</code> for SDK types.</p></details>
-      <details><summary>Updating a project that used Gateway component names</summary><p>Update custom C# references from <code>MuxyGatewayManager</code> to <code>MuxyHypelineManager</code> and <code>MuxyGatewayPolling</code> to <code>MuxyHypelinePolling</code>. The legacy components are now <code>MuxyHypelineLegacyAuthenticationUI</code> and <code>MuxyHypelineLegacyNotifications</code>. Prefab instances and components using the original Gateway script IDs should retain their serialized settings; check their references and events after updating. If a scene used a Hypeline component added directly from the short-lived wrapper release and Unity shows a missing script, reattach the matching Hypeline component, restore its settings, and reconnect references.</p></details>
+      <details><summary>Unity cannot find SDK types or UI assemblies</summary><p>Confirm Muxy Hypeline is installed, its dependencies have resolved, and address the Console's first error. Add <code>Muxy.Hypeline</code> to any consumer <code>.asmdef</code>, and use <code>using MuxyHypeline;</code> for SDK types.</p></details>
       <details><summary>The manager's metadata fields are locked</summary><p>The prefab inside <b>Packages → Muxy Hypeline</b> is read-only. Drag <code>MuxyHypelineManager</code> into the scene, select that instance in the <b>Hierarchy</b>, and expand <b>Game Metadata</b> in the Inspector. Edit and save the scene instance.</p></details>
       <details><summary>The Hypeline panel is unclickable</summary><p>Keep exactly one active EventSystem with an input module compatible with the project. In a new-Input-System-only project, use Input System UI Input Module. Confirm the Canvas is enabled, no other UI blocks raycasts, and the Hypeline Manager reference is assigned before Play. The Hypeline prefabs do not require TextMesh Pro.</p></details>
       <details><summary>The sample's debug buttons cause input errors</summary><p>The optional action sample uses legacy <code>OnGUI</code> input. If the project uses only the new Input System, set <b>Player → Other Settings → Active Input Handling</b> to <b>Both</b> and restart the Editor if prompted. The Hypeline panel itself does not require these sample controls.</p></details>
@@ -467,7 +465,7 @@ public class GatewayCodeDemo : MonoBehaviour
       <details><summary>PIN authentication fails or never finishes</summary><p>Request a fresh code and check that the Twitch extension is installed and active. Inspect the <code>Hypeline:</code> Console status messages. If the panel shows no response after 8 seconds, a response may still arrive. Select <b>Try again</b> and request a new code to retry. Do not share PINs or tokens.</p></details>
       <details><summary>I am authenticated, but the viewer sees no game or actions</summary><p>Confirm the extension is activated on the same channel. Reopen the viewer session under the conditions required by the extension's placement. Check that metadata and actions were published after authentication, action IDs are unique, state is Available, and count is usable. With the prefab route, set Inspector values before Play and submit runtime list edits explicitly.</p></details>
       <details><summary>The action appears, but nothing happens in Unity</summary><p>Check <code>healthpack</code> spelling and the Dynamic GameActionUsed binding to <code>HypelineActionDemo.OnHealthpack</code>. In code, create the per-action UnityEvent and register the global SDK action callback. Keep <code>SDK.Update()</code> running. Check for exceptions in your handler. Do not use a local test button as evidence of a delivered viewer transaction.</p></details>
-      <details><summary>A poll appears in the extension, but the Unity widget stays hidden</summary><p>Assign the widget's manager and forward the configuration delegate to <code>GatewayManager.OnPollUpdate.Invoke(update)</code>, as shown in the demo. Confirm you received poll updates. Use the callback's final state to judge completion.</p></details>
+      <details><summary>A poll appears in the extension, but the Unity widget stays hidden</summary><p>Assign the widget's manager and forward the configuration delegate to <code>HypelineManager.OnPollUpdate.Invoke(update)</code>, as shown in the demo. Confirm you received poll updates. Use the callback's final state to judge completion.</p></details>
       <details><summary>It works in the Editor but fails in a player</summary><p>Check the player log's first failure. For <code>DllNotFoundException</code>, verify the native library exists and its plugin import settings match the target. For <code>EntryPointNotFoundException</code>, check that managed code and native binaries came from the same SDK package. Compare architecture, backend, and stripping level. Retain the package's Editor linker callback. A TLS configuration initialization error and an actual network/certificate negotiation error require separate diagnosis.</p></details>
       <details><summary>Callbacks duplicate, re-login breaks, or shutdown hangs</summary><p>Use one manager or code integration, not both, and remove listeners when custom components are disabled. The Hypeline menu resets the transport when you disconnect or choose <b>Try again</b>. Use a fresh code when reconnecting. Test disconnect, scene reload, network loss, and shutdown in your target player before release.</p></details>
     </section>
@@ -484,7 +482,7 @@ public class GatewayCodeDemo : MonoBehaviour
       <p class="caption">This is a quick reference; the SDK provides additional methods.</p>
     </section>
 
-    <footer class="page-footer"><div><strong>muxy <span>/ Hypeline</span></strong><p>Build something your audience can play a part in.</p></div><a href="#overview">Back to top ↑</a><p class="footer-note"><a href="https://github.com/jrslyce/gateway-unity/tree/codex/hypeline-developer-readiness">Hypeline SDK source</a> · <a href="https://www.muxy.io/gateway">Muxy Gateway</a></p></footer>
+    <footer class="page-footer"><div><strong>muxy <span>/ Hypeline</span></strong><p>Build something your audience can play a part in.</p></div><a href="#overview">Back to top ↑</a><p class="footer-note"><a href="https://github.com/jrslyce/gateway-unity/tree/codex/hypeline-developer-readiness">Hypeline SDK source</a> · <a href="https://www.muxy.io/gateway">Hypeline</a></p></footer>
   </main>
   <aside class="on-this-page" aria-label="Guide milestones"><span class="nav-group">YOUR PATH TO CONNECTED</span><a href="#install"><i>1</i> Install</a><a href="#scene"><i>2</i> Initialize</a><a href="#authenticate"><i>3</i> Authenticate</a><a href="#first-action"><i>4</i> Interact</a><a href="#testing"><i>5</i> Verify</a><div class="rail-note"><span>START SMALL</span><p>One channel.<br>One action.<br>A working round trip.</p></div></aside>
 </div>

@@ -1,12 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
-using MuxyGateway;
+using MuxyHypeline;
 using UnityEngine;
 
 // A deliberately small first action: show a scene object and acknowledge delivery.
 public class HypelineLogoDemo : MonoBehaviour
 {
-    public MuxyHypelineManager GatewayManager;
+    public MuxyHypelineManager HypelineManager;
     public GameObject LogoObject;
     public string ActionID = "show-muxy-logo";
     [Min(0.1f)] public float DisplaySeconds = 5f;
@@ -16,9 +16,9 @@ public class HypelineLogoDemo : MonoBehaviour
 
     private void OnEnable()
     {
-        if (GatewayManager == null)
+        if (HypelineManager == null)
         {
-            Debug.LogError("Hypeline logo sample: assign the Gateway Manager.", this);
+            Debug.LogError("Hypeline logo sample: assign the Hypeline Manager.", this);
             enabled = false;
             return;
         }
@@ -29,12 +29,12 @@ public class HypelineLogoDemo : MonoBehaviour
             return;
         }
         if (LogoObject != null && !transform.IsChildOf(LogoObject.transform)) LogoObject.SetActive(false);
-        GatewayManager.OnAnyGameActionUsed.AddListener(OnAction);
+        HypelineManager.OnAnyGameActionUsed.AddListener(OnAction);
     }
 
     private void OnDisable()
     {
-        if (GatewayManager != null) GatewayManager.OnAnyGameActionUsed.RemoveListener(OnAction);
+        if (HypelineManager != null) HypelineManager.OnAnyGameActionUsed.RemoveListener(OnAction);
         if (hideRoutine != null) StopCoroutine(hideRoutine);
         hideRoutine = null;
         if (LogoObject != null && !transform.IsChildOf(LogoObject.transform)) LogoObject.SetActive(false);
@@ -64,12 +64,12 @@ public class HypelineLogoDemo : MonoBehaviour
     // Override these in a local test harness to avoid contacting the service.
     protected virtual void Accept(GameActionUsed action, string description)
     {
-        GatewayManager.AcceptGameAction(action, description);
+        HypelineManager.AcceptGameAction(action, description);
     }
 
     protected virtual void Refund(GameActionUsed action, string description)
     {
-        GatewayManager.RefundGameAction(action, description);
+        HypelineManager.RefundGameAction(action, description);
     }
 
     // Use this from an Inspector button or your own test UI. It has no transaction.

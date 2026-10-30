@@ -1,13 +1,13 @@
-using MuxyGateway;
+using MuxyHypeline;
 using UnityEngine;
 
 // Alternative to the prefab manager. Do not run both integrations together.
-public class GatewayCodeDemo : MonoBehaviour
+public class HypelineCodeDemo : MonoBehaviour
 {
     [SerializeField] private string gameID = "gamelink-testing";
     private SDK sdk;
     private string pin = "";
-    private string status = "Request a PIN from the Gateway extension configuration.";
+    private string status = "Request a code from the Twitch extension configuration.";
     private int health = 50;
     private bool authenticationPending;
 
@@ -51,7 +51,7 @@ public class GatewayCodeDemo : MonoBehaviour
     {
         sdk.SetGameMetadata(new GameMetadata
         {
-            Name = "Gateway Unity Demo", Logo = "", Theme = "default"
+            Name = "Hypeline Unity Demo", Logo = "", Theme = "default"
         });
         GameAction action = new GameAction
         {
@@ -63,14 +63,14 @@ public class GatewayCodeDemo : MonoBehaviour
             State = GameActionState.Available,
             Impact = 1,
             Count = GameAction.InfiniteCount,
-            OnGameActionUsed = new MuxyGatewayGameActionUsedEvent()
+            OnGameActionUsed = new MuxyHypelineGameActionUsedEvent()
         };
         action.OnGameActionUsed.AddListener(OnHealthpack);
         sdk.SetGameActions(new[] { action });
         // Register the global callback too: it enables native action delivery
         // and dispatch to the per-action UnityEvent in this SDK revision.
         sdk.OnGameActionUsed(used =>
-            Debug.Log("Gateway action callback received."));
+            Debug.Log("Hypeline action callback received."));
         PublishHealth();
     }
 
@@ -116,7 +116,7 @@ public class GatewayCodeDemo : MonoBehaviour
     private void OnGUI()
     {
         GUILayout.BeginArea(new Rect(16, 16, 440, 230), GUI.skin.box);
-        GUILayout.Label("Gateway code demo | Health: " + health);
+        GUILayout.Label("Hypeline code demo | Health: " + health);
         GUILayout.Label(status);
         if (sdk != null && !sdk.IsAuthenticated)
         {
