@@ -5,6 +5,7 @@ using UnityEngine;
 public class HypelineActionDemo : MonoBehaviour
 {
     public MuxyHypelineManager HypelineManager;
+    private MuxyHypelineMenu menu;
     private int health = 50;
     private string status = "Open Stream Interactivity and connect with your Twitch code.";
 
@@ -83,8 +84,15 @@ public class HypelineActionDemo : MonoBehaviour
         HypelineManager.StartPoll();
     }
 
+    private bool ShouldShowControls()
+    {
+        if (menu == null) menu = FindObjectOfType<MuxyHypelineMenu>();
+        return menu == null || !menu.IsPanelOpen;
+    }
+
     private void OnGUI()
     {
+        if (!ShouldShowControls()) return;
         GUILayout.BeginArea(new Rect(16, Screen.height - 206, 440, 190), GUI.skin.box);
         GUILayout.Label("Hypeline action test | Health: " + health);
         GUILayout.Label(status);

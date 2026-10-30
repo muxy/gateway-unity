@@ -109,7 +109,7 @@
     <section id="scene">
       <div class="section-label">STEP 02</div><h2>Set up your Hypeline scene</h2>
       <p>Use the <a href="#hypeline-prefabs">Hypeline menu</a> as the connection interface and one <code>MuxyHypelineManager</code> prefab as the SDK owner. Its component is named <code>MuxyHypelineManager</code>. You can add these prefabs to an existing game or a fresh test scene.</p>
-      <ol class="steps"><li><strong>Add the manager and menu.</strong> Drag <code>MuxyHypelineManager</code> and <code>MuxyHypelineMenu</code> into the scene and assign the manager to the menu's <b>Hypeline Manager</b> field before Play mode. </li><li><strong>Prepare input.</strong> Keep exactly one active EventSystem with an input module compatible with your project. The Hypeline menu does not create an EventSystem.</li><li><strong>Set game metadata.</strong> Select the manager in the scene Hierarchy, expand <b>Game Metadata</b> in the Inspector, and set a game name and theme. A logo texture is optional for the first test. The prefab in the package is read-only; edit its scene instance.</li><li><strong>Add a Health game text.</strong> In the manager's <b>Game Texts</b>, create element 0 with <b>Label</b> = <code>Health</code>, <b>Value</b> = <code>50</code>, and <b>Icon</b> = <code>fa-solid:heart</code>. The sample updates this entry.</li><li><strong>Add the action sample.</strong> Download <a href="examples/HypelineActionDemo.cs" download>HypelineActionDemo.cs</a> into <code>Assets/Scripts</code>. Attach it to a new <code>HypelineDemoController</code> GameObject and assign the same manager. This optional sample provides health and poll test controls; it does not create a second connection interface. Its on-screen debug controls can overlap other UI at smaller Game view sizes; maximize the Game view or temporarily disable the sample component while using the connection panel.</li><li><strong>Enable input for the optional sample.</strong> Its debug buttons use Unity's legacy IMGUI input. If your project uses only the new Input System, select <b>Both</b> in <b>Player → Other Settings → Active Input Handling</b> and restart the Editor if prompted. This is required by the sample controls, not by the Hypeline panel.</li></ol>
+      <ol class="steps"><li><strong>Add the manager and menu.</strong> Drag <code>MuxyHypelineManager</code> and <code>MuxyHypelineMenu</code> into the scene and assign the manager to the menu's <b>Hypeline Manager</b> field before Play mode. </li><li><strong>Prepare input.</strong> Keep exactly one active EventSystem with an input module compatible with your project. The Hypeline menu does not create an EventSystem.</li><li><strong>Set game metadata.</strong> Select the manager in the scene Hierarchy, expand <b>Game Metadata</b> in the Inspector, and set a game name and theme. A logo texture is optional for the first test. The prefab in the package is read-only; edit its scene instance.</li><li><strong>Add a Health game text.</strong> In the manager's <b>Game Texts</b>, create element 0 with <b>Label</b> = <code>Health</code>, <b>Value</b> = <code>50</code>, and <b>Icon</b> = <code>fa-solid:heart</code>. The sample updates this entry.</li><li><strong>Add the action sample.</strong> Download <a href="examples/HypelineActionDemo.cs" download>HypelineActionDemo.cs</a> into <code>Assets/Scripts</code>. Attach it to a new <code>HypelineDemoController</code> GameObject and assign the same manager. This optional sample provides health and poll test controls; it does not create a second connection interface. The debug controls hide while the Hypeline connection panel is open.</li><li><strong>Enable input for the optional sample.</strong> Its debug buttons use Unity's legacy IMGUI input. If your project uses only the new Input System, select <b>Both</b> in <b>Player → Other Settings → Active Input Handling</b> and restart the Editor if prompted. This is required by the sample controls, not by the Hypeline panel.</li></ol>
       <details class="code-details"><summary>View the Hypeline action sample script <span>C#</span></summary><div class="code-heading"><span>HypelineActionDemo.cs</span><a href="examples/HypelineActionDemo.cs" download>Download</a></div><!-- example:HypelineActionDemo.cs --><pre><code class="language-csharp">using MuxyHypeline;
 using UnityEngine;
 
@@ -117,6 +117,7 @@ using UnityEngine;
 public class HypelineActionDemo : MonoBehaviour
 {
     public MuxyHypelineManager HypelineManager;
+    private MuxyHypelineMenu menu;
     private int health = 50;
     private string status = "Open Stream Interactivity and connect with your Twitch code.";
 
@@ -195,8 +196,15 @@ public class HypelineActionDemo : MonoBehaviour
         HypelineManager.StartPoll();
     }
 
+    private bool ShouldShowControls()
+    {
+        if (menu == null) menu = FindObjectOfType&lt;MuxyHypelineMenu&gt;();
+        return menu == null || !menu.IsPanelOpen;
+    }
+
     private void OnGUI()
     {
+        if (!ShouldShowControls()) return;
         GUILayout.BeginArea(new Rect(16, Screen.height - 206, 440, 190), GUI.skin.box);
         GUILayout.Label("Hypeline action test | Health: " + health);
         GUILayout.Label(status);
@@ -214,7 +222,7 @@ public class HypelineActionDemo : MonoBehaviour
       <div class="section-label">STEP 03</div><h2>Connect a Twitch channel</h2>
       <p>The broadcaster connects their own channel through the Hypeline menu. Viewers do not enter the broadcaster's code.</p>
       <ol class="steps"><li>Enter Play mode and select <b>Stream Interactivity</b>.</li><li>Select <b>Open Twitch</b>, then install and activate the Twitch extension on the broadcaster's channel.</li><li>Select <b>Open configuration</b>. On the extension page, choose <b>Configure</b> and generate a six-character code. Both buttons open the extension page; Configure is selected in Twitch.</li><li>Enter the fresh code in the Hypeline panel and choose <b>Connect</b>. Codes expire after five minutes.</li><li>Wait for <b>You are connected</b> and the green fox on the game menu. The Console reports connection and authentication stages without printing the code. TikTok remains a coming-soon label.</li></ol>
-      <figure class="capture"><a class="capture-zoom" href="assets/screenshots/unity-2022-connection.jpg" target="_blank" rel="noopener" aria-label="Enlarge screenshot: The Hypeline connection panel in the Foxfire game, showing the Muxy Hypeline heading and disconnected status"><img src="assets/screenshots/unity-2022-connection.jpg" alt="The Hypeline connection panel in the Foxfire game, showing the Muxy Hypeline heading and disconnected status" loading="lazy"></a><figcaption>The connection panel in Unity 2022, before connecting. The optional sample debug controls are visible in the lower left.</figcaption></figure>
+      <figure class="capture"><a class="capture-zoom" href="assets/screenshots/unity-2022-connection.jpg" target="_blank" rel="noopener" aria-label="Enlarge screenshot: The Hypeline connection panel in the Foxfire game, showing the Muxy Hypeline heading and disconnected status"><img src="assets/screenshots/unity-2022-connection.jpg" alt="The Hypeline connection panel in the Foxfire game, showing the Muxy Hypeline heading and disconnected status" loading="lazy"></a><figcaption>The connection panel in Unity 2022, before connecting. The sample debug controls hide while this panel is open.</figcaption></figure>
       <div class="callout warning"><strong>If connection stalls</strong><p>The logo fill and countdown show the 8-second wait, not measured connection progress. The panel shows a warning if no authentication response arrives during that time. A response may still arrive. To retry, select <b>Try again</b> to reset the connection, then get a fresh code. Inspect the <code>Hypeline:</code> Console messages for transport and authentication timings. Keep PINs, tokens, and credential-bearing logs out of screenshots and messages.</p></div>
       <p>The manager can restore a saved session using a refresh token stored in PlayerPrefs, which is not encrypted. Test a fresh login, a returning login, and disconnect/reconnect on each target platform.</p>
     </section>
