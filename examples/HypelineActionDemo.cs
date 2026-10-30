@@ -4,7 +4,7 @@ using UnityEngine;
 // Tutorial scene only: use the prefab manager as the sole SDK owner.
 public class HypelineActionDemo : MonoBehaviour
 {
-    public MuxyGatewayManager GatewayManager;
+    public MuxyHypelineManager GatewayManager;
     private int health = 50;
     private string status = "Open Stream Interactivity and connect with your Twitch code.";
 
