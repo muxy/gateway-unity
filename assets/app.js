@@ -115,3 +115,24 @@ dialog.addEventListener("click", event => {
   if (event.clientX < bounds.left || event.clientX > bounds.right ||
       event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
 });
+
+// Enlarge tutorial screenshots while keeping ordinary image links as a fallback.
+const screenshotLinks = document.querySelectorAll(".capture-zoom");
+if (screenshotLinks.length && typeof HTMLDialogElement !== "undefined" && HTMLDialogElement.prototype.showModal) {
+  const viewer = document.createElement("dialog");
+  viewer.className = "image-viewer";
+  viewer.setAttribute("aria-label", "Enlarged tutorial screenshot");
+  viewer.innerHTML = '<div class="image-viewer-header"><p>Full-size image · Scroll to see more</p><button type="button">Close</button></div><div class="image-viewer-content"><img alt=""></div>';
+  document.body.append(viewer);
+  const viewerImage = viewer.querySelector("img");
+  viewer.querySelector("button").addEventListener("click", () => viewer.close());
+  viewer.addEventListener("click", event => { if (event.target === viewer) viewer.close(); });
+  screenshotLinks.forEach(link => link.addEventListener("click", event => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    viewerImage.src = link.href;
+    viewerImage.alt = link.querySelector("img").alt;
+    viewer.querySelector(".image-viewer-content").scrollTo(0, 0);
+    viewer.showModal();
+  }));
+}

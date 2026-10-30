@@ -212,3 +212,15 @@ dialog::backdrop{background:rgba(13,13,13,.8)}
 @media(max-width:480px){main{padding-left:16px;padding-right:16px}.brand-logo{height:26px}.brand-divider{font-size:20px}.brand>span:last-child{font-size:14px}.topbar{padding:0 12px}.top-actions{gap:2px}h1{font-size:32px}h2{font-size:24px}.lead{font-size:18px}section{padding:38px 0}section>p,section>ol,section>ul{font-size:16px}pre{padding:18px 14px}pre code{font-size:12px}.capture-tag{margin-left:0}td,th{padding:10px 12px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
 @media print{.topbar,.sidebar,.on-this-page,.hero-actions,.copy-button,.search-trigger,#toast{display:none!important}.layout{display:block}main{padding:0;max-width:none}body{font-size:11pt}section{padding:20px 0}h1{font-size:30pt}h2{font-size:22pt}.table-scroll{overflow:visible}pre{white-space:pre-wrap;overflow:visible}pre code{white-space:pre-wrap}details:not([open]){display:none}.capture-placeholder{min-height:0}table,figure,.callout,.checkpoint{break-inside:avoid}.code-details pre{max-height:none}}
+
+/* Screenshot links also work without JavaScript; the dialog adds an in-page zoom. */
+.capture-zoom{display:inline-block;position:relative;cursor:zoom-in;max-width:100%}
+.capture-zoom::after{content:"Click to enlarge";position:absolute;right:10px;bottom:10px;background:#0d0d0d;color:#fff;border:var(--hairline);padding:3px 9px;font-size:14px}
+.capture-zoom:hover img,.capture-zoom:focus-visible img{border-color:#fff}
+.image-viewer{width:min(96vw,2000px);max-width:96vw;height:92vh;max-height:92vh;padding:0;border:var(--hairline);background:var(--ground);color:var(--text);overflow:hidden}
+.image-viewer::backdrop{background:rgba(0,0,0,.86)}
+.image-viewer-header{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:8px 14px;border-bottom:var(--hairline)}
+.image-viewer-header p{margin:0;font-size:14px}
+.image-viewer-header button{border:var(--hairline);background:var(--surface);padding:4px 14px}
+.image-viewer-content{height:calc(100% - 57px);overflow:auto;text-align:center}
+.image-viewer-content img{display:block;max-width:none;height:auto;margin:auto}
