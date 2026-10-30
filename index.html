@@ -274,7 +274,7 @@ HypelineManager.SubmitGameTexts();</code></pre>
         <div class="icon-pages"><button id="icon-prev" type="button">Previous</button><span id="icon-page"></span><button id="icon-next" type="button">Next</button></div>
         <noscript><p>Enable JavaScript to search this icon library.</p></noscript>
       </details>
-      <p><code>AddGameText()</code> and <code>ClearGameTexts()</code> change the manager's local list; call <code>SubmitGameTexts()</code> to publish a nonempty list. The code-only SDK uses <code>SetGameTexts(GameText[])</code> to publish the complete list. Some native SDK versions do not send an empty list, so it may not clear previously published values; replace them with the new game's fields and verify the viewer display. Send meaningful state changes instead of resending identical data every frame.</p>
+      <p><code>AddGameText()</code> and <code>ClearGameTexts()</code> change the manager's local list; call <code>SubmitGameTexts()</code> to publish it, including an empty list to clear Game Info. The code-only SDK uses <code>SetGameTexts(GameText[])</code> to publish the complete list. Send meaningful state changes instead of resending identical data every frame.</p>
       <h3>Enable actions only when they can run</h3>
       <pre><code class="language-csharp">// Prefab manager: call when pausing / resuming valid gameplay.
 HypelineManager.SetAllGameActionStates(GameActionState.Unavailable);
@@ -285,7 +285,7 @@ GameAction action = HypelineManager.GetGameActionAt(0);
 action.State = GameActionState.Hidden;
 HypelineManager.SetGameActionAt(action, 0);
 HypelineManager.SubmitGameActions();</code></pre>
-      <p>Some native SDK versions do not send an empty action list, so submitting one may leave previously published actions visible. Publish the new game’s nonempty action list and verify the viewer display.</p>
+      <p>After removing actions, call <code>SubmitGameActions()</code> to publish the updated list. Submitting an empty list sends a request to clear the available actions.</p>
       <p>Use <b>Unavailable</b> for a visible action viewers cannot currently use and <b>Hidden</b> when it should not appear. Keep IDs unique. Choose finite counts for disruptive mechanics and restore availability only after the next scene or match is ready.</p>
       <details><summary>Add a game logo</summary><p>Import a readable texture in a supported format: RGB24, RGBA32, or ARGB32. Enable <b>Read/Write</b> and choose a compatible texture format in its import settings. Use the SDK's static conversion helper:</p><pre><code class="language-csharp">GameMetadata metadata = HypelineManager.GetGameMetadata();
 metadata.Logo = SDK.ConvertTextureToBase64(yourReadableTexture);
