@@ -115,28 +115,3 @@ dialog.addEventListener("click", event => {
   if (event.clientX < bounds.left || event.clientX > bounds.right ||
       event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
 });
-
-// Only registered screenshots are requested, keeping missing captures free of 404s.
-fetch("assets/screenshots.json")
-  .then(response => { if (!response.ok) throw new Error("Screenshot manifest unavailable"); return response.json(); })
-  .then(manifest => {
-    document.querySelectorAll("figure[data-shot]").forEach(figure => {
-      const item = manifest[figure.dataset.shot];
-      if (!item || typeof item.file !== "string" || typeof item.alt !== "string") return;
-      if (!/^[a-z0-9-]+\.(png|webp|jpg|jpeg)$/i.test(item.file)) return;
-      const image = new Image();
-      image.alt = item.alt;
-      image.decoding = "async";
-      image.onload = () => {
-        const fullSizeLink = document.createElement("a");
-        fullSizeLink.href = image.src;
-        fullSizeLink.target = "_blank";
-        fullSizeLink.rel = "noopener";
-        fullSizeLink.setAttribute("aria-label", `Open full-size screenshot: ${item.alt}`);
-        fullSizeLink.title = "Open full-size screenshot";
-        fullSizeLink.append(image);
-        figure.querySelector(".capture-placeholder").replaceWith(fullSizeLink);
-      };
-      image.src = `assets/screenshots/${item.file}`;
-    });
-  }).catch(() => { /* The complete instructions remain available without images. */ });
