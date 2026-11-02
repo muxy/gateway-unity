@@ -10,6 +10,10 @@ public class HypelineCodeDemo : MonoBehaviour
     private string status = "Request a code from the Twitch extension configuration.";
     private int health = 50;
     private bool authenticationPending;
+    private string viewerAlertText;
+    private float viewerAlertUntil;
+    private GUIStyle viewerAlertHeadingStyle;
+    private GUIStyle viewerAlertMessageStyle;
 
     private void OnEnable()
     {
@@ -76,10 +80,16 @@ public class HypelineCodeDemo : MonoBehaviour
 
     private void OnHealthpack(GameActionUsed used)
     {
+        if (used == null || used.ActionID != "healthpack") return;
         health = Mathf.Min(100, health + 10);
         PublishHealth();
         sdk.AcceptGameAction(used, "Added up to 10 health.");
         status = "Viewer action received: healthpack.";
+        // The code-only scene owns its presentation as well as its SDK instance.
+        // This alert observes the fulfilled action; it never applies another effect.
+        string viewer = string.IsNullOrWhiteSpace(used.Username) ? "A viewer" : used.Username.Trim();
+        viewerAlertText = viewer + " sent\nSpawn Healthpack";
+        viewerAlertUntil = Time.unscaledTime + 6f;
     }
 
     private void PublishHealth()
@@ -128,6 +138,38 @@ public class HypelineCodeDemo : MonoBehaviour
         if (GUILayout.Button("Start 30-second viewer poll")) StartDemoPoll();
         GUI.enabled = true;
         GUILayout.EndArea();
+        DrawViewerActionAlert();
+    }
+
+    private void DrawViewerActionAlert()
+    {
+        if (string.IsNullOrEmpty(viewerAlertText) || Time.unscaledTime >= viewerAlertUntil) return;
+        if (viewerAlertHeadingStyle == null)
+        {
+            viewerAlertHeadingStyle = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 17, fontStyle = FontStyle.Bold, richText = false
+            };
+            viewerAlertHeadingStyle.normal.textColor = new Color(.30f, .86f, .52f);
+            viewerAlertMessageStyle = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 26, wordWrap = true, richText = false,
+                alignment = TextAnchor.MiddleLeft, clipping = TextClipping.Clip
+            };
+            viewerAlertMessageStyle.normal.textColor = Color.white;
+        }
+        float width = Mathf.Min(520f, Screen.width - 32f);
+        Rect card = new Rect(Screen.width - width - 24f, 40f, width, 140f);
+        Color previousColor = GUI.color;
+        GUI.color = new Color(.08f, .10f, .10f, .97f);
+        GUI.DrawTexture(card, Texture2D.whiteTexture);
+        GUI.color = new Color(.30f, .86f, .52f);
+        GUI.DrawTexture(new Rect(card.x, card.y, 7f, card.height), Texture2D.whiteTexture);
+        GUI.color = previousColor;
+        GUI.Label(new Rect(card.x + 24f, card.y + 12f, width - 44f, 26f),
+                  "VIEWER ACTION", viewerAlertHeadingStyle);
+        GUI.Label(new Rect(card.x + 24f, card.y + 42f, width - 44f, 88f),
+                  viewerAlertText, viewerAlertMessageStyle);
     }
 
     private void OnDisable()
@@ -136,5 +178,7 @@ public class HypelineCodeDemo : MonoBehaviour
         sdk = null;
         authenticationPending = false;
         pin = "";
+        viewerAlertText = null;
+        viewerAlertUntil = 0f;
     }
 }
