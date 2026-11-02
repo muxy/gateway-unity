@@ -83,6 +83,9 @@ main{min-width:0;padding:34px 56px 0}
 .button{display:inline-flex;align-items:center;gap:18px;border-radius:var(--radius-pill);padding:10px 22px;font-size:16px;font-weight:700}
 .primary{background:var(--teal);color:var(--ground);border:var(--hairline)}
 .primary:hover{background:transparent;color:var(--teal)}
+.secondary{background:transparent;color:var(--teal);border:var(--hairline)}
+.secondary:hover{background:var(--surface)}
+.prompt-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:24px 0}
 .text-link{font-size:16px;font-weight:700;color:var(--teal)}
 .outcome{padding:var(--space-card-pad);border:var(--hairline);border-radius:var(--radius-card);display:flex;gap:16px;align-items:flex-start;background:var(--surface);margin-bottom:var(--space-card-gap)}
 .outcome-icon,.checkpoint>span{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:48px;height:48px;border:1.75px solid var(--teal);border-radius:var(--radius-round);background:var(--ground);color:var(--teal);font-size:20px;font-weight:700}

@@ -61,6 +61,20 @@ document.querySelectorAll("pre").forEach(pre => {
   pre.append(button);
 });
 
+document.querySelectorAll("[data-copy-target]").forEach(button => {
+  const target = document.getElementById(button.dataset.copyTarget);
+  if (!target) return;
+  const label = button.textContent;
+  button.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(target.textContent);
+      button.textContent = "Copied";
+      toast("Install prompt copied to clipboard");
+      setTimeout(() => { button.textContent = label; }, 2000);
+    } catch { toast("Copy unavailable. Open the prompt below and copy it manually, or download the Markdown file."); }
+  });
+});
+
 const dialog = document.querySelector("#search-dialog");
 const input = document.querySelector("#search-input");
 const resultBox = document.querySelector("#search-results");
